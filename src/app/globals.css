@@ -1,0 +1,231 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --radius: 0.625rem;
+  
+  /* Fondo y texto principal */
+  --background: oklch(1 0 0);                    /* #FFFFFF - Fondo principal */
+  --foreground: oklch(0.145 0.084 264.376);      /* #0F172A - Texto principal */
+  
+  /* Cards y popovers */
+  --card: oklch(1 0 0);                          /* #FFFFFF - Fondo de cards */
+  --card-foreground: oklch(0.145 0.084 264.376); /* #0F172A - Texto en cards */
+  --popover: oklch(1 0 0);                       /* #FFFFFF - Fondo de popovers */
+  --popover-foreground: oklch(0.145 0.084 264.376); /* #0F172A - Texto en popovers */
+  
+  /* Colores primarios - Azul profesional */
+  --primary: oklch(0.56 0.182 264.376);          /* #3B82F6 - Blue 500 */
+  --primary-foreground: oklch(0.98 0 0);         /* #FAFAFA - Texto sobre azul */
+  
+  /* Colores secundarios - Azul claro */
+  --secondary: oklch(0.91 0.064 264.376);        /* #DBEAFE - Blue 100 */
+  --secondary-foreground: oklch(0.145 0.084 264.376); /* #0F172A - Texto sobre azul claro */
+  
+  /* Colores mutados - Fondos sutiles */
+  --muted: oklch(0.98 0.008 264.376);            /* #F8FAFC - Fondos sutiles */
+  --muted-foreground: oklch(0.47 0.032 264.376); /* #64748B - Texto secundario */
+  
+  /* Colores de acento - Azul más intenso */
+  --accent: oklch(0.60 0.196 264.376);           /* #2563EB - Blue 600 */
+  --accent-foreground: oklch(0.98 0 0);          /* #FAFAFA - Texto sobre acento */
+  
+  /* Estados destructivos */
+  --destructive: oklch(0.60 0.245 27.325);       /* #DC2626 - Rojo */
+  
+  /* Bordes y elementos de entrada */
+  --border: oklch(0.91 0.064 264.376);           /* #DBEAFE - Bordes sutiles */
+  --input: oklch(0.91 0.064 264.376);            /* #DBEAFE - Bordes de input */
+  --ring: oklch(0.56 0.182 264.376);             /* #3B82F6 - Focus rings */
+  
+  /* Charts con tonos azules */
+  --chart-1: oklch(0.56 0.182 264.376);          /* #3B82F6 - Blue 500 */
+  --chart-2: oklch(0.60 0.196 264.376);          /* #2563EB - Blue 600 */
+  --chart-3: oklch(0.48 0.156 264.376);          /* #1E40AF - Blue 800 */
+  --chart-4: oklch(0.75 0.108 264.376);          /* #60A5FA - Blue 400 */
+  --chart-5: oklch(0.85 0.076 264.376);          /* #93C5FD - Blue 300 */
+  
+  /* Sidebar con tonos azules */
+  --sidebar: oklch(0.985 0.004 264.376);         /* #F8FAFC - Sidebar background */
+  --sidebar-foreground: oklch(0.145 0.084 264.376); /* #0F172A - Sidebar text */
+  --sidebar-primary: oklch(0.56 0.182 264.376);  /* #3B82F6 - Sidebar primary */
+  --sidebar-primary-foreground: oklch(0.98 0 0); /* #FAFAFA - Sidebar primary text */
+  --sidebar-accent: oklch(0.91 0.064 264.376);   /* #DBEAFE - Sidebar accent */
+  --sidebar-accent-foreground: oklch(0.145 0.084 264.376); /* #0F172A - Sidebar accent text */
+  --sidebar-border: oklch(0.91 0.064 264.376);   /* #DBEAFE - Sidebar border */
+  --sidebar-ring: oklch(0.56 0.182 264.376);     /* #3B82F6 - Sidebar ring */
+}
+
+.dark {
+  /* Fondo y texto principal - Modo oscuro con azules */
+  --background: oklch(0.145 0.084 264.376);       /* #0F172A - Fondo oscuro azulado */
+  --foreground: oklch(0.985 0.004 264.376);       /* #F8FAFC - Texto claro */
+  
+  /* Cards y popovers - Modo oscuro */
+  --card: oklch(0.205 0.068 264.376);             /* #1E293B - Cards oscuras azuladas */
+  --card-foreground: oklch(0.985 0.004 264.376); /* #F8FAFC - Texto en cards */
+  --popover: oklch(0.205 0.068 264.376);          /* #1E293B - Popovers oscuros */
+  --popover-foreground: oklch(0.985 0.004 264.376); /* #F8FAFC - Texto en popovers */
+  
+  /* Colores primarios - Azul más claro en modo oscuro */
+  --primary: oklch(0.75 0.108 264.376);           /* #60A5FA - Blue 400 */
+  --primary-foreground: oklch(0.145 0.084 264.376); /* #0F172A - Texto sobre azul */
+  
+  /* Colores secundarios - Azul oscuro */
+  --secondary: oklch(0.269 0.076 264.376);        /* #334155 - Blue gray 700 */
+  --secondary-foreground: oklch(0.985 0.004 264.376); /* #F8FAFC - Texto sobre azul oscuro */
+  
+  /* Colores mutados - Fondos sutiles oscuros */
+  --muted: oklch(0.269 0.076 264.376);            /* #334155 - Fondos sutiles oscuros */
+  --muted-foreground: oklch(0.708 0.024 264.376); /* #94A3B8 - Texto secundario claro */
+  
+  /* Colores de acento - Azul brillante */
+  --accent: oklch(0.75 0.108 264.376);            /* #60A5FA - Blue 400 */
+  --accent-foreground: oklch(0.145 0.084 264.376); /* #0F172A - Texto sobre acento */
+  
+  /* Estados destructivos - Rojo más suave */
+  --destructive: oklch(0.704 0.191 22.216);       /* #EF4444 - Rojo más suave */
+  
+  /* Bordes y elementos de entrada - Transparentes */
+  --border: oklch(1 0 0 / 10%);                   /* Bordes transparentes */
+  --input: oklch(1 0 0 / 15%);                    /* Inputs transparentes */
+  --ring: oklch(0.75 0.108 264.376);              /* #60A5FA - Focus rings claros */
+  
+  /* Charts con tonos azules para modo oscuro */
+  --chart-1: oklch(0.75 0.108 264.376);           /* #60A5FA - Blue 400 */
+  --chart-2: oklch(0.85 0.076 264.376);           /* #93C5FD - Blue 300 */
+  --chart-3: oklch(0.56 0.182 264.376);           /* #3B82F6 - Blue 500 */
+  --chart-4: oklch(0.48 0.156 264.376);           /* #1E40AF - Blue 800 */
+  --chart-5: oklch(0.91 0.064 264.376);           /* #DBEAFE - Blue 100 */
+  
+  /* Sidebar con tonos azules para modo oscuro */
+  --sidebar: oklch(0.205 0.068 264.376);          /* #1E293B - Sidebar oscura */
+  --sidebar-foreground: oklch(0.985 0.004 264.376); /* #F8FAFC - Sidebar text */
+  --sidebar-primary: oklch(0.75 0.108 264.376);   /* #60A5FA - Sidebar primary */
+  --sidebar-primary-foreground: oklch(0.145 0.084 264.376); /* #0F172A - Sidebar primary text */
+  --sidebar-accent: oklch(0.269 0.076 264.376);   /* #334155 - Sidebar accent */
+  --sidebar-accent-foreground: oklch(0.985 0.004 264.376); /* #F8FAFC - Sidebar accent text */
+  --sidebar-border: oklch(1 0 0 / 10%);           /* Sidebar border transparente */
+  --sidebar-ring: oklch(0.75 0.108 264.376);      /* #60A5FA - Sidebar ring */
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* ============================================================================ */
+/* SISTEMA DE ANIMACIONES MINIMALISTAS */
+/* ============================================================================ */
+
+@layer utilities {
+  /* Duraciones de animación */
+  .duration-fast {
+    transition-duration: 150ms;
+  }
+  
+  .duration-normal {
+    transition-duration: 300ms;
+  }
+  
+  .duration-slow {
+    transition-duration: 500ms;
+  }
+  
+  /* Easing functions profesionales */
+  .ease-out-smooth {
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  .ease-in-out-smooth {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .ease-spring {
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  
+  /* Efectos hover para cards */
+  .card-hover {
+    @apply transition-all duration-normal ease-out-smooth;
+    @apply hover:shadow-lg hover:shadow-primary/10;
+    @apply hover:-translate-y-1 hover:scale-[1.02];
+  }
+  
+  /* Efectos hover para botones */
+  .button-hover {
+    @apply transition-all duration-fast ease-out-smooth;
+    @apply hover:shadow-md hover:shadow-primary/20;
+    @apply hover:scale-105 active:scale-95;
+  }
+  
+  /* Focus states accesibles */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2;
+    @apply focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+  
+  /* Gradientes azules */
+  .gradient-primary {
+    background: linear-gradient(135deg, oklch(0.56 0.182 264.376) 0%, oklch(0.48 0.156 264.376) 100%);
+  }
+  
+  .gradient-subtle {
+    background: linear-gradient(135deg, oklch(0.91 0.064 264.376) 0%, oklch(0.85 0.076 264.376) 100%);
+  }
+  
+  .gradient-hover {
+    background: linear-gradient(135deg, oklch(0.60 0.196 264.376) 0%, oklch(0.48 0.156 264.376) 100%);
+  }
+  
+  /* Animaciones de entrada */
+  .animate-fade-in {
+    animation: fadeIn 300ms ease-out-smooth;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 300ms ease-out-smooth;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 200ms ease-spring;
+  }
+}
+
+/* Keyframes para animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
