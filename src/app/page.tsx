@@ -1,102 +1,161 @@
-import Image from "next/image";
+"use client";
+
+import Link from "next/link";
+import { TypewriterEffectSmooth } from "@/components/ui/typewriter-effect";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Building2, Users, Shield, Zap } from "lucide-react";
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const words = [
+    {
+      text: "Build",
+    },
+    {
+      text: "your",
+    },
+    {
+      text: "next",
+    },
+    {
+      text: "SaaS",
+      className: "text-blue-500 dark:text-blue-500",
+    },
+    {
+      text: "application",
+      className: "text-blue-500 dark:text-blue-500",
+    },
+  ];
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 dark:from-neutral-950 dark:to-neutral-900">
+      {/* Navigation */}
+      <nav className="border-b border-neutral-200 dark:border-neutral-800 bg-white/50 dark:bg-black/50 backdrop-blur-lg sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-2">
+              <Building2 className="h-8 w-8 text-blue-500" />
+              <span className="text-xl font-bold">Poli2</span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Link href="/auth/login">
+                <Button variant="ghost">Login</Button>
+              </Link>
+              <Link href="/auth/register">
+                <Button>Get Started</Button>
+              </Link>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-32">
+        <div className="text-center">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6">
+            <span>Build your next </span>
+            <span className="text-blue-500">SaaS application</span>
+          </h1>
+          <TypewriterEffectSmooth words={words} className="justify-center" />
+          <p className="mt-8 text-lg text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
+            A multi-tenant SaaS platform built with Clean Architecture, Next.js, and Supabase.
+            Manage organizations, collaborate with teams, and scale with confidence.
+          </p>
+          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/auth/register">
+              <Button size="lg" className="w-full sm:w-auto">
+                Start Free Trial
+              </Button>
+            </Link>
+            <Link href="/auth/login">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto">
+                Sign In
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+            Everything you need to build modern SaaS
+          </h2>
+          <p className="text-lg text-neutral-600 dark:text-neutral-400">
+            Built with best practices and modern technologies
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card>
+            <CardHeader>
+              <Building2 className="h-10 w-10 text-blue-500 mb-2" />
+              <CardTitle>Multi-Tenant</CardTitle>
+              <CardDescription>
+                Isolated organizations with role-based access control and RLS security
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <Users className="h-10 w-10 text-green-500 mb-2" />
+              <CardTitle>Team Collaboration</CardTitle>
+              <CardDescription>
+                Invite members, assign roles, and manage permissions seamlessly
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <Shield className="h-10 w-10 text-purple-500 mb-2" />
+              <CardTitle>Secure by Default</CardTitle>
+              <CardDescription>
+                Row Level Security, authentication, and authorization built-in
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <Zap className="h-10 w-10 text-yellow-500 mb-2" />
+              <CardTitle>Lightning Fast</CardTitle>
+              <CardDescription>
+                Built with Next.js 14, TanStack Query, and optimized performance
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <Card className="bg-gradient-to-r from-blue-500 to-purple-600 border-0 text-white">
+          <CardContent className="py-12 text-center">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+              Ready to get started?
+            </h2>
+            <p className="text-lg mb-8 text-blue-100">
+              Join thousands of teams building better products with Poli2
+            </p>
+            <Link href="/auth/register">
+              <Button size="lg" variant="secondary">
+                Create Your Account
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-neutral-200 dark:border-neutral-800 mt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center text-neutral-600 dark:text-neutral-400">
+            <p>&copy; 2025 Poli2. Built with Clean Architecture & TDD.</p>
+          </div>
+        </div>
       </footer>
     </div>
   );
