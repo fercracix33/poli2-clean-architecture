@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const { id, email: userEmail } = await requireAuthenticatedUser(request);
-    const payload = await parseJson<{ email?: string; name: string }>(request);
+    const payload = await parseJson<{ email?: string; name: string; avatar_url?: string }>(request);
 
     const email = payload.email ?? userEmail;
 
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       throw new Error('Email is required and must be a valid string');
     }
 
-    const profile = await createUserProfile(id, email, payload.name);
+    const profile = await createUserProfile(id, email, payload.name, payload.avatar_url);
 
     return Response.json(profile, { status: 201 });
   } catch (error) {

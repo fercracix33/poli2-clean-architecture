@@ -9,13 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
-import { Building2, Mail, Lock, User, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Building2, Mail, Lock, AlertCircle, CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -28,19 +27,21 @@ export default function RegisterPage() {
   const validateForm = () => {
     const errors: Record<string, string> = {};
 
-    if (!formData.name || formData.name.length < 2) {
-      errors.name = "Name must be at least 2 characters";
+    if (!formData.email) {
+      errors.email = "Invalid email address";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = "Invalid email address";
     }
 
-    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = "Please enter a valid email address";
-    }
-
-    if (!formData.password || formData.password.length < 8) {
+    if (!formData.password) {
+      errors.password = "Password must be at least 8 characters";
+    } else if (formData.password.length < 8) {
       errors.password = "Password must be at least 8 characters";
     }
 
-    if (formData.password !== formData.confirmPassword) {
+    if (!formData.confirmPassword) {
+      errors.confirmPassword = "Passwords do not match";
+    } else if (formData.password !== formData.confirmPassword) {
       errors.confirmPassword = "Passwords do not match";
     }
 
@@ -62,19 +63,19 @@ export default function RegisterPage() {
     try {
       const supabase = createClient();
 
-      // Sign up the user
+      // Sign up the user - no name field anymore!
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
-        options: {
-          data: {
-            name: formData.name,
-          },
-        },
       });
 
       if (signUpError) {
-        setError(signUpError.message);
+        // Handle duplicate email error
+        if (signUpError.message.includes("already registered")) {
+          setError("User already registered");
+        } else {
+          setError(signUpError.message);
+        }
         return;
       }
 
@@ -86,7 +87,12 @@ export default function RegisterPage() {
         }, 2000);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
+      // Network error handling
+      if (err instanceof Error && err.message.includes("fetch")) {
+        setError("Network error. Please check your internet connection.");
+      } else {
+        setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -138,33 +144,7 @@ export default function RegisterPage() {
               </Alert>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4" data-testid="register-form">
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-neutral-400" />
-                  <Input
-                    id="name"
-                    type="text"
-                    placeholder="John Doe"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange("name", e.target.value)}
-                    className="pl-10"
-                    required
-                    disabled={isLoading}
-                    data-testid="name-input"
-                    aria-label="Full name"
-                    aria-invalid={!!validationErrors.name}
-                    aria-describedby={validationErrors.name ? "name-error" : undefined}
-                  />
-                </div>
-                {validationErrors.name && (
-                  <p className="text-sm text-red-500" id="name-error" data-testid="name-error">
-                    {validationErrors.name}
-                  </p>
-                )}
-              </div>
-
+            <form onSubmit={handleSubmit} className="space-y-4" data-testid="register-form" role="form">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
@@ -245,14 +225,17 @@ export default function RegisterPage() {
 
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full min-h-[44px]"
                 disabled={isLoading}
                 data-testid="submit-button"
+                aria-label="Register"
               >
                 {isLoading ? (
                   <>
-                    <Spinner className="mr-2" data-testid="loading-spinner" />
-                    Creating account...
+                    <div data-testid="loading-spinner">
+                      <Spinner className="mr-2 inline" />
+                    </div>
+                    <span role="status" aria-live="polite">Creating account...</span>
                   </>
                 ) : (
                   "Create account"

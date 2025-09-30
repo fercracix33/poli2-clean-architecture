@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,9 +11,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import { CheckCircle, AlertCircle, RefreshCw, ImageIcon, User } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { BackgroundGradient } from '@/components/ui/background-gradient';
+import { createClient } from '@/lib/supabase';
 
 // Schema de validación para el formulario
 const profileCreationSchema = z.object({
@@ -21,9 +22,6 @@ const profileCreationSchema = z.object({
     .min(1, 'Name is required')
     .min(2, 'Name must be at least 2 characters')
     .max(100, 'Name cannot exceed 100 characters'),
-  email: z.string()
-    .min(1, 'Email is required')
-    .email('Invalid email format'),
 });
 
 type ProfileCreationData = z.infer<typeof profileCreationSchema>;
@@ -31,6 +29,9 @@ type ProfileCreationData = z.infer<typeof profileCreationSchema>;
 export default function CreateProfilePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string>('');
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -38,19 +39,76 @@ export default function CreateProfilePage() {
     resolver: zodResolver(profileCreationSchema),
     defaultValues: {
       name: '',
-      email: '',
     },
     mode: 'onChange',
   });
 
+  // Get user email from auth session
+  useEffect(() => {
+    const getUserEmail = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        setUserEmail(user.email);
+      } else {
+        // If no user session, redirect to register
+        router.push('/auth/register');
+      }
+    };
+    getUserEmail();
+  }, [router]);
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setAvatarPreview(previewUrl);
+    }
+  };
+
   const createProfileMutation = useMutation({
     mutationFn: async (data: ProfileCreationData) => {
+      let avatar_url: string | undefined;
+
+      // Upload avatar if file exists
+      if (avatarFile) {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (user) {
+          const fileExt = avatarFile.name.split('.').pop();
+          const fileName = `${user.id}.${fileExt}`;
+
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(fileName, avatarFile, {
+              upsert: true,
+              contentType: avatarFile.type
+            });
+
+          if (uploadError) {
+            console.error('Avatar upload error:', uploadError);
+          } else if (uploadData) {
+            // Get public URL for the avatar
+            const { data: urlData } = supabase.storage
+              .from('avatars')
+              .getPublicUrl(fileName);
+            avatar_url = urlData.publicUrl;
+          }
+        }
+      }
+
       const response = await fetch('/api/auth/profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          name: data.name,
+          avatar_url,
+        }),
       });
 
       if (!response.ok) {
@@ -90,142 +148,179 @@ export default function CreateProfilePage() {
 
   // Check for empty name error
   const nameError = form.formState.errors.name?.message === 'Name is required'
-    ? 'Name cannot be empty'
+    ? 'Name is required'
     : form.formState.errors.name?.message;
+
+  // Clean up preview URL on unmount
+  useEffect(() => {
+    return () => {
+      if (avatarPreview) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+    };
+  }, [avatarPreview]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="w-full max-w-[500px]">
         <BackgroundGradient className="rounded-[22px] w-full p-1">
           <Card
-            data-testid="profile-form"
             className="w-full"
             style={{ maxWidth: '500px' }}
           >
             <CardHeader className="text-center">
               <CardTitle>Create Your Profile</CardTitle>
               <CardDescription>
-                Complete your information to get started
+                Complete your profile to get started
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
                 role="form"
+                data-testid="profile-form"
                 className="space-y-6"
               >
-              {/* Name Field */}
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium">
-                  Full name
-                </Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Enter your full name"
-                  data-testid="name-input"
-                  aria-label="Full name"
-                  {...form.register('name')}
-                  disabled={isSubmitting}
-                />
-                {form.formState.errors.name && (
-                  <div
-                    data-testid="name-error"
-                    role="alert"
-                    className="text-sm text-destructive"
-                  >
-                    {nameError}
-                  </div>
-                )}
-              </div>
+                {/* Name Field */}
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-sm font-medium">
+                    Full name
+                  </Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Enter your full name"
+                    data-testid="name-input"
+                    aria-label="Full name"
+                    aria-invalid={!!form.formState.errors.name}
+                    aria-describedby={form.formState.errors.name ? "name-error" : undefined}
+                    {...form.register('name')}
+                    disabled={isSubmitting}
+                  />
+                  {form.formState.errors.name && (
+                    <div
+                      id="name-error"
+                      data-testid="name-error"
+                      role="alert"
+                      className="text-sm text-destructive"
+                    >
+                      {nameError}
+                    </div>
+                  )}
+                </div>
 
-              {/* Email Field */}
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">
-                  Email address
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="your@email.com"
-                  data-testid="email-input"
-                  aria-label="Email address"
-                  {...form.register('email')}
-                  disabled={isSubmitting}
-                />
-                {form.formState.errors.email && (
-                  <div
-                    data-testid="email-error"
-                    role="alert"
-                    className="text-sm text-destructive"
-                  >
-                    {form.formState.errors.email.message}
-                  </div>
-                )}
-              </div>
-
-              {/* Success Message */}
-              {showSuccess && (
-                <Alert
-                  data-testid="success-message"
-                  className="border-green-500/20 bg-green-500/10"
-                >
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <AlertDescription className="text-green-800 dark:text-green-200">
-                    Profile created successfully
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {/* Error Message */}
-              {createProfileMutation.error && (
-                <Alert
-                  data-testid="error-message"
-                  variant="destructive"
-                >
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    {createProfileMutation.error.message}
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                data-testid="submit-button"
-                aria-label="Create profile"
-                className="w-full h-11"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Spinner
-                      data-testid="loading-spinner"
-                      variant="circle"
-                      className="w-4 h-4 mr-2"
+                {/* Avatar Upload Field */}
+                <div className="space-y-2">
+                  <Label htmlFor="avatar" className="text-sm font-medium">
+                    Profile picture (optional)
+                  </Label>
+                  <div className="space-y-4">
+                    <Input
+                      id="avatar"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarChange}
+                      data-testid="avatar-input"
+                      aria-label="Profile picture"
+                      disabled={isSubmitting}
+                      className="cursor-pointer"
                     />
-                    <span>Creating...</span>
-                  </>
-                ) : (
-                  <span>Create Profile</span>
-                )}
-              </Button>
 
-              {/* Retry Button */}
-              {createProfileMutation.error && (
+                    {/* Avatar Preview */}
+                    {avatarPreview && (
+                      <div data-testid="avatar-preview" className="flex items-center justify-center">
+                        <div className="relative">
+                          <img
+                            src={avatarPreview}
+                            alt="Avatar preview"
+                            className="w-24 h-24 rounded-full object-cover border-4 border-gray-200 dark:border-gray-700"
+                          />
+                          <div className="absolute inset-0 w-24 h-24 rounded-full ring-2 ring-primary/20 animate-pulse"></div>
+                        </div>
+                      </div>
+                    )}
+
+                    {!avatarPreview && (
+                      <div className="flex items-center justify-center">
+                        <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                          <User className="w-12 h-12 text-gray-400" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Success Message */}
+                {showSuccess && (
+                  <Alert
+                    data-testid="success-message"
+                    role="alert"
+                    className="border-green-500/20 bg-green-500/10"
+                  >
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <AlertDescription className="text-green-800 dark:text-green-200">
+                      Profile created successfully! Redirecting...
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Error Message */}
+                {createProfileMutation.error && (
+                  <Alert
+                    data-testid="error-message"
+                    role="alert"
+                    variant="destructive"
+                  >
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      {createProfileMutation.error.message}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Submit Button */}
                 <Button
-                  type="button"
-                  variant="outline"
-                  data-testid="retry-button"
-                  onClick={handleRetry}
-                  className="w-full"
+                  type="submit"
+                  data-testid="submit-button"
+                  aria-label="Create profile"
+                  className="w-full h-11 min-h-[44px]"
+                  disabled={isSubmitting}
                 >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Retry
+                  {isSubmitting ? (
+                    <>
+                      <Spinner
+                        data-testid="loading-spinner"
+                        variant="circle"
+                        className="w-4 h-4 mr-2"
+                      />
+                      <span role="status" aria-live="polite">Creating profile...</span>
+                    </>
+                  ) : (
+                    <span>Create Profile</span>
+                  )}
                 </Button>
-              )}
+
+                {/* Retry Button */}
+                {createProfileMutation.error && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    data-testid="retry-button"
+                    onClick={handleRetry}
+                    className="w-full"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Retry
+                  </Button>
+                )}
               </form>
+
+              {/* Display user email */}
+              {userEmail && (
+                <div className="mt-6 text-center text-sm text-muted-foreground">
+                  Creating profile for: <span className="font-medium">{userEmail}</span>
+                </div>
+              )}
             </CardContent>
           </Card>
         </BackgroundGradient>

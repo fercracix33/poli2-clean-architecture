@@ -1,0 +1,42 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e8]:
+    - generic [ref=e9]:
+      - generic [ref=e10]: Create Your Profile
+      - generic [ref=e11]: Complete your profile to get started
+    - form [ref=e13]:
+      - generic [ref=e14]:
+        - generic [ref=e15]: Full name
+        - textbox "Full name" [ref=e16]: John Doe
+      - generic [ref=e17]:
+        - generic [ref=e18]: Profile picture (optional)
+        - generic [ref=e19]:
+          - button "Profile picture" [ref=e20] [cursor=pointer]
+          - img "Avatar preview" [ref=e23]
+      - alert [ref=e25]:
+        - img [ref=e26]
+        - generic [ref=e30]: Unauthorized
+      - button "Create profile" [ref=e31]:
+        - generic [ref=e32]: Create Profile
+      - button "Retry" [ref=e33]:
+        - img
+        - text: Retry
+  - generic [ref=e34]:
+    - img [ref=e36]
+    - button "Open Tanstack query devtools" [ref=e85] [cursor=pointer]:
+      - img [ref=e86] [cursor=pointer]
+  - generic [ref=e139] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e140] [cursor=pointer]:
+      - img [ref=e141] [cursor=pointer]
+    - generic [ref=e145] [cursor=pointer]:
+      - button "Open issues overlay" [ref=e146] [cursor=pointer]:
+        - generic [ref=e147] [cursor=pointer]:
+          - generic [ref=e148] [cursor=pointer]: "0"
+          - generic [ref=e149] [cursor=pointer]: "1"
+        - generic [ref=e150] [cursor=pointer]: Issue
+      - button "Collapse issues badge" [ref=e151] [cursor=pointer]:
+        - img [ref=e152] [cursor=pointer]
+  - alert [ref=e154]
+```

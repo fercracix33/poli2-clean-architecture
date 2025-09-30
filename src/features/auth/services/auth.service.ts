@@ -1,10 +1,10 @@
-import { supabase } from '@/lib/supabase';
-import { 
-  UserProfile, 
-  Organization, 
-  OrganizationMember, 
-  OrganizationCreate, 
-  UserProfileUpdate 
+import { SupabaseClient } from '@supabase/supabase-js';
+import {
+  UserProfile,
+  Organization,
+  OrganizationMember,
+  OrganizationCreate,
+  UserProfileUpdate
 } from '../entities';
 
 // ============================================================================
@@ -13,11 +13,12 @@ import {
 
 /**
  * Crear perfil de usuario en base de datos
- * Acceso directo a Supabase sin lógica de negocio
+ * Acceso directo a Supabase sin lÃ³gica de negocio
  */
 export async function createUserProfileInDB(
+  supabase: SupabaseClient,
   userId: string,
-  profileData: { email: string; name: string }
+  profileData: { email: string; name: string; avatar_url?: string }
 ): Promise<UserProfile> {
   const response = await supabase
     .from('user_profiles')
@@ -25,6 +26,7 @@ export async function createUserProfileInDB(
       id: userId,
       email: profileData.email,
       name: profileData.name,
+      avatar_url: profileData.avatar_url,
     })
     .select()
     .single();

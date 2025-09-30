@@ -85,11 +85,22 @@ export default function DashboardPage() {
           <Card>
             <CardHeader>
               <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User className="w-8 h-8 text-primary" />
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+                  {profile?.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt="User avatar"
+                      data-testid="user-avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User className="w-8 h-8 text-primary" />
+                  )}
                 </div>
                 <div>
-                  <CardTitle>Welcome back, {profile?.name || 'User'}!</CardTitle>
+                  <CardTitle>
+                    Welcome back, <span data-testid="user-name">{profile?.name || 'User'}</span>!
+                  </CardTitle>
                   <CardDescription>{profile?.email || 'user@example.com'}</CardDescription>
                 </div>
               </div>

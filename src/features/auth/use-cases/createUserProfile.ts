@@ -1,19 +1,22 @@
 import { UserProfile } from '../entities';
 import { createUserProfileInDB } from '../services/auth.service';
 import { validateUUID, validateAndSanitizeUserName } from '@/lib/validation';
+import { createClient } from '@/lib/supabase-server';
 
 /**
  * Crear perfil de usuario con validaciones completas
- * @param userId - ID del usuario (debe ser UUID v·lido)
+ * @param userId - ID del usuario (debe ser UUID v√°lido)
  * @param email - Email del usuario
- * @param name - Nombre del usuario (ser· sanitizado)
+ * @param name - Nombre del usuario (ser√° sanitizado)
+ * @param avatarUrl - URL del avatar (opcional)
  * @returns Promise<UserProfile> - Perfil creado
- * @throws Error si la validaciÛn falla o hay error en BD
+ * @throws Error si la validaci√≥n falla o hay error en BD
  */
 export async function createUserProfile(
   userId: string,
   email: string,
-  name: string
+  name: string,
+  avatarUrl?: string
 ): Promise<UserProfile> {
   validateUUID(userId, 'User ID');
 
@@ -29,9 +32,11 @@ export async function createUserProfile(
   const sanitizedName = validateAndSanitizeUserName(name);
 
   try {
-    return await createUserProfileInDB(userId, {
+    const supabase = await createClient();
+    return await createUserProfileInDB(supabase, userId, {
       email,
       name: sanitizedName,
+      avatar_url: avatarUrl,
     });
   } catch (error) {
     if (error instanceof Error) {
