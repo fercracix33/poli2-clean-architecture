@@ -1,0 +1,56 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - img [ref=e5]
+      - generic [ref=e13]: Poli2
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - heading "Create your account" [level=1] [ref=e20]
+        - paragraph [ref=e21]: Get started with your free account today
+      - alert [ref=e22]:
+        - img [ref=e23]
+        - generic [ref=e27]: NetworkError when attempting to fetch resource.
+      - form [ref=e28]:
+        - generic [ref=e29]:
+          - generic [ref=e30]: Email
+          - generic [ref=e31]:
+            - img [ref=e32]
+            - textbox "Email address" [ref=e35]: user@example.com
+        - generic [ref=e36]:
+          - generic [ref=e37]: Password
+          - generic [ref=e38]:
+            - img [ref=e39]
+            - textbox "Password" [ref=e42]: SecurePass123
+        - generic [ref=e43]:
+          - generic [ref=e44]: Confirm Password
+          - generic [ref=e45]:
+            - img [ref=e46]
+            - textbox "Confirm password" [ref=e49]: SecurePass123
+        - button "Register" [ref=e50]: Create account
+        - paragraph [ref=e51]: By creating an account, you agree to our Terms of Service and Privacy Policy
+      - generic [ref=e52]:
+        - generic [ref=e53]: Already have an account?
+        - link "Sign in" [ref=e54] [cursor=pointer]:
+          - /url: /auth/login
+    - link "← Back to home" [ref=e56] [cursor=pointer]:
+      - /url: /
+  - generic [ref=e57]:
+    - img [ref=e59]
+    - button "Open Tanstack query devtools" [ref=e108] [cursor=pointer]:
+      - img [ref=e109] [cursor=pointer]
+  - generic [ref=e162] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e163] [cursor=pointer]:
+      - img [ref=e164] [cursor=pointer]
+    - generic [ref=e168] [cursor=pointer]:
+      - button "Open issues overlay" [ref=e169] [cursor=pointer]:
+        - generic [ref=e170] [cursor=pointer]:
+          - generic [ref=e171] [cursor=pointer]: "0"
+          - generic [ref=e172] [cursor=pointer]: "1"
+        - generic [ref=e173] [cursor=pointer]: Issue
+      - button "Collapse issues badge" [ref=e174] [cursor=pointer]:
+        - img [ref=e175] [cursor=pointer]
+  - alert [ref=e177]
+```

@@ -1,0 +1,44 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - img [ref=e5]
+      - generic [ref=e9]: Poli2
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - heading "Create your account" [level=1] [ref=e16]
+        - paragraph [ref=e17]: Get started with your free account today
+      - form [ref=e18]:
+        - generic [ref=e19]:
+          - generic [ref=e20]: Email
+          - generic [ref=e21]:
+            - img [ref=e22]
+            - textbox "Email address" [active] [ref=e25]
+        - generic [ref=e26]:
+          - generic [ref=e27]: Password
+          - generic [ref=e28]:
+            - img [ref=e29]
+            - textbox "Password" [ref=e32]: SecurePass123
+        - generic [ref=e33]:
+          - generic [ref=e34]: Confirm Password
+          - generic [ref=e35]:
+            - img [ref=e36]
+            - textbox "Confirm password" [ref=e39]: SecurePass123
+        - button "Register" [ref=e40]: Create account
+        - paragraph [ref=e41]: By creating an account, you agree to our Terms of Service and Privacy Policy
+      - generic [ref=e42]:
+        - generic [ref=e43]: Already have an account?
+        - link "Sign in" [ref=e44]:
+          - /url: /auth/login
+    - link "← Back to home" [ref=e46]:
+      - /url: /
+  - generic [ref=e47]:
+    - img [ref=e49]
+    - button "Open Tanstack query devtools" [ref=e117] [cursor=pointer]:
+      - img [ref=e118] [cursor=pointer]
+  - button "Open Next.js Dev Tools" [ref=e191] [cursor=pointer]:
+    - img [ref=e192] [cursor=pointer]
+  - alert [ref=e197]
+```

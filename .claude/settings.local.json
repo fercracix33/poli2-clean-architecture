@@ -1,0 +1,53 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__context7__resolve-library-id",
+      "mcp__shadcn__getComponents",
+      "mcp__chrome-devtools__list_pages",
+      "mcp__ide__getDiagnostics",
+      "Bash(npm run build:*)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(npm run test:*)",
+      "Bash(npm test)",
+      "Bash(timeout 30 npm run test:e2e)",
+      "Bash(tree:*)",
+      "Bash(npm run test:coverage:*)",
+      "Bash(cat:*)",
+      "Bash(npm run test:e2e:*)",
+      "Bash(git add:*)",
+      "Bash(npm run dev:*)",
+      "Bash(dir:*)",
+      "Bash(grep:*)",
+      "Bash(if [ -f .env.local ])",
+      "Bash(then echo \"Env file exists\")",
+      "Bash(else echo \"No env file\")",
+      "Bash(fi)",
+      "Bash(npm run lint)",
+      "Bash(npx tsc:*)",
+      "Bash(npx eslint:*)",
+      "Bash(python:*)",
+      "Bash(timeout 30 npm run test -- --run)",
+      "Bash(for feature in auth projects tasks waitlist)",
+      "Bash(do echo \"📁 Feature: $feature\")",
+      "Bash(ls:*)",
+      "Bash(done)",
+      "Bash(timeout 30 npm run test -- --run --reporter=verbose)",
+      "Bash(npm run typecheck:*)",
+      "Bash(mkdir:*)",
+      "Bash(timeout 10 npm run test -- src/features/theme --run)",
+      "Bash(timeout:*)",
+      "Bash(find:*)",
+      "Bash(if [ -f tailwind.config.ts ])",
+      "Bash(then cat tailwind.config.ts)",
+      "Bash(elif [ -f tailwind.config.js ])",
+      "Bash(then cat tailwind.config.js)",
+      "Bash(else echo \"No tailwind config found\")"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "shared-server"
+  ]
+}

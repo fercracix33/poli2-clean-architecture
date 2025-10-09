@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+/* Configure dark mode with class selector */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Define theme variables using @theme (Tailwind v4 approach) */
+@theme {
+  /* Light mode colors (default) */
+  --color-background: oklch(100% 0 0); /* white */
+  --color-foreground: oklch(9% 0 0); /* near black */
+
+  --color-card: oklch(100% 0 0);
+  --color-card-foreground: oklch(9% 0 0);
+
+  --color-popover: oklch(100% 0 0);
+  --color-popover-foreground: oklch(9% 0 0);
+
+  --color-primary: oklch(9% 0 0);
+  --color-primary-foreground: oklch(98% 0 0);
+
+  --color-secondary: oklch(96% 0 0);
+  --color-secondary-foreground: oklch(9% 0 0);
+
+  --color-muted: oklch(96% 0 0);
+  --color-muted-foreground: oklch(45% 0 0);
+
+  --color-accent: oklch(96% 0 0);
+  --color-accent-foreground: oklch(9% 0 0);
+
+  --color-destructive: oklch(50% 0.2 25); /* red */
+  --color-destructive-foreground: oklch(98% 0 0);
+
+  --color-border: oklch(90% 0 0);
+  --color-input: oklch(90% 0 0);
+  --color-ring: oklch(9% 0 0);
+
+  --radius: 0.5rem;
+}
+
+/* Dark mode color overrides */
+@layer base {
+  .dark {
+    --color-background: oklch(9% 0 0); /* near black */
+    --color-foreground: oklch(98% 0 0); /* near white */
+
+    --color-card: oklch(9% 0 0);
+    --color-card-foreground: oklch(98% 0 0);
+
+    --color-popover: oklch(9% 0 0);
+    --color-popover-foreground: oklch(98% 0 0);
+
+    --color-primary: oklch(98% 0 0);
+    --color-primary-foreground: oklch(9% 0 0);
+
+    --color-secondary: oklch(15% 0 0);
+    --color-secondary-foreground: oklch(98% 0 0);
+
+    --color-muted: oklch(15% 0 0);
+    --color-muted-foreground: oklch(64% 0 0);
+
+    --color-accent: oklch(15% 0 0);
+    --color-accent-foreground: oklch(98% 0 0);
+
+    --color-destructive: oklch(60% 0.15 25); /* lighter red for dark mode */
+    --color-destructive-foreground: oklch(98% 0 0);
+
+    --color-border: oklch(15% 0 0);
+    --color-input: oklch(15% 0 0);
+    --color-ring: oklch(82% 0 0);
+  }
+}
+
+/* Base styles */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground transition-colors duration-300;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+  }
+}

@@ -1,0 +1,53 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - img [ref=e5]
+      - generic [ref=e13]: Poli2
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - heading "Create your account" [level=1] [ref=e20]
+        - paragraph [ref=e21]: Get started with your free account today
+      - form [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e24]: Email
+          - generic [ref=e25]:
+            - img [ref=e26]
+            - textbox "Email address" [ref=e29]
+        - generic [ref=e30]:
+          - generic [ref=e31]: Password
+          - generic [ref=e32]:
+            - img [ref=e33]
+            - textbox "Password" [ref=e36]
+        - generic [ref=e37]:
+          - generic [ref=e38]: Confirm Password
+          - generic [ref=e39]:
+            - img [ref=e40]
+            - textbox "Confirm password" [ref=e43]
+        - button "Register" [ref=e44]: Create account
+        - paragraph [ref=e45]: By creating an account, you agree to our Terms of Service and Privacy Policy
+      - generic [ref=e46]:
+        - generic [ref=e47]: Already have an account?
+        - link "Sign in" [ref=e48] [cursor=pointer]:
+          - /url: /auth/login
+    - link "← Back to home" [ref=e50] [cursor=pointer]:
+      - /url: /
+  - generic [ref=e51]:
+    - img [ref=e53]
+    - button "Open Tanstack query devtools" [ref=e102] [cursor=pointer]:
+      - img [ref=e103] [cursor=pointer]
+  - generic [ref=e156] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e157] [cursor=pointer]:
+      - img [ref=e158] [cursor=pointer]
+    - generic [ref=e162] [cursor=pointer]:
+      - button "Open issues overlay" [ref=e163] [cursor=pointer]:
+        - generic [ref=e164] [cursor=pointer]:
+          - generic [ref=e165] [cursor=pointer]: "0"
+          - generic [ref=e166] [cursor=pointer]: "1"
+        - generic [ref=e167] [cursor=pointer]: Issue
+      - button "Collapse issues badge" [ref=e168] [cursor=pointer]:
+        - img [ref=e169] [cursor=pointer]
+  - alert [ref=e171]
+```
