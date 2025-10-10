@@ -1,0 +1,54 @@
+{
+  "app": {
+    "name": "PoliOrganizaT",
+    "tagline": "for software teams"
+  },
+  "nav": {
+    "home": "Home",
+    "features": "Features",
+    "pricing": "Pricing",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "changeLanguage": "Change language"
+  },
+  "hero": {
+    "badge": "Project management for software teams",
+    "title": "Project management that",
+    "flipWords": ["adapts", "evolves", "grows", "scales", "flexes"],
+    "titleEnd": "with your team",
+    "description": "Start simple like Trello. Grow powerful like Jira. Without the complexity of either.",
+    "descriptionHighlight": "Built for software teams who need more power without the learning curve.",
+    "ctaPrimary": "Start Free Trial",
+    "ctaSecondary": "Sign In"
+  },
+  "features": {
+    "title": "Everything your team needs",
+    "titleHighlight": "to ship better software",
+    "subtitle": "From Kanban boards to Gantt charts, all connected in one place",
+    "visualWorkflow": {
+      "title": "Visual Workflow",
+      "description": "Drag-and-drop Kanban boards across organization, project, and personal spaces"
+    },
+    "organize": {
+      "title": "Organize Your Way",
+      "description": "Organization → Projects → Personal Space. Every level customizable with roles and permissions"
+    },
+    "linking": {
+      "title": "Link Across Everything",
+      "description": "Connect tasks, notes, events, and messages. Markdown-powered with [[wiki-style]] linking"
+    },
+    "planning": {
+      "title": "Plan & Track",
+      "description": "Timeline views, dependencies, and integrated calendar with smart notifications"
+    }
+  },
+  "cta": {
+    "title": "Ready to simplify your project management?",
+    "description": "Join software teams who moved from Jira's complexity and Trello's limitations.",
+    "descriptionHighlight": "Start free. Scale when you're ready.",
+    "button": "Create Your Account"
+  },
+  "footer": {
+    "copyright": "© 2025 PoliOrganizaT. Project management for software teams."
+  }
+}

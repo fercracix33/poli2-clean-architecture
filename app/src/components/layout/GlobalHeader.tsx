@@ -18,10 +18,14 @@
 'use client'
 
 import { ThemeToggle } from '@/features/theme/components/ThemeToggle'
+import { LocaleSelector } from '@/features/i18n/components/LocaleSelector'
+import { useTranslations } from 'next-intl'
 import { Building2 } from 'lucide-react'
 import Link from 'next/link'
 
 export function GlobalHeader() {
+  const t = useTranslations('app');
+
   return (
     <nav className="border-b border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-black/60 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -35,16 +39,17 @@ export function GlobalHeader() {
             <Building2 className="h-8 w-8 text-blue-600 dark:text-blue-400" />
             <div className="flex flex-col">
               <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent leading-tight">
-                PoliOrganizaT
+                {t('name')}
               </span>
               <span className="text-xs text-slate-500 dark:text-slate-400 leading-tight">
-                for software teams
+                {t('tagline')}
               </span>
             </div>
           </Link>
 
-          {/* Right side: Theme Toggle */}
+          {/* Right side: Language Selector & Theme Toggle */}
           <div className="flex items-center space-x-4">
+            <LocaleSelector />
             <ThemeToggle />
           </div>
         </div>

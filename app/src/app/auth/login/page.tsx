@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { BackgroundGradient } from "@/components/ui/background-gradient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import { Building2, Mail, Lock, AlertCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 
 export default function LoginPage() {
+  const t = useTranslations('auth');
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -64,9 +66,9 @@ export default function LoginPage() {
         <BackgroundGradient className="rounded-[22px] p-8 bg-white dark:bg-neutral-900">
           <div className="space-y-6">
             <div className="text-center">
-              <h1 className="text-2xl font-bold mb-2">Welcome back to your projects</h1>
+              <h1 className="text-2xl font-bold mb-2">{t('login.title')}</h1>
               <p className="text-neutral-600 dark:text-neutral-400">
-                Continue organizing your team's work
+                {t('login.subtitle')}
               </p>
             </div>
 
@@ -79,38 +81,38 @@ export default function LoginPage() {
 
             {success && (
               <Alert className="bg-green-50 text-green-900 border-green-200" data-testid="success-message">
-                <AlertDescription>Login successful! Redirecting...</AlertDescription>
+                <AlertDescription>{t('login.success')}</AlertDescription>
               </Alert>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4" data-testid="login-form">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('login.email.label')}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-neutral-400" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder={t('login.email.placeholder')}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
                     required
                     disabled={isLoading}
                     data-testid="email-input"
-                    aria-label="Email address"
+                    aria-label={t('login.email.aria')}
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t('login.password.label')}</Label>
                   <Link
                     href="/auth/forgot-password"
                     className="text-sm text-blue-500 hover:text-blue-600"
                   >
-                    Forgot password?
+                    {t('login.forgotPassword')}
                   </Link>
                 </div>
                 <div className="relative">
@@ -118,14 +120,14 @@ export default function LoginPage() {
                   <Input
                     id="password"
                     type="password"
-                    placeholder="••••••••"
+                    placeholder={t('login.password.placeholder')}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10"
                     required
                     disabled={isLoading}
                     data-testid="password-input"
-                    aria-label="Password"
+                    aria-label={t('login.password.aria')}
                   />
                 </div>
               </div>
@@ -139,20 +141,20 @@ export default function LoginPage() {
                 {isLoading ? (
                   <>
                     <Spinner className="mr-2" data-testid="loading-spinner" />
-                    Signing in...
+                    {t('login.submitting')}
                   </>
                 ) : (
-                  "Sign in"
+                  t('login.submit')
                 )}
               </Button>
             </form>
 
             <div className="text-center text-sm">
               <span className="text-neutral-600 dark:text-neutral-400">
-                Don&apos;t have an account?{" "}
+                {t('login.noAccount')}{" "}
               </span>
               <Link href="/auth/register" className="text-blue-500 hover:text-blue-600 font-medium">
-                Sign up
+                {t('login.signUp')}
               </Link>
             </div>
           </div>
@@ -160,7 +162,7 @@ export default function LoginPage() {
 
         <div className="mt-8 text-center">
           <Link href="/" className="text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100">
-            ← Back to home
+            {t('login.backHome')}
           </Link>
         </div>
       </div>

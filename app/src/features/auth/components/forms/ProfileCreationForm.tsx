@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -15,18 +16,10 @@ import { MotionEffect } from '@/components/ui/motion-effect';
 import BlurText from '@/components/ui/blur-text';
 import { Spinner } from '@/components/ui/spinner';
 
-// Schema de validación para el formulario
-const profileCreationSchema = z.object({
-  name: z.string()
-    .min(2, 'El nombre debe tener al menos 2 caracteres')
-    .max(100, 'El nombre no puede exceder 100 caracteres')
-    .regex(/^[a-zA-ZÀ-ÿ\s\-']+$/, 'Solo se permiten letras, espacios, guiones y apostrofes'),
-  email: z.string()
-    .email('Ingresa un email válido')
-    .min(1, 'El email es requerido'),
-});
-
-type ProfileCreationData = z.infer<typeof profileCreationSchema>;
+type ProfileCreationData = {
+  name: string;
+  email: string;
+};
 
 interface ProfileCreationFormProps {
   onSuccess?: (profile: any) => void;
@@ -34,13 +27,25 @@ interface ProfileCreationFormProps {
   className?: string;
 }
 
-export function ProfileCreationForm({ 
-  onSuccess, 
-  onError, 
-  className = '' 
+export function ProfileCreationForm({
+  onSuccess,
+  onError,
+  className = ''
 }: ProfileCreationFormProps) {
+  const t = useTranslations('auth');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
+
+  // Zod schema INSIDE component to access translations
+  const profileCreationSchema = z.object({
+    name: z.string()
+      .min(2, t('validation.name.min'))
+      .max(100, t('validation.name.max'))
+      .regex(/^[a-zA-ZÀ-ÿ\s\-']+$/, t('validation.name.format')),
+    email: z.string()
+      .email(t('validation.email.invalid'))
+      .min(1, t('validation.email.required')),
+  });
 
   const form = useForm<ProfileCreationData>({
     resolver: zodResolver(profileCreationSchema),
@@ -62,7 +67,7 @@ export function ProfileCreationForm({
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Error al crear perfil');
+        throw new Error(error.error || t('errors.profileSaveFailed'));
       }
 
       return response.json();
@@ -106,7 +111,7 @@ export function ProfileCreationForm({
           
           <div className="space-y-2">
             <BlurText
-              text="Crear tu Perfil"
+              text={t('createProfile.title')}
               className="text-2xl font-semibold text-foreground"
               delay={100}
               animateBy="words"
@@ -116,7 +121,7 @@ export function ProfileCreationForm({
               delay={0.4}
             >
               <CardDescription className="text-muted-foreground">
-                Completa tu información para comenzar a usar la plataforma
+                {t('createProfile.subtitle')}
               </CardDescription>
             </MotionEffect>
           </div>
@@ -132,13 +137,13 @@ export function ProfileCreationForm({
             >
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm font-medium text-foreground">
-                  Nombre completo
+                  {t('createProfile.name.label')}
                 </Label>
                 <div className="relative group">
                   <Input
                     id="name"
                     type="text"
-                    placeholder="Ingresa tu nombre completo"
+                    placeholder={t('createProfile.name.placeholder')}
                     className="pl-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary group-hover:border-primary/50"
                     {...form.register('name')}
                     disabled={isSubmitting}
@@ -168,13 +173,13 @@ export function ProfileCreationForm({
             >
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium text-foreground">
-                  Correo electrónico
+                  {t('createProfile.email.label')}
                 </Label>
                 <div className="relative group">
                   <Input
                     id="email"
                     type="email"
-                    placeholder="tu@email.com"
+                    placeholder={t('createProfile.email.placeholder')}
                     className="pl-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary group-hover:border-primary/50"
                     {...form.register('email')}
                     disabled={isSubmitting}
@@ -224,12 +229,12 @@ export function ProfileCreationForm({
                 {isSubmitting ? (
                   <div className="flex items-center space-x-2">
                     <Spinner variant="circle" className="w-4 h-4 text-primary-foreground" />
-                    <span>Creando perfil...</span>
+                    <span>{t('createProfile.submitting')}</span>
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2">
                     <CheckCircle className="w-4 h-4" />
-                    <span>Crear Perfil</span>
+                    <span>{t('createProfile.submit')}</span>
                   </div>
                 )}
               </Button>
@@ -247,7 +252,7 @@ export function ProfileCreationForm({
                   <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
                   <div className="w-2 h-2 bg-primary/30 rounded-full"></div>
                 </div>
-                <span>Paso 1 de 2: Configurar perfil</span>
+                <span>{t('createProfile.progress')}</span>
               </div>
             </div>
           </MotionEffect>

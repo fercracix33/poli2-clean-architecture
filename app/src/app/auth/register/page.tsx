@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { BackgroundGradient } from "@/components/ui/background-gradient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import { Building2, Mail, Lock, AlertCircle, CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 
 export default function RegisterPage() {
+  const t = useTranslations('auth');
   const router = useRouter();
   const [formData, setFormData] = useState({
     email: "",
@@ -28,21 +30,21 @@ export default function RegisterPage() {
     const errors: Record<string, string> = {};
 
     if (!formData.email) {
-      errors.email = "Invalid email address";
+      errors.email = t('validation.email.invalid');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = "Invalid email address";
+      errors.email = t('validation.email.invalid');
     }
 
     if (!formData.password) {
-      errors.password = "Password must be at least 8 characters";
+      errors.password = t('validation.password.min');
     } else if (formData.password.length < 8) {
-      errors.password = "Password must be at least 8 characters";
+      errors.password = t('validation.password.min');
     }
 
     if (!formData.confirmPassword) {
-      errors.confirmPassword = "Passwords do not match";
+      errors.confirmPassword = t('validation.confirmPassword.match');
     } else if (formData.password !== formData.confirmPassword) {
-      errors.confirmPassword = "Passwords do not match";
+      errors.confirmPassword = t('validation.confirmPassword.match');
     }
 
     setValidationErrors(errors);
@@ -72,7 +74,7 @@ export default function RegisterPage() {
       if (signUpError) {
         // Handle duplicate email error
         if (signUpError.message.includes("already registered")) {
-          setError("User already registered");
+          setError(t('errors.alreadyRegistered'));
         } else {
           setError(signUpError.message);
         }
@@ -89,9 +91,9 @@ export default function RegisterPage() {
     } catch (err) {
       // Network error handling
       if (err instanceof Error && err.message.includes("fetch")) {
-        setError("Network error. Please check your internet connection.");
+        setError(t('errors.network'));
       } else {
-        setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+        setError(err instanceof Error ? err.message : t('errors.generic'));
       }
     } finally {
       setIsLoading(false);
@@ -122,9 +124,9 @@ export default function RegisterPage() {
         <BackgroundGradient className="rounded-[22px] p-8 bg-white dark:bg-neutral-900">
           <div className="space-y-6">
             <div className="text-center">
-              <h1 className="text-2xl font-bold mb-2">Start managing projects your way</h1>
+              <h1 className="text-2xl font-bold mb-2">{t('register.title')}</h1>
               <p className="text-neutral-600 dark:text-neutral-400">
-                From simple Kanban boards to complex Gantt timelines—all in one place. Free for teams under 10 members.
+                {t('register.subtitle')}
               </p>
             </div>
 
@@ -139,27 +141,27 @@ export default function RegisterPage() {
               <Alert className="bg-green-50 text-green-900 border-green-200" data-testid="success-message">
                 <CheckCircle2 className="h-4 w-4" />
                 <AlertDescription>
-                  Account created successfully! Redirecting to profile setup...
+                  {t('register.success')}
                 </AlertDescription>
               </Alert>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4" data-testid="register-form" role="form">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('register.email.label')}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-neutral-400" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder={t('register.email.placeholder')}
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     className="pl-10"
                     required
                     disabled={isLoading}
                     data-testid="email-input"
-                    aria-label="Email address"
+                    aria-label={t('register.email.aria')}
                     aria-invalid={!!validationErrors.email}
                     aria-describedby={validationErrors.email ? "email-error" : undefined}
                   />
@@ -172,20 +174,20 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('register.password.label')}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-neutral-400" />
                   <Input
                     id="password"
                     type="password"
-                    placeholder="••••••••"
+                    placeholder={t('register.password.placeholder')}
                     value={formData.password}
                     onChange={(e) => handleInputChange("password", e.target.value)}
                     className="pl-10"
                     required
                     disabled={isLoading}
                     data-testid="password-input"
-                    aria-label="Password"
+                    aria-label={t('register.password.aria')}
                     aria-invalid={!!validationErrors.password}
                     aria-describedby={validationErrors.password ? "password-error" : undefined}
                   />
@@ -198,20 +200,20 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword">{t('register.confirmPassword.label')}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-neutral-400" />
                   <Input
                     id="confirmPassword"
                     type="password"
-                    placeholder="••••••••"
+                    placeholder={t('register.confirmPassword.placeholder')}
                     value={formData.confirmPassword}
                     onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                     className="pl-10"
                     required
                     disabled={isLoading}
                     data-testid="confirm-password-input"
-                    aria-label="Confirm password"
+                    aria-label={t('register.confirmPassword.aria')}
                     aria-invalid={!!validationErrors.confirmPassword}
                     aria-describedby={validationErrors.confirmPassword ? "confirm-password-error" : undefined}
                   />
@@ -228,31 +230,31 @@ export default function RegisterPage() {
                 className="w-full min-h-[44px]"
                 disabled={isLoading}
                 data-testid="submit-button"
-                aria-label="Register"
+                aria-label={t('register.submitAria')}
               >
                 {isLoading ? (
                   <>
                     <div data-testid="loading-spinner">
                       <Spinner className="mr-2 inline" />
                     </div>
-                    <span role="status" aria-live="polite">Creating account...</span>
+                    <span role="status" aria-live="polite">{t('register.submitting')}</span>
                   </>
                 ) : (
-                  "Create account"
+                  t('register.submit')
                 )}
               </Button>
 
               <p className="text-xs text-neutral-600 dark:text-neutral-400 text-center">
-                By creating an account, you agree to our Terms of Service and Privacy Policy
+                {t('register.terms')}
               </p>
             </form>
 
             <div className="text-center text-sm">
               <span className="text-neutral-600 dark:text-neutral-400">
-                Already have an account?{" "}
+                {t('register.haveAccount')}{" "}
               </span>
               <Link href="/auth/login" className="text-blue-500 hover:text-blue-600 font-medium">
-                Sign in
+                {t('register.signIn')}
               </Link>
             </div>
           </div>
@@ -260,7 +262,7 @@ export default function RegisterPage() {
 
         <div className="mt-8 text-center">
           <Link href="/" className="text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100">
-            ← Back to home
+            {t('register.backHome')}
           </Link>
         </div>
       </div>

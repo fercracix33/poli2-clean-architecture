@@ -1,0 +1,54 @@
+{
+  "app": {
+    "name": "PoliOrganizaT",
+    "tagline": "para equipos de software"
+  },
+  "nav": {
+    "home": "Inicio",
+    "features": "Características",
+    "pricing": "Precios",
+    "signIn": "Iniciar Sesión",
+    "signUp": "Registrarse",
+    "changeLanguage": "Cambiar idioma"
+  },
+  "hero": {
+    "badge": "Gestión de proyectos para equipos de software",
+    "title": "Gestión de proyectos que",
+    "flipWords": ["se adapta", "evoluciona", "crece", "escala", "flexibiliza"],
+    "titleEnd": "con tu equipo",
+    "description": "Empieza simple como Trello. Crece potente como Jira. Sin la complejidad de ninguno.",
+    "descriptionHighlight": "Diseñado para equipos de software que necesitan más poder sin la curva de aprendizaje.",
+    "ctaPrimary": "Comenzar Prueba Gratis",
+    "ctaSecondary": "Iniciar Sesión"
+  },
+  "features": {
+    "title": "Todo lo que tu equipo necesita",
+    "titleHighlight": "para enviar mejor software",
+    "subtitle": "Desde tableros Kanban hasta diagramas de Gantt, todo conectado en un solo lugar",
+    "visualWorkflow": {
+      "title": "Flujo de Trabajo Visual",
+      "description": "Tableros Kanban de arrastrar y soltar en organización, proyecto y espacios personales"
+    },
+    "organize": {
+      "title": "Organiza a Tu Manera",
+      "description": "Organización → Proyectos → Espacio Personal. Cada nivel personalizable con roles y permisos"
+    },
+    "linking": {
+      "title": "Vincula Todo",
+      "description": "Conecta tareas, notas, eventos y mensajes. Con Markdown y enlaces estilo [[wiki]]"
+    },
+    "planning": {
+      "title": "Planifica y Rastrea",
+      "description": "Vistas de línea de tiempo, dependencias y calendario integrado con notificaciones inteligentes"
+    }
+  },
+  "cta": {
+    "title": "¿Listo para simplificar tu gestión de proyectos?",
+    "description": "Únete a equipos de software que dejaron atrás la complejidad de Jira y las limitaciones de Trello.",
+    "descriptionHighlight": "Comienza gratis. Escala cuando estés listo.",
+    "button": "Crea Tu Cuenta"
+  },
+  "footer": {
+    "copyright": "© 2025 PoliOrganizaT. Gestión de proyectos para equipos de software."
+  }
+}

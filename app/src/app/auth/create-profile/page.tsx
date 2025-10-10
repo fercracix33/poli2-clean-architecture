@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -16,17 +17,12 @@ import { Spinner } from '@/components/ui/spinner';
 import { BackgroundGradient } from '@/components/ui/background-gradient';
 import { createClient } from '@/lib/supabase';
 
-// Schema de validación para el formulario
-const profileCreationSchema = z.object({
-  name: z.string()
-    .min(1, 'Name is required')
-    .min(2, 'Name must be at least 2 characters')
-    .max(100, 'Name cannot exceed 100 characters'),
-});
-
-type ProfileCreationData = z.infer<typeof profileCreationSchema>;
+type ProfileCreationData = {
+  name: string;
+};
 
 export default function CreateProfilePage() {
+  const t = useTranslations('auth');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -34,6 +30,14 @@ export default function CreateProfilePage() {
   const [userEmail, setUserEmail] = useState<string>('');
   const queryClient = useQueryClient();
   const router = useRouter();
+
+  // Zod schema INSIDE component to access translations
+  const profileCreationSchema = z.object({
+    name: z.string()
+      .min(1, t('validation.name.required'))
+      .min(2, t('validation.name.min'))
+      .max(100, t('validation.name.max')),
+  });
 
   const form = useForm<ProfileCreationData>({
     resolver: zodResolver(profileCreationSchema),
@@ -113,10 +117,10 @@ export default function CreateProfilePage() {
 
       if (!response.ok) {
         if (response.status === 500) {
-          throw new Error('Something went wrong. Please try again later.');
+          throw new Error(t('errors.serverError'));
         }
-        const error = await response.json().catch(() => ({ error: 'Network error. Please try again.' }));
-        throw new Error(error.error || 'Network error. Please try again.');
+        const error = await response.json().catch(() => ({ error: t('errors.networkRetry') }));
+        throw new Error(error.error || t('errors.networkRetry'));
       }
 
       return response.json();
@@ -147,9 +151,7 @@ export default function CreateProfilePage() {
   };
 
   // Check for empty name error
-  const nameError = form.formState.errors.name?.message === 'Name is required'
-    ? 'Name is required'
-    : form.formState.errors.name?.message;
+  const nameError = form.formState.errors.name?.message;
 
   // Clean up preview URL on unmount
   useEffect(() => {
@@ -169,9 +171,9 @@ export default function CreateProfilePage() {
             style={{ maxWidth: '500px' }}
           >
             <CardHeader className="text-center">
-              <CardTitle>Create Your Profile</CardTitle>
+              <CardTitle>{t('createProfile.title')}</CardTitle>
               <CardDescription>
-                Complete your profile to get started
+                {t('createProfile.subtitle')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -184,14 +186,14 @@ export default function CreateProfilePage() {
                 {/* Name Field */}
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm font-medium">
-                    Full name
+                    {t('createProfile.name.label')}
                   </Label>
                   <Input
                     id="name"
                     type="text"
-                    placeholder="Enter your full name"
+                    placeholder={t('createProfile.name.placeholder')}
                     data-testid="name-input"
-                    aria-label="Full name"
+                    aria-label={t('createProfile.name.aria')}
                     aria-invalid={!!form.formState.errors.name}
                     aria-describedby={form.formState.errors.name ? "name-error" : undefined}
                     {...form.register('name')}
@@ -212,7 +214,7 @@ export default function CreateProfilePage() {
                 {/* Avatar Upload Field */}
                 <div className="space-y-2">
                   <Label htmlFor="avatar" className="text-sm font-medium">
-                    Profile picture (optional)
+                    {t('createProfile.avatar.label')}
                   </Label>
                   <div className="space-y-4">
                     <Input
@@ -221,7 +223,7 @@ export default function CreateProfilePage() {
                       accept="image/*"
                       onChange={handleAvatarChange}
                       data-testid="avatar-input"
-                      aria-label="Profile picture"
+                      aria-label={t('createProfile.avatar.aria')}
                       disabled={isSubmitting}
                       className="cursor-pointer"
                     />
@@ -232,7 +234,7 @@ export default function CreateProfilePage() {
                         <div className="relative">
                           <img
                             src={avatarPreview}
-                            alt="Avatar preview"
+                            alt={t('createProfile.avatar.preview')}
                             className="w-24 h-24 rounded-full object-cover border-4 border-gray-200 dark:border-gray-700"
                           />
                           <div className="absolute inset-0 w-24 h-24 rounded-full ring-2 ring-primary/20 animate-pulse"></div>
@@ -259,7 +261,7 @@ export default function CreateProfilePage() {
                   >
                     <CheckCircle className="h-4 w-4 text-green-600" />
                     <AlertDescription className="text-green-800 dark:text-green-200">
-                      Profile created successfully! Redirecting...
+                      {t('createProfile.success')}
                     </AlertDescription>
                   </Alert>
                 )}
@@ -282,7 +284,7 @@ export default function CreateProfilePage() {
                 <Button
                   type="submit"
                   data-testid="submit-button"
-                  aria-label="Create profile"
+                  aria-label={t('createProfile.submitAria')}
                   className="w-full h-11 min-h-[44px]"
                   disabled={isSubmitting}
                 >
@@ -293,10 +295,10 @@ export default function CreateProfilePage() {
                         variant="circle"
                         className="w-4 h-4 mr-2"
                       />
-                      <span role="status" aria-live="polite">Creating profile...</span>
+                      <span role="status" aria-live="polite">{t('createProfile.submitting')}</span>
                     </>
                   ) : (
-                    <span>Create Profile</span>
+                    <span>{t('createProfile.submit')}</span>
                   )}
                 </Button>
 
@@ -310,7 +312,7 @@ export default function CreateProfilePage() {
                     className="w-full"
                   >
                     <RefreshCw className="w-4 h-4 mr-2" />
-                    Retry
+                    {t('createProfile.retry')}
                   </Button>
                 )}
               </form>
@@ -318,7 +320,7 @@ export default function CreateProfilePage() {
               {/* Display user email */}
               {userEmail && (
                 <div className="mt-6 text-center text-sm text-muted-foreground">
-                  Creating profile for: <span className="font-medium">{userEmail}</span>
+                  {t('createProfile.creatingFor')} <span className="font-medium">{userEmail}</span>
                 </div>
               )}
             </CardContent>
