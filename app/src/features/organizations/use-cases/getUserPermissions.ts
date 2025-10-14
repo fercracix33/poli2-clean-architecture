@@ -1,18 +1,17 @@
-import { Permission } from '../entities';
-import { getUserPermissionsInOrganization } from '../services/auth.service';
+import { getUserPermissionsInOrganization } from '../services/organization.service';
 import { validateUUID } from '@/lib/validation';
 
 /**
  * Obtener permisos de usuario en una organización con validaciones
  * @param userId - ID del usuario
  * @param organizationId - ID de la organización
- * @returns Promise<Permission[]> - Lista de permisos del usuario
+ * @returns Promise<string[]> - Lista de nombres de permisos del usuario
  * @throws Error si la validación falla o hay error en BD
  */
 export async function getUserPermissions(
   userId: string,
   organizationId: string
-): Promise<Permission[]> {
+): Promise<string[]> {
   // Validación de UUIDs
   validateUUID(userId, 'User ID');
   validateUUID(organizationId, 'Organization ID');

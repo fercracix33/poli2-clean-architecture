@@ -4,7 +4,7 @@ import {
   isUserMemberOfOrganization,
   getRoleByNameFromDB,
   addUserToOrganizationInDB
-} from '../services/auth.service';
+} from '../services/organization.service';
 import {
   validateUUID,
   validateOrganizationSlug,

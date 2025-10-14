@@ -3,8 +3,8 @@ import {
   createOrganizationInDB,
   isOrganizationSlugAvailable,
   getRoleByNameFromDB,
-  addUserToOrganizationInDB
-} from '../services/auth.service';
+  addFirstOrganizationMemberInDB
+} from '../services/organization.service';
 import {
   validateUUID,
   validateAndSanitizeOrganizationName,
@@ -76,8 +76,9 @@ export async function createOrganization(
       throw new Error('System admin role not found');
     }
 
-    // Añadir el creador como administrador automáticamente
-    await addUserToOrganizationInDB(organization.id, userId, adminRole.id);
+    // Añadir el creador como primer miembro (administrador) automáticamente
+    // Uses SECURITY DEFINER function to bypass RLS for first member only
+    await addFirstOrganizationMemberInDB(organization.id, userId, adminRole.id);
     
     // Log de operación sensible
     console.log('Organization created', {

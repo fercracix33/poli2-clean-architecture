@@ -1,4 +1,5 @@
-import { OrganizationMember, UserProfile } from '../entities';
+import { OrganizationMember } from '../entities';
+import { UserProfile } from '@/features/auth/entities';
 import {
   getOrganizationMembersFromDB,
   removeUserFromOrganizationInDB,
@@ -7,7 +8,7 @@ import {
   getRoleByNameFromDB,
   getOrganizationCreatorFromDB,
   countOrganizationAdminsFromDB
-} from '../services/auth.service';
+} from '../services/organization.service';
 import { validateUUID } from '@/lib/validation';
 
 /**

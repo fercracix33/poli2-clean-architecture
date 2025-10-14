@@ -3,14 +3,14 @@ import { ZodError } from 'zod';
 import { createOrganization } from './createOrganization';
 import { joinOrganization } from './joinOrganization';
 import { getUserOrganizations } from './getUserOrganizations';
-import * as authService from '../services/auth.service';
+import * as authService from '../services/organization.service';
 import { createClient } from '@/lib/supabase-server';
 
 vi.mock('@/lib/supabase-server', () => ({
   createClient: vi.fn(),
 }));
 
-vi.mock('../services/auth.service', () => ({
+vi.mock('../services/organization.service', () => ({
   createOrganizationInDB: vi.fn(),
   isOrganizationSlugAvailable: vi.fn(),
   getRoleByNameFromDB: vi.fn(),
@@ -64,10 +64,10 @@ describe('Organization use cases', () => {
 
   describe('createOrganization', () => {
     it('creates the organization and assigns the creator as admin', async () => {
-      isOrganizationSlugAvailable.mockResolvedValue(true);
-      createOrganizationInDB.mockResolvedValue(ORGANIZATION_RESPONSE as any);
-      getRoleByNameFromDB.mockResolvedValue({ id: 'admin-role-id' } as any);
-      addUserToOrganizationInDB.mockResolvedValue({} as any);
+      vi.mocked(authService.isOrganizationSlugAvailable).mockResolvedValue(true);
+      vi.mocked(authService.createOrganizationInDB).mockResolvedValue(ORGANIZATION_RESPONSE as any);
+      vi.mocked(authService.getRoleByNameFromDB).mockResolvedValue({ id: 'admin-role-id' } as any);
+      vi.mocked(authService.addUserToOrganizationInDB).mockResolvedValue({} as any);
 
       const result = await createOrganization(ORGANIZATION_PAYLOAD, USER_ID);
 
@@ -86,9 +86,9 @@ describe('Organization use cases', () => {
     });
 
     it('fails when the system admin role is missing', async () => {
-      isOrganizationSlugAvailable.mockResolvedValue(true);
-      createOrganizationInDB.mockResolvedValue(ORGANIZATION_RESPONSE as any);
-      getRoleByNameFromDB.mockResolvedValue(null);
+      vi.mocked(authService.isOrganizationSlugAvailable).mockResolvedValue(true);
+      vi.mocked(authService.createOrganizationInDB).mockResolvedValue(ORGANIZATION_RESPONSE as any);
+      vi.mocked(authService.getRoleByNameFromDB).mockResolvedValue(null);
 
       await expect(createOrganization(ORGANIZATION_PAYLOAD, USER_ID)).rejects.toThrow(
         'System admin role not found',
@@ -106,10 +106,10 @@ describe('Organization use cases', () => {
 
   describe('joinOrganization', () => {
     it('enrolls the user when the invite is valid', async () => {
-      getOrganizationBySlugAndCodeFromDB.mockResolvedValue({ id: ORGANIZATION_ID, name: 'Acme' } as any);
-      isUserMemberOfOrganization.mockResolvedValue(false);
-      getRoleByNameFromDB.mockResolvedValue({ id: 'member-role-id' } as any);
-      addUserToOrganizationInDB.mockResolvedValue({ id: 'membership-id' } as any);
+      vi.mocked(authService.getOrganizationBySlugAndCodeFromDB).mockResolvedValue({ id: ORGANIZATION_ID, name: 'Acme' } as any);
+      vi.mocked(authService.isUserMemberOfOrganization).mockResolvedValue(false);
+      vi.mocked(authService.getRoleByNameFromDB).mockResolvedValue({ id: 'member-role-id' } as any);
+      vi.mocked(authService.addUserToOrganizationInDB).mockResolvedValue({ id: 'membership-id' } as any);
 
       const result = await joinOrganization({ slug: 'acme-corp', invite_code: 'INVITE01' }, USER_ID);
 
@@ -119,8 +119,8 @@ describe('Organization use cases', () => {
     });
 
     it('rejects when the user is already a member', async () => {
-      getOrganizationBySlugAndCodeFromDB.mockResolvedValue({ id: ORGANIZATION_ID, name: 'Acme' } as any);
-      isUserMemberOfOrganization.mockResolvedValue(true);
+      vi.mocked(authService.getOrganizationBySlugAndCodeFromDB).mockResolvedValue({ id: ORGANIZATION_ID, name: 'Acme' } as any);
+      vi.mocked(authService.isUserMemberOfOrganization).mockResolvedValue(true);
 
       await expect(
         joinOrganization({ slug: 'acme-corp', invite_code: 'INVITE01' }, USER_ID),
@@ -137,7 +137,7 @@ describe('Organization use cases', () => {
 
   describe('getUserOrganizations', () => {
     it('returns organizations fetched from the data layer', async () => {
-      getUserOrganizationsFromDB.mockResolvedValue([ORGANIZATION_RESPONSE] as any);
+      vi.mocked(authService.getUserOrganizationsFromDB).mockResolvedValue([ORGANIZATION_RESPONSE] as any);
 
       const result = await getUserOrganizations(USER_ID);
 
@@ -151,7 +151,7 @@ describe('Organization use cases', () => {
     });
 
     it('propagates Supabase errors', async () => {
-      getUserOrganizationsFromDB.mockRejectedValue(new Error('Connection error'));
+      vi.mocked(authService.getUserOrganizationsFromDB).mockRejectedValue(new Error('Connection error'));
 
       await expect(getUserOrganizations(USER_ID)).rejects.toThrow('Could not fetch user organizations.');
       expect(consoleErrorSpy).toHaveBeenCalled();

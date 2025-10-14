@@ -18,6 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Framework**: Next.js 14+ with App Router
 - **Database/Backend**: Supabase (Postgres, Auth, Storage with mandatory RLS)
+- **Internationalization**: next-intl 4.x (cookie-based, no URL prefix)
 - **Unit/Integration Testing**: **Vitest** (Jest is PROHIBITED)
 - **E2E Testing**: Playwright
 - **UI/Styling**: Tailwind CSS + shadcn/ui + Aceternity UI (no traditional CSS)
@@ -378,6 +379,286 @@ find PRDs/_examples -name "*.md"
 - **Maintain traceability**: Link implementation back to requirements
 
 For complete details, see `PRDs/GUIA-USO-PRD.md`.
+
+
+## 🌐 Internationalization (i18n) - MANDATORY
+
+### Configuration
+- **Library**: next-intl 4.x
+- **Strategy**: Cookie-based locale (no URL prefix)
+- **Supported Locales**: English (default), Spanish
+- **Cookie Name**: `NEXT_LOCALE`
+- **Location**: `app/src/locales/[locale]/[namespace].json`
+
+### Strict i18n Rules
+
+#### 1. **NO HARDCODED STRINGS** (MANDATORY)
+**PROHIBITED:**
+```typescript
+// ❌ WRONG
+<h1>Welcome to Dashboard</h1>
+<Button>Create Project</Button>
+<p>No projects found</p>
+```
+
+**REQUIRED:**
+```typescript
+// ✅ CORRECT
+import { useTranslations } from 'next-intl';
+
+export default function Dashboard() {
+  const t = useTranslations('dashboard');
+
+  return (
+    <>
+      <h1>{t('title')}</h1>
+      <Button>{t('createProject')}</Button>
+      <p>{t('empty.message')}</p>
+    </>
+  );
+}
+```
+
+#### 2. **Namespace Organization**
+All translations MUST be organized by feature domain:
+
+```
+locales/
+├── en/
+│   ├── common.json      # Landing page, shared UI
+│   ├── auth.json        # Authentication flow
+│   ├── dashboard.json   # Dashboard & organizations
+│   ├── projects.json    # Projects feature
+│   ├── tasks.json       # Tasks feature
+│   ├── settings.json    # User settings
+│   └── errors.json      # Error messages, validations
+└── es/ (same structure)
+```
+
+#### 3. **Component Requirements**
+Every client component with user-facing text MUST:
+- Import `useTranslations` from 'next-intl'
+- Use appropriate namespace: `const t = useTranslations('namespace')`
+- Replace ALL hardcoded strings with translation keys
+- Use semantic key names: `t('form.email.label')` not `t('label1')`
+
+#### 4. **Validation Messages (Zod)**
+**PROHIBITED:**
+```typescript
+// ❌ WRONG - Hardcoded message
+const schema = z.object({
+  email: z.string().email('Invalid email address')
+});
+```
+
+**REQUIRED:**
+```typescript
+// ✅ CORRECT - Translated message
+export default function LoginForm() {
+  const t = useTranslations('auth');
+
+  // Create schema inside component for translation access
+  const schema = z.object({
+    email: z.string().email(t('login.email.error'))
+  });
+
+  // ... rest of component
+}
+```
+
+#### 5. **Error Handling**
+Backend errors (Supabase, API) MUST be mapped to translations:
+
+```typescript
+// ✅ CORRECT
+import { useTranslations } from 'next-intl';
+
+export default function LoginPage() {
+  const t = useTranslations('auth');
+  const tErrors = useTranslations('errors');
+
+  if (error) {
+    // Map Supabase error code to translation key
+    const errorKey = `supabase.${error.code}` || 'network.generic';
+    setErrorMessage(tErrors(errorKey));
+  }
+}
+```
+
+#### 6. **Dynamic Content (Pluralization, Variables)**
+Use next-intl's ICU message format:
+
+```json
+{
+  "tasks": {
+    "count": "{count, plural, =0 {No tasks} =1 {1 task} other {# tasks}}"
+  }
+}
+```
+
+```typescript
+const t = useTranslations('tasks');
+<p>{t('count', { count: taskList.length })}</p>
+```
+
+#### 7. **Translation File Structure**
+Each namespace JSON must follow this pattern:
+
+```json
+{
+  "featureArea": {
+    "component": {
+      "element": {
+        "label": "Text here",
+        "placeholder": "Placeholder text",
+        "error": "Error message"
+      }
+    }
+  }
+}
+```
+
+### Agent Responsibilities for i18n
+
+#### **Arquitecto:**
+When creating a new feature:
+1. Identify all user-facing strings
+2. Propose namespace structure in PRD
+3. Define translation keys in entities/specifications
+4. Document which components need translations
+
+#### **Test Agent:**
+NOT required for translation changes (translations are data, not logic)
+
+**Exception:** If creating i18n utilities (error mappers, formatters):
+- Create tests for utility functions
+- Ensure proper type safety
+
+#### **Implementer Agent:**
+When implementing use cases:
+1. Create translation JSON files (`en` and `es`)
+2. **CRITICAL: Update `app/src/i18n/request.ts`** to import and merge the new namespace
+3. Update all components to use `useTranslations()`
+4. Move Zod schemas inside components if they have translated messages
+5. Verify no hardcoded strings remain (search regex: `"[A-Z]`)
+
+#### **Supabase Agent:**
+NOT typically required for i18n
+
+**Exception:** If storing locale preferences in database:
+- Add `preferred_locale` column to `users` table
+- Create RLS policies if needed
+
+#### **UI/UX Expert:**
+When creating UI components:
+1. NEVER hardcode strings
+2. Always use `useTranslations('namespace')` from the start
+3. **Verify namespace is loaded in `i18n/request.ts`** before using it
+4. Ensure aria-labels are translated for accessibility
+5. Test locale switching in E2E tests
+
+### 🚨 CRITICAL: Adding New Translation Namespaces
+
+**MANDATORY WORKFLOW** when creating a new feature that needs translations:
+
+#### Step 1: Create Translation Files
+```bash
+# Example: Adding 'dashboard' namespace
+touch app/src/locales/en/dashboard.json
+touch app/src/locales/es/dashboard.json
+```
+
+#### Step 2: Update `i18n/request.ts` (CRITICAL!)
+**⚠️ IF YOU SKIP THIS STEP, YOU WILL GET `MISSING_MESSAGE` ERRORS**
+
+```typescript
+// app/src/i18n/request.ts
+export default getRequestConfig(async () => {
+  const cookieStore = await cookies();
+  const localeCookie = cookieStore.get(LOCALE_COOKIE_NAME);
+  const parseResult = LocaleSchema.safeParse(localeCookie?.value);
+  const locale: Locale = parseResult.success ? parseResult.data : DEFAULT_LOCALE;
+
+  // Load ALL translation namespaces
+  const commonMessages = (await import(`@/locales/${locale}/common.json`)).default;
+  const authMessages = (await import(`@/locales/${locale}/auth.json`)).default;
+  const dashboardMessages = (await import(`@/locales/${locale}/dashboard.json`)).default; // ← ADD THIS
+
+  // Merge all namespaces into messages object
+  const messages = {
+    ...commonMessages,      // Root-level keys (landing page, shared UI)
+    auth: authMessages,     // Namespaced under 'auth'
+    dashboard: dashboardMessages, // ← ADD THIS
+  };
+
+  return { locale, messages };
+});
+```
+
+#### Step 3: Use in Components
+```typescript
+// app/src/app/dashboard/page.tsx
+'use client';
+import { useTranslations } from 'next-intl';
+
+export default function DashboardPage() {
+  const t = useTranslations('dashboard'); // Must match namespace in i18n/request.ts
+
+  return <h1>{t('welcome.title')}</h1>;
+}
+```
+
+#### Why This Is Required
+
+- `useTranslations('namespace')` looks for `messages.namespace` in the provider
+- If you don't merge the namespace in `i18n/request.ts`, next-intl can't find it
+- Error: `MISSING_MESSAGE: Could not resolve 'namespace' in messages for locale 'XX'`
+
+**Example of Correct Messages Structure:**
+```json
+{
+  "app": { ... },        // From common.json (root level)
+  "hero": { ... },       // From common.json (root level)
+  "auth": {              // From auth.json (namespaced)
+    "login": { ... },
+    "register": { ... }
+  },
+  "dashboard": {         // From dashboard.json (namespaced)
+    "welcome": { ... }
+  }
+}
+```
+
+### Validation Checklist
+
+Before merging any new feature, verify:
+- [ ] NO hardcoded user-facing strings in code
+- [ ] Translation files exist for both `en` and `es`
+- [ ] **`i18n/request.ts` imports and merges the new namespace** ⚠️ CRITICAL
+- [ ] All keys referenced in code exist in JSON files
+- [ ] Zod validation messages are translated
+- [ ] Error messages are mapped to translations
+- [ ] Component imports `useTranslations` if it has text
+- [ ] Locale switching works without breaking functionality
+- [ ] No hydration errors in browser console
+- [ ] No `MISSING_MESSAGE` console errors
+
+### Common i18n Mistakes to Avoid
+
+❌ **Hardcoding strings in components**
+❌ **Mixing languages** (some English, some Spanish)
+❌ **Creating Zod schemas outside components** (can't access translations)
+❌ **Forgetting to translate error messages**
+❌ **Using generic keys** like `text1`, `message2`
+❌ **Not providing Spanish translations** (both languages required)
+❌ **Creating translation files WITHOUT updating `i18n/request.ts`** (causes MISSING_MESSAGE errors)
+❌ **Using `useTranslations('namespace')` without merging that namespace in request.ts**
+
+### References
+- Landing page: `app/src/app/page.tsx` (reference implementation)
+- GlobalHeader: `app/src/components/layout/GlobalHeader.tsx`
+- Translation files: `app/src/locales/en/common.json`
+- Configuration: `app/src/i18n/request.ts`
 
 
 ## ⚠️ Common Mistakes to Avoid

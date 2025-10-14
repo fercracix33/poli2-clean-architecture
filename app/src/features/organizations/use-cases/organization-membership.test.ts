@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { listOrganizationMembers, removeOrganizationMember } from './manageOrganizationMembers';
-import * as authService from '../services/auth.service';
+import * as authService from '../services/organization.service';
 import { createClient } from '@/lib/supabase-server';
 
 vi.mock('@/lib/supabase-server', () => ({
   createClient: vi.fn(),
 }));
 
-vi.mock('../services/auth.service', () => ({
+vi.mock('../services/organization.service', () => ({
   getOrganizationMembersFromDB: vi.fn(),
   removeUserFromOrganizationInDB: vi.fn(),
   getUserRoleInOrganization: vi.fn(),
@@ -66,8 +66,8 @@ describe('Organization membership use cases', () => {
 
   describe('listOrganizationMembers', () => {
     it('returns members when requester has permission', async () => {
-      userHasPermissionInOrganization.mockResolvedValue(true);
-      getOrganizationMembersFromDB.mockResolvedValue(MEMBERS as any);
+      vi.mocked(authService.userHasPermissionInOrganization).mockResolvedValue(true);
+      vi.mocked(authService.getOrganizationMembersFromDB).mockResolvedValue(MEMBERS as any);
 
       const result = await listOrganizationMembers(ORGANIZATION_ID, REQUESTING_USER_ID, 25, 0);
 
@@ -81,7 +81,7 @@ describe('Organization membership use cases', () => {
     });
 
     it('throws when requester lacks permission', async () => {
-      userHasPermissionInOrganization.mockResolvedValue(false);
+      vi.mocked(authService.userHasPermissionInOrganization).mockResolvedValue(false);
 
       await expect(listOrganizationMembers(ORGANIZATION_ID, REQUESTING_USER_ID)).rejects.toThrow(
         'Access denied to organization members',
@@ -90,7 +90,7 @@ describe('Organization membership use cases', () => {
     });
 
     it('validates pagination window', async () => {
-      userHasPermissionInOrganization.mockResolvedValue(true);
+      vi.mocked(authService.userHasPermissionInOrganization).mockResolvedValue(true);
 
       await expect(listOrganizationMembers(ORGANIZATION_ID, REQUESTING_USER_ID, 0)).rejects.toThrow(
         'Limit must be between 1 and 100',
@@ -102,8 +102,8 @@ describe('Organization membership use cases', () => {
     });
 
     it('wraps database errors with a generic message', async () => {
-      userHasPermissionInOrganization.mockResolvedValue(true);
-      getOrganizationMembersFromDB.mockRejectedValue(new Error('connection lost'));
+      vi.mocked(authService.userHasPermissionInOrganization).mockResolvedValue(true);
+      vi.mocked(authService.getOrganizationMembersFromDB).mockRejectedValue(new Error('connection lost'));
 
       await expect(listOrganizationMembers(ORGANIZATION_ID, REQUESTING_USER_ID)).rejects.toThrow(
         'Could not fetch organization members.',
@@ -114,12 +114,12 @@ describe('Organization membership use cases', () => {
 
   describe('removeOrganizationMember', () => {
     it('removes member and logs the operation when validations pass', async () => {
-      userHasPermissionInOrganization.mockResolvedValue(true);
-      getOrganizationCreatorFromDB.mockResolvedValue('creator-id');
-      getUserRoleInOrganization.mockResolvedValue(ADMIN_ROLE_ID);
-      getRoleByNameFromDB.mockResolvedValue({ id: ADMIN_ROLE_ID } as any);
-      countOrganizationAdminsFromDB.mockResolvedValue(2);
-      removeUserFromOrganizationInDB.mockResolvedValue();
+      vi.mocked(authService.userHasPermissionInOrganization).mockResolvedValue(true);
+      vi.mocked(authService.getOrganizationCreatorFromDB).mockResolvedValue('creator-id');
+      vi.mocked(authService.getUserRoleInOrganization).mockResolvedValue(ADMIN_ROLE_ID);
+      vi.mocked(authService.getRoleByNameFromDB).mockResolvedValue({ id: ADMIN_ROLE_ID } as any);
+      vi.mocked(authService.countOrganizationAdminsFromDB).mockResolvedValue(2);
+      vi.mocked(authService.removeUserFromOrganizationInDB).mockResolvedValue();
 
       await removeOrganizationMember(ORGANIZATION_ID, TARGET_USER_ID, REQUESTING_USER_ID);
 
@@ -136,7 +136,7 @@ describe('Organization membership use cases', () => {
     });
 
     it('rejects when requester lacks manage permission', async () => {
-      userHasPermissionInOrganization.mockResolvedValue(false);
+      vi.mocked(authService.userHasPermissionInOrganization).mockResolvedValue(false);
 
       await expect(
         removeOrganizationMember(ORGANIZATION_ID, TARGET_USER_ID, REQUESTING_USER_ID),
@@ -145,8 +145,8 @@ describe('Organization membership use cases', () => {
     });
 
     it('prevents removing the organization creator', async () => {
-      userHasPermissionInOrganization.mockResolvedValue(true);
-      getOrganizationCreatorFromDB.mockResolvedValue(TARGET_USER_ID);
+      vi.mocked(authService.userHasPermissionInOrganization).mockResolvedValue(true);
+      vi.mocked(authService.getOrganizationCreatorFromDB).mockResolvedValue(TARGET_USER_ID);
 
       await expect(
         removeOrganizationMember(ORGANIZATION_ID, TARGET_USER_ID, REQUESTING_USER_ID),
@@ -155,11 +155,11 @@ describe('Organization membership use cases', () => {
     });
 
     it('prevents removing the last administrator', async () => {
-      userHasPermissionInOrganization.mockResolvedValue(true);
-      getOrganizationCreatorFromDB.mockResolvedValue('another-creator');
-      getUserRoleInOrganization.mockResolvedValue(ADMIN_ROLE_ID);
-      getRoleByNameFromDB.mockResolvedValue({ id: ADMIN_ROLE_ID } as any);
-      countOrganizationAdminsFromDB.mockResolvedValue(1);
+      vi.mocked(authService.userHasPermissionInOrganization).mockResolvedValue(true);
+      vi.mocked(authService.getOrganizationCreatorFromDB).mockResolvedValue('another-creator');
+      vi.mocked(authService.getUserRoleInOrganization).mockResolvedValue(ADMIN_ROLE_ID);
+      vi.mocked(authService.getRoleByNameFromDB).mockResolvedValue({ id: ADMIN_ROLE_ID } as any);
+      vi.mocked(authService.countOrganizationAdminsFromDB).mockResolvedValue(1);
 
       await expect(
         removeOrganizationMember(ORGANIZATION_ID, TARGET_USER_ID, REQUESTING_USER_ID),
@@ -168,12 +168,12 @@ describe('Organization membership use cases', () => {
     });
 
     it('propagates database errors from removal', async () => {
-      userHasPermissionInOrganization.mockResolvedValue(true);
-      getOrganizationCreatorFromDB.mockResolvedValue('another-creator');
-      getUserRoleInOrganization.mockResolvedValue(null);
-      getRoleByNameFromDB.mockResolvedValue({ id: ADMIN_ROLE_ID } as any);
-      countOrganizationAdminsFromDB.mockResolvedValue(2);
-      removeUserFromOrganizationInDB.mockRejectedValue(new Error('Unexpected failure'));
+      vi.mocked(authService.userHasPermissionInOrganization).mockResolvedValue(true);
+      vi.mocked(authService.getOrganizationCreatorFromDB).mockResolvedValue('another-creator');
+      vi.mocked(authService.getUserRoleInOrganization).mockResolvedValue(null);
+      vi.mocked(authService.getRoleByNameFromDB).mockResolvedValue({ id: ADMIN_ROLE_ID } as any);
+      vi.mocked(authService.countOrganizationAdminsFromDB).mockResolvedValue(2);
+      vi.mocked(authService.removeUserFromOrganizationInDB).mockRejectedValue(new Error('Unexpected failure'));
 
       await expect(
         removeOrganizationMember(ORGANIZATION_ID, TARGET_USER_ID, REQUESTING_USER_ID),

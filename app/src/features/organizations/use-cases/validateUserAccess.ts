@@ -1,7 +1,7 @@
 import {
   userHasPermissionInOrganization,
   isUserMemberOfOrganization
-} from '../services/auth.service';
+} from '../services/organization.service';
 import { validateUUID } from '@/lib/validation';
 
 /**

@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getUserOrganizations } from '@/features/auth/use-cases/getUserOrganizations';
+import { getUserOrganizations } from '@/features/organizations/use-cases/getUserOrganizations';
 import { AuthError, requireAuthenticatedUser } from '@/lib/auth';
 
 function handleError(error: unknown, logLabel: string): Response {

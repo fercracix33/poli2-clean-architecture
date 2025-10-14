@@ -1,5 +1,5 @@
 import { Organization } from '../entities';
-import { getUserOrganizationsFromDB } from '../services/auth.service';
+import { getUserOrganizationsFromDB } from '../services/organization.service';
 import { validateUUID } from '@/lib/validation';
 
 export async function getUserOrganizations(userId: string): Promise<Organization[]> {

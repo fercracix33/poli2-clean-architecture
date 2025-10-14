@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getUserPermissions } from './getUserPermissions';
-import * as authService from '../services/auth.service';
+import * as authService from '../services/organization.service';
 import { createClient } from '@/lib/supabase-server';
 
 vi.mock('@/lib/supabase-server', () => ({
   createClient: vi.fn(),
 }));
 
-vi.mock('../services/auth.service', () => ({
+vi.mock('../services/organization.service', () => ({
   getUserPermissionsInOrganization: vi.fn(),
 }));
 
@@ -34,7 +34,7 @@ describe('getUserPermissions use case', () => {
   });
 
   it('returns permissions provided by the data layer', async () => {
-    getUserPermissionsInOrganization.mockResolvedValue(PERMISSIONS as any);
+    vi.mocked(authService.getUserPermissionsInOrganization).mockResolvedValue(PERMISSIONS as any);
 
     const result = await getUserPermissions(USER_ID, ORGANIZATION_ID);
 
@@ -55,7 +55,7 @@ describe('getUserPermissions use case', () => {
   });
 
   it('propagates errors from the data layer', async () => {
-    getUserPermissionsInOrganization.mockRejectedValue(new Error('Connection error'));
+    vi.mocked(authService.getUserPermissionsInOrganization).mockRejectedValue(new Error('Connection error'));
 
     await expect(getUserPermissions(USER_ID, ORGANIZATION_ID)).rejects.toThrow('Connection error');
   });

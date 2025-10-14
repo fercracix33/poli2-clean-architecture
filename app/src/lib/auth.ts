@@ -1,3 +1,4 @@
+import 'server-only'
 import { createClient } from './supabase-server';
 import type { NextRequest } from 'next/server';
 

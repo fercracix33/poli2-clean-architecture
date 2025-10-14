@@ -1,11 +1,11 @@
 // Test fixtures for auth feature
-import { 
-  UserProfile, 
-  Organization, 
-  OrganizationMember, 
-  Role, 
-  Permission 
-} from '../entities';
+import { UserProfile } from '@/features/auth/entities';
+import {
+  Organization,
+  OrganizationMember,
+  Role,
+  Permission
+} from '@/features/organizations/entities';
 
 // Mock User IDs
 export const MOCK_USER_IDS = {

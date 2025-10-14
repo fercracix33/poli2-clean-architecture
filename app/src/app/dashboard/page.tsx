@@ -8,7 +8,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { FlipWords } from '@/components/ui/flip-words';
 import { User, Settings, Building, Users, Plus, LogOut, Sparkles, TrendingUp, Zap, Target } from 'lucide-react';
 import Link from 'next/link';
-import { Organization } from '@/features/auth/entities';
+import { Organization } from '@/features/organizations/entities';
+import { CreateOrganizationDialog } from '@/components/organizations/CreateOrganizationDialog';
+import { JoinOrganizationDialog } from '@/components/organizations/JoinOrganizationDialog';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -172,10 +174,14 @@ export default function DashboardPage() {
                       Workspaces for your teams and projects
                     </CardDescription>
                   </div>
-                  <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md">
-                    <Plus className="w-4 h-4 mr-1" />
-                    New
-                  </Button>
+                  <CreateOrganizationDialog
+                    trigger={
+                      <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md">
+                        <Plus className="w-4 h-4 mr-1" />
+                        New
+                      </Button>
+                    }
+                  />
                 </div>
               </CardHeader>
               <CardContent>
@@ -210,10 +216,14 @@ export default function DashboardPage() {
                     </div>
                     <p className="text-slate-600 dark:text-slate-400 font-medium">No organizations yet</p>
                     <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">Create your first workspace to start organizing projects</p>
-                    <Button className="mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700" size="sm">
-                      <Plus className="w-4 h-4 mr-1" />
-                      Create your first organization
-                    </Button>
+                    <CreateOrganizationDialog
+                      trigger={
+                        <Button className="mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700" size="sm">
+                          <Plus className="w-4 h-4 mr-1" />
+                          Create your first organization
+                        </Button>
+                      }
+                    />
                   </div>
                 )}
               </CardContent>
@@ -241,15 +251,19 @@ export default function DashboardPage() {
                     </div>
                     <span className="font-medium">Invite team members</span>
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="justify-start border-2 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all group"
-                  >
-                    <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
-                      <Building className="w-4 h-4 text-white" />
-                    </div>
-                    <span className="font-medium">Create project</span>
-                  </Button>
+                  <JoinOrganizationDialog
+                    trigger={
+                      <Button
+                        variant="outline"
+                        className="justify-start border-2 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all group w-full"
+                      >
+                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                          <Building className="w-4 h-4 text-white" />
+                        </div>
+                        <span className="font-medium">Join with invite code</span>
+                      </Button>
+                    }
+                  />
                   <Link href="/settings/profile">
                     <Button
                       variant="outline"

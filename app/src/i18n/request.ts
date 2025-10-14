@@ -44,15 +44,18 @@ export default getRequestConfig(async () => {
   // Each JSON file represents a namespace that components can access via useTranslations()
   const commonMessages = (await import(`@/locales/${locale}/common.json`)).default;
   const authMessages = (await import(`@/locales/${locale}/auth.json`)).default;
+  const organizationMessages = (await import(`@/locales/${locale}/organization.json`)).default;
 
   // Merge all namespaces into a single messages object
-  // Pattern: { ...common, auth: authMessages }
+  // Pattern: { ...common, auth: authMessages, organization: organizationMessages }
   // This allows:
   // - useTranslations() to access common.* keys directly
   // - useTranslations('auth') to access auth.* keys
+  // - useTranslations('organization') to access organization.* keys
   const messages = {
     ...commonMessages,
     auth: authMessages,
+    organization: organizationMessages,
   };
 
   return {

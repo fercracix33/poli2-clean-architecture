@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { ZodError } from 'zod';
-import { createOrganization } from '@/features/auth/use-cases/createOrganization';
-import { getUserOrganizations } from '@/features/auth/use-cases/getUserOrganizations';
+import { createOrganization } from '@/features/organizations/use-cases/createOrganization';
+import { getUserOrganizations } from '@/features/organizations/use-cases/getUserOrganizations';
 import { AuthError, requireAuthenticatedUser } from '@/lib/auth';
 
 async function parseJson<T>(request: NextRequest): Promise<T> {
