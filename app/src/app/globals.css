@@ -1,76 +1,103 @@
 @import "tailwindcss";
 
-/* Configure dark mode with class selector */
-@custom-variant dark (&:where(.dark, .dark *));
-
-/* Define theme variables using @theme (Tailwind v4 approach) */
+/* Tailwind v4 Theme Configuration */
 @theme {
-  /* Light mode colors (default) */
-  --color-background: oklch(100% 0 0); /* white */
-  --color-foreground: oklch(9% 0 0); /* near black */
+  /* Brand Colors - Using HSL format for semantic tokens */
+  --color-brand-1: hsl(0 0% 0%); /* Pure black */
+  --color-brand-2: hsl(230 38% 25%); /* Deep navy blue */
+  --color-brand-3: hsl(235 33% 43%); /* Medium purple */
+  --color-brand-4: hsl(236 76% 72%); /* Light purple */
+  --color-brand-5: hsl(236 100% 88%); /* Pale lavender */
 
-  --color-card: oklch(100% 0 0);
-  --color-card-foreground: oklch(9% 0 0);
+  /* Semantic Colors - Light Mode (Default) */
+  --color-background: hsl(0 0% 100%); /* White */
+  --color-foreground: hsl(230 38% 25%); /* Brand-2 */
 
-  --color-popover: oklch(100% 0 0);
-  --color-popover-foreground: oklch(9% 0 0);
+  --color-card: hsl(0 0% 100%); /* White */
+  --color-card-foreground: hsl(230 38% 25%); /* Brand-2 */
 
-  --color-primary: oklch(9% 0 0);
-  --color-primary-foreground: oklch(98% 0 0);
+  --color-popover: hsl(0 0% 100%); /* White */
+  --color-popover-foreground: hsl(230 38% 25%); /* Brand-2 */
 
-  --color-secondary: oklch(96% 0 0);
-  --color-secondary-foreground: oklch(9% 0 0);
+  --color-primary: hsl(235 33% 43%); /* Brand-3 */
+  --color-primary-foreground: hsl(0 0% 100%); /* White */
 
-  --color-muted: oklch(96% 0 0);
-  --color-muted-foreground: oklch(45% 0 0);
+  --color-secondary: hsl(236 100% 96%); /* Very light lavender */
+  --color-secondary-foreground: hsl(235 33% 43%); /* Brand-3 */
 
-  --color-accent: oklch(96% 0 0);
-  --color-accent-foreground: oklch(9% 0 0);
+  --color-muted: hsl(236 100% 96%); /* Light lavender */
+  --color-muted-foreground: hsl(235 20% 60%); /* Muted purple */
 
-  --color-destructive: oklch(50% 0.2 25); /* red */
-  --color-destructive-foreground: oklch(98% 0 0);
+  --color-accent: hsl(236 76% 72%); /* Brand-4 */
+  --color-accent-foreground: hsl(230 38% 25%); /* Brand-2 */
 
-  --color-border: oklch(90% 0 0);
-  --color-input: oklch(90% 0 0);
-  --color-ring: oklch(9% 0 0);
+  --color-destructive: hsl(0 84% 60%); /* Red */
+  --color-destructive-foreground: hsl(0 0% 100%); /* White */
 
-  --radius: 0.5rem;
-}
+  --color-border: hsl(236 50% 90%); /* Subtle lavender border */
+  --color-input: hsl(236 50% 90%); /* Same as border */
+  --color-ring: hsl(235 33% 43%); /* Brand-3 */
 
-/* Dark mode color overrides */
-@layer base {
-  .dark {
-    --color-background: oklch(9% 0 0); /* near black */
-    --color-foreground: oklch(98% 0 0); /* near white */
+  /* Border Radius */
+  --radius-lg: 0.5rem;
+  --radius-md: calc(0.5rem - 2px);
+  --radius-sm: calc(0.5rem - 4px);
 
-    --color-card: oklch(9% 0 0);
-    --color-card-foreground: oklch(98% 0 0);
+  /* Custom Animations */
+  --animate-fade-in: fade-in 200ms ease-in-out;
+  --animate-slide-in-up: slide-in-up 300ms ease-out;
+  --animate-slide-in-down: slide-in-down 300ms ease-out;
 
-    --color-popover: oklch(9% 0 0);
-    --color-popover-foreground: oklch(98% 0 0);
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
 
-    --color-primary: oklch(98% 0 0);
-    --color-primary-foreground: oklch(9% 0 0);
+  @keyframes slide-in-up {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
 
-    --color-secondary: oklch(15% 0 0);
-    --color-secondary-foreground: oklch(98% 0 0);
-
-    --color-muted: oklch(15% 0 0);
-    --color-muted-foreground: oklch(64% 0 0);
-
-    --color-accent: oklch(15% 0 0);
-    --color-accent-foreground: oklch(98% 0 0);
-
-    --color-destructive: oklch(60% 0.15 25); /* lighter red for dark mode */
-    --color-destructive-foreground: oklch(98% 0 0);
-
-    --color-border: oklch(15% 0 0);
-    --color-input: oklch(15% 0 0);
-    --color-ring: oklch(82% 0 0);
+  @keyframes slide-in-down {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
   }
 }
 
-/* Base styles */
+/* Dark Mode Overrides */
+@layer base {
+  .dark {
+    --color-background: hsl(230 38% 8%); /* Very dark navy */
+    --color-foreground: hsl(236 100% 96%); /* Light lavender */
+
+    --color-card: hsl(230 38% 12%); /* Slightly elevated */
+    --color-card-foreground: hsl(236 100% 96%);
+
+    --color-popover: hsl(230 38% 10%);
+    --color-popover-foreground: hsl(236 100% 96%);
+
+    --color-primary: hsl(236 76% 72%); /* Brand-4 (brighter) */
+    --color-primary-foreground: hsl(230 38% 10%);
+
+    --color-secondary: hsl(230 38% 15%);
+    --color-secondary-foreground: hsl(236 100% 88%);
+
+    --color-muted: hsl(230 38% 15%);
+    --color-muted-foreground: hsl(235 20% 60%);
+
+    --color-accent: hsl(235 33% 43%);
+    --color-accent-foreground: hsl(236 100% 96%);
+
+    --color-destructive: hsl(0 63% 55%);
+    --color-destructive-foreground: hsl(236 100% 96%);
+
+    --color-border: hsl(230 38% 20%);
+    --color-input: hsl(230 38% 20%);
+    --color-ring: hsl(236 76% 72%);
+  }
+}
+
+/* Base Styles */
 @layer base {
   * {
     @apply border-border;
@@ -79,6 +106,5 @@
   body {
     @apply bg-background text-foreground transition-colors duration-300;
     font-feature-settings: "rlig" 1, "calt" 1;
-    font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
   }
 }
