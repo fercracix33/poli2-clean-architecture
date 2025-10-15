@@ -28,8 +28,8 @@ import { UserPlus, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function OrganizationMembersPage() {
-  const t = useTranslations('organization.members');
-  const tErrors = useTranslations('organization.errors');
+  const t = useTranslations('organization');
+  const tErrors = useTranslations('organization');
   const params = useParams();
   const queryClient = useQueryClient();
   const slug = params.slug as string;
@@ -93,13 +93,13 @@ export default function OrganizationMembersPage() {
     onSuccess: (userName) => {
       queryClient.invalidateQueries({ queryKey: ['organization', slug, 'members'] });
       queryClient.invalidateQueries({ queryKey: ['organization-stats', orgDetails?.organization.id] });
-      toast.success(t('remove.success'), {
+      toast.success(t('members.remove.success'), {
         description: `${userName} has been removed from the organization`,
       });
     },
     onError: (error) => {
-      toast.error(t('remove.error'), {
-        description: error instanceof Error ? error.message : tErrors('unknownError'),
+      toast.error(t('members.remove.error'), {
+        description: error instanceof Error ? error.message : tErrors('errors.unknownError'),
       });
     },
   });
@@ -126,9 +126,9 @@ export default function OrganizationMembersPage() {
       <div className="p-6">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>{tErrors('loadFailed')}</AlertTitle>
+          <AlertTitle>{tErrors('errors.loadFailed')}</AlertTitle>
           <AlertDescription>
-            {membersError?.message || tErrors('unknownError')}
+            {membersError?.message || tErrors('errors.unknownError')}
           </AlertDescription>
         </Alert>
       </div>
@@ -141,10 +141,10 @@ export default function OrganizationMembersPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">
-            {t('title')}
+            {t('members.title')}
           </h1>
           <p className="text-muted-foreground">
-            {t('subtitle')}
+            {t('members.subtitle')}
           </p>
         </div>
         {/* Use permission flag from use case instead of direct query */}
@@ -154,7 +154,7 @@ export default function OrganizationMembersPage() {
             data-testid="invite-members-button"
           >
             <UserPlus className="h-4 w-4 mr-2" />
-            {t('inviteButton')}
+            {t('members.inviteButton')}
           </Button>
         )}
       </div>

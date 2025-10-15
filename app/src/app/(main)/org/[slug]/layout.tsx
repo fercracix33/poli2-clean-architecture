@@ -37,7 +37,7 @@ interface OrganizationLayoutProps {
 }
 
 export default function OrganizationLayout({ children }: OrganizationLayoutProps) {
-  const t = useTranslations('organization.dashboard');
+  const t = useTranslations('organization');
   const params = useParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -78,25 +78,25 @@ export default function OrganizationLayout({ children }: OrganizationLayoutProps
   // Navigation items
   const navigation = [
     {
-      name: t('overview'),
+      name: t('dashboard.overview'),
       href: `/org/${slug}`,
       icon: LayoutDashboard,
       current: pathname === `/org/${slug}`,
     },
     {
-      name: t('projects'),
+      name: t('dashboard.projects'),
       href: `/org/${slug}/projects`,
       icon: FolderKanban,
       current: pathname?.startsWith(`/org/${slug}/projects`),
     },
     {
-      name: t('members'),
+      name: t('dashboard.members'),
       href: `/org/${slug}/members`,
       icon: Users,
       current: pathname === `/org/${slug}/members`,
     },
     {
-      name: t('settings'),
+      name: t('dashboard.settings'),
       href: `/org/${slug}/settings`,
       icon: Settings,
       current: pathname === `/org/${slug}/settings`,

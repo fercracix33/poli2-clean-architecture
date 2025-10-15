@@ -1,0 +1,266 @@
+{
+  "list": {
+    "title": "Proyectos",
+    "subtitle": "Gestiona los proyectos de tu organización",
+    "createButton": "Crear Proyecto",
+    "empty": {
+      "title": "Aún no hay proyectos",
+      "description": "Crea tu primer proyecto para comenzar",
+      "action": "Crear Proyecto"
+    },
+    "search": {
+      "placeholder": "Buscar proyectos...",
+      "noResults": "No se encontraron proyectos",
+      "noResultsDescription": "Intenta ajustar tus filtros o términos de búsqueda"
+    }
+  },
+  "card": {
+    "members": "{count, plural, =0 {Sin miembros} =1 {1 miembro} other {# miembros}}",
+    "createdBy": "Creado por {name}",
+    "favorite": "Marcar como favorito",
+    "unfavorite": "Quitar de favoritos",
+    "view": "Ver Proyecto",
+    "status": {
+      "active": "Activo",
+      "archived": "Archivado",
+      "completed": "Completado",
+      "on_hold": "En Espera"
+    }
+  },
+  "filters": {
+    "title": "Filtros",
+    "search": "Buscar",
+    "status": "Estado",
+    "allStatuses": "Todos los estados",
+    "favorites": "Solo favoritos",
+    "createdByMe": "Creados por mí",
+    "clear": "Limpiar filtros",
+    "apply": "Aplicar"
+  },
+  "form": {
+    "title": "Crear Nuevo Proyecto",
+    "subtitle": "Completa los detalles a continuación para crear tu proyecto",
+    "name": {
+      "label": "Nombre del Proyecto",
+      "placeholder": "Ingresa el nombre del proyecto",
+      "description": "Un nombre claro y descriptivo para tu proyecto",
+      "error": {
+        "required": "El nombre es requerido",
+        "tooShort": "El nombre debe tener al menos 2 caracteres",
+        "tooLong": "El nombre no puede exceder 100 caracteres"
+      }
+    },
+    "slug": {
+      "label": "Slug del Proyecto",
+      "placeholder": "slug-del-proyecto",
+      "description": "Identificador amigable para URLs (minúsculas, números, guiones, guiones bajos)",
+      "autoGenerate": "Auto-generar desde el nombre",
+      "preview": "Vista previa URL: /org/{orgSlug}/projects/{slug}",
+      "error": {
+        "required": "El slug es requerido",
+        "tooShort": "El slug debe tener al menos 2 caracteres",
+        "tooLong": "El slug no puede exceder 50 caracteres",
+        "invalid": "El slug solo puede contener letras minúsculas, números, guiones y guiones bajos",
+        "exists": "Este slug ya existe en la organización"
+      }
+    },
+    "description": {
+      "label": "Descripción",
+      "placeholder": "¿De qué trata este proyecto?",
+      "description": "Descripción opcional del proyecto (máx. 1000 caracteres)",
+      "error": {
+        "tooLong": "La descripción no puede exceder 1000 caracteres"
+      }
+    },
+    "color": {
+      "label": "Color",
+      "description": "Elige un color para identificar este proyecto",
+      "error": "Formato de color HEX inválido"
+    },
+    "icon": {
+      "label": "Ícono",
+      "placeholder": "📁",
+      "description": "Un emoji o ícono para representar este proyecto (máx. 50 caracteres)",
+      "error": {
+        "tooLong": "El ícono no puede exceder 50 caracteres"
+      }
+    },
+    "status": {
+      "label": "Estado",
+      "description": "Estado actual del proyecto"
+    },
+    "settings": {
+      "label": "Configuración del Proyecto",
+      "description": "Configuraciones personalizadas para este proyecto (formato JSON)"
+    }
+  },
+  "actions": {
+    "create": "Crear Proyecto",
+    "creating": "Creando...",
+    "back": "Volver a Proyectos",
+    "edit": "Editar Proyecto",
+    "editing": "Editando...",
+    "save": "Guardar Cambios",
+    "saving": "Guardando...",
+    "cancel": "Cancelar",
+    "archive": "Archivar",
+    "archiving": "Archivando...",
+    "unarchive": "Desarchivar",
+    "unarchiving": "Desarchivando...",
+    "delete": "Eliminar",
+    "deleting": "Eliminando...",
+    "addMember": "Añadir Miembro",
+    "removeMember": "Remover Miembro",
+    "updateRole": "Actualizar Rol",
+    "clearFilters": "Limpiar Filtros"
+  },
+  "confirmations": {
+    "archive": {
+      "title": "¿Archivar este proyecto?",
+      "description": "El proyecto será de solo lectura pero puede desarchivarse después. Los miembros mantendrán acceso pero no podrán hacer cambios.",
+      "confirm": "Archivar Proyecto",
+      "cancel": "Cancelar"
+    },
+    "unarchive": {
+      "title": "¿Desarchivar este proyecto?",
+      "description": "El proyecto se volverá activo nuevamente y los miembros podrán hacer cambios.",
+      "confirm": "Desarchivar Proyecto",
+      "cancel": "Cancelar"
+    },
+    "delete": {
+      "title": "¿Eliminar proyecto permanentemente?",
+      "description": "Esta acción no se puede deshacer. Todos los datos del proyecto, miembros y configuraciones serán eliminados permanentemente.",
+      "warning": "Escribe el nombre del proyecto para confirmar la eliminación",
+      "placeholder": "Ingresa el nombre del proyecto",
+      "confirm": "Eliminar Proyecto",
+      "cancel": "Cancelar",
+      "mismatch": "El nombre del proyecto no coincide"
+    },
+    "removeMember": {
+      "title": "¿Remover miembro del proyecto?",
+      "description": "¿Estás seguro de que quieres remover a {name} de este proyecto?",
+      "warning": "Perderá acceso a todos los recursos del proyecto.",
+      "confirm": "Remover Miembro",
+      "cancel": "Cancelar"
+    }
+  },
+  "members": {
+    "title": "Miembros del Proyecto",
+    "subtitle": "Gestiona quién tiene acceso a este proyecto",
+    "addButton": "Añadir Miembro",
+    "search": "Buscar miembros...",
+    "table": {
+      "name": "Nombre",
+      "email": "Correo",
+      "role": "Rol",
+      "joined": "Unido",
+      "actions": "Acciones"
+    },
+    "empty": {
+      "title": "Aún no hay miembros",
+      "description": "Añade miembros para comenzar a colaborar en este proyecto",
+      "action": "Añadir Miembro"
+    },
+    "addDialog": {
+      "title": "Añadir Miembro al Proyecto",
+      "description": "Selecciona un miembro de tu organización para añadir a este proyecto",
+      "userLabel": "Miembro",
+      "userPlaceholder": "Selecciona un miembro",
+      "roleLabel": "Rol",
+      "rolePlaceholder": "Selecciona un rol",
+      "noMembers": "No hay miembros disponibles para añadir",
+      "alreadyMember": "Todos los miembros de la organización ya están en este proyecto"
+    }
+  },
+  "settings": {
+    "title": "Configuración del Proyecto",
+    "subtitle": "Gestiona la configuración y preferencias del proyecto",
+    "general": {
+      "title": "Información General",
+      "description": "Información básica y detalles del proyecto"
+    },
+    "advanced": {
+      "title": "Configuración Avanzada",
+      "description": "Configuración personalizada del proyecto (formato JSON)",
+      "placeholder": "{\"clave\": \"valor\"}"
+    },
+    "danger": {
+      "title": "Zona de Peligro",
+      "description": "Acciones irreversibles y destructivas",
+      "archiveButton": "Archivar Proyecto",
+      "deleteButton": "Eliminar Proyecto"
+    }
+  },
+  "header": {
+    "tabs": {
+      "overview": "Resumen",
+      "members": "Miembros",
+      "settings": "Configuración"
+    },
+    "breadcrumbs": {
+      "organization": "Organización",
+      "projects": "Proyectos"
+    }
+  },
+  "overview": {
+    "title": "Resumen del Proyecto",
+    "stats": {
+      "members": "Miembros",
+      "created": "Creado",
+      "status": "Estado",
+      "lastUpdated": "Última Actualización"
+    },
+    "activity": {
+      "title": "Actividad Reciente",
+      "noActivity": "Sin actividad reciente",
+      "placeholder": "Gestión de tareas próximamente"
+    },
+    "quickActions": {
+      "title": "Acciones Rápidas",
+      "addMembers": "Añadir Miembros",
+      "viewSettings": "Ver Configuración",
+      "createTask": "Crear Tarea (Próximamente)"
+    }
+  },
+  "errors": {
+    "loadFailed": "Error al cargar proyectos",
+    "loadProjectFailed": "Error al cargar proyecto",
+    "createFailed": "Error al crear proyecto",
+    "updateFailed": "Error al actualizar proyecto",
+    "deleteFailed": "Error al eliminar proyecto",
+    "archiveFailed": "Error al archivar proyecto",
+    "unarchiveFailed": "Error al desarchivar proyecto",
+    "addMemberFailed": "Error al añadir miembro",
+    "removeMemberFailed": "Error al remover miembro",
+    "updateRoleFailed": "Error al actualizar rol del miembro",
+    "forbidden": "No tienes permiso para realizar esta acción",
+    "notFound": "Proyecto no encontrado o acceso denegado",
+    "slugExists": "Ya existe un proyecto con este slug",
+    "alreadyMember": "El usuario ya es miembro de este proyecto",
+    "userNotInOrg": "El usuario no es miembro de esta organización",
+    "alreadyArchived": "El proyecto ya está archivado",
+    "notArchived": "El proyecto no está archivado",
+    "networkError": "Error de red. Por favor intenta de nuevo.",
+    "unknownError": "Ocurrió un error inesperado"
+  },
+  "success": {
+    "created": "Proyecto creado exitosamente",
+    "updated": "Proyecto actualizado exitosamente",
+    "archived": "Proyecto archivado exitosamente",
+    "unarchived": "Proyecto desarchivado exitosamente",
+    "deleted": "Proyecto eliminado exitosamente",
+    "memberAdded": "{name} añadido al proyecto",
+    "memberRemoved": "{name} removido del proyecto",
+    "roleUpdated": "Rol del miembro actualizado exitosamente",
+    "favorited": "Añadido a favoritos",
+    "unfavorited": "Removido de favoritos"
+  },
+  "loading": {
+    "projects": "Cargando proyectos...",
+    "project": "Cargando proyecto...",
+    "members": "Cargando miembros...",
+    "creating": "Creando proyecto...",
+    "updating": "Actualizando proyecto...",
+    "deleting": "Eliminando proyecto..."
+  }
+}

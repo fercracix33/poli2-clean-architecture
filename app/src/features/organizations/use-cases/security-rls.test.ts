@@ -14,6 +14,7 @@ vi.mock('../services/organization.service', () => ({
   isOrganizationSlugAvailable: vi.fn(),
   getRoleByNameFromDB: vi.fn(),
   addUserToOrganizationInDB: vi.fn(),
+  addFirstOrganizationMemberInDB: vi.fn(),
   getOrganizationBySlugAndCodeFromDB: vi.fn(),
   isUserMemberOfOrganization: vi.fn(),
 }));
@@ -23,6 +24,7 @@ const createOrganizationInDB = vi.mocked(authService.createOrganizationInDB);
 const isOrganizationSlugAvailable = vi.mocked(authService.isOrganizationSlugAvailable);
 const getRoleByNameFromDB = vi.mocked(authService.getRoleByNameFromDB);
 const addUserToOrganizationInDB = vi.mocked(authService.addUserToOrganizationInDB);
+const addFirstOrganizationMemberInDB = vi.mocked(authService.addFirstOrganizationMemberInDB);
 const getOrganizationBySlugAndCodeFromDB = vi.mocked(authService.getOrganizationBySlugAndCodeFromDB);
 const isUserMemberOfOrganization = vi.mocked(authService.isUserMemberOfOrganization);
 
@@ -60,7 +62,7 @@ describe('Security-sensitive organization flows', () => {
       vi.mocked(authService.isOrganizationSlugAvailable).mockResolvedValue(true);
       vi.mocked(authService.createOrganizationInDB).mockResolvedValue({ id: ORGANIZATION_ID, ...ORGANIZATION_DATA } as any);
       vi.mocked(authService.getRoleByNameFromDB).mockResolvedValue({ id: 'admin-role-id' } as any);
-      vi.mocked(authService.addUserToOrganizationInDB).mockResolvedValue({} as any);
+      vi.mocked(authService.addFirstOrganizationMemberInDB).mockResolvedValue({} as any);
 
       const result = await createOrganization(ORGANIZATION_DATA, USER_ID);
 
@@ -73,7 +75,7 @@ describe('Security-sensitive organization flows', () => {
         },
         USER_ID,
       );
-      expect(addUserToOrganizationInDB).toHaveBeenCalledWith(ORGANIZATION_ID, USER_ID, 'admin-role-id');
+      expect(addFirstOrganizationMemberInDB).toHaveBeenCalledWith(ORGANIZATION_ID, USER_ID, 'admin-role-id');
       expect(result.id).toBe(ORGANIZATION_ID);
       expect(consoleLogSpy).toHaveBeenCalledWith(
         'Organization created',

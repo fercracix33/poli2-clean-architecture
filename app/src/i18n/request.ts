@@ -45,17 +45,23 @@ export default getRequestConfig(async () => {
   const commonMessages = (await import(`@/locales/${locale}/common.json`)).default;
   const authMessages = (await import(`@/locales/${locale}/auth.json`)).default;
   const organizationMessages = (await import(`@/locales/${locale}/organization.json`)).default;
+  const projectsMessages = (await import(`@/locales/${locale}/projects.json`)).default;
+  const dashboardMessages = (await import(`@/locales/${locale}/dashboard.json`)).default;
 
   // Merge all namespaces into a single messages object
-  // Pattern: { ...common, auth: authMessages, organization: organizationMessages }
+  // Pattern: { ...common, auth: authMessages, organization: organizationMessages, projects: projectsMessages, dashboard: dashboardMessages }
   // This allows:
   // - useTranslations() to access common.* keys directly
   // - useTranslations('auth') to access auth.* keys
   // - useTranslations('organization') to access organization.* keys
+  // - useTranslations('projects') to access projects.* keys
+  // - useTranslations('dashboard') to access dashboard.* keys
   const messages = {
     ...commonMessages,
     auth: authMessages,
     organization: organizationMessages,
+    projects: projectsMessages,
+    dashboard: dashboardMessages,
   };
 
   return {

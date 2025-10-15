@@ -1,0 +1,266 @@
+{
+  "list": {
+    "title": "Projects",
+    "subtitle": "Manage projects within your organization",
+    "createButton": "Create Project",
+    "empty": {
+      "title": "No projects yet",
+      "description": "Create your first project to get started",
+      "action": "Create Project"
+    },
+    "search": {
+      "placeholder": "Search projects...",
+      "noResults": "No projects found",
+      "noResultsDescription": "Try adjusting your filters or search terms"
+    }
+  },
+  "card": {
+    "members": "{count, plural, =0 {No members} =1 {1 member} other {# members}}",
+    "createdBy": "Created by {name}",
+    "favorite": "Mark as favorite",
+    "unfavorite": "Remove from favorites",
+    "view": "View Project",
+    "status": {
+      "active": "Active",
+      "archived": "Archived",
+      "completed": "Completed",
+      "on_hold": "On Hold"
+    }
+  },
+  "filters": {
+    "title": "Filters",
+    "search": "Search",
+    "status": "Status",
+    "allStatuses": "All statuses",
+    "favorites": "Favorites only",
+    "createdByMe": "Created by me",
+    "clear": "Clear filters",
+    "apply": "Apply"
+  },
+  "form": {
+    "title": "Create New Project",
+    "subtitle": "Fill in the details below to create your project",
+    "name": {
+      "label": "Project Name",
+      "placeholder": "Enter project name",
+      "description": "A clear, descriptive name for your project",
+      "error": {
+        "required": "Name is required",
+        "tooShort": "Name must be at least 2 characters",
+        "tooLong": "Name cannot exceed 100 characters"
+      }
+    },
+    "slug": {
+      "label": "Project Slug",
+      "placeholder": "project-slug",
+      "description": "URL-friendly identifier (lowercase, numbers, hyphens, underscores)",
+      "autoGenerate": "Auto-generate from name",
+      "preview": "URL Preview: /org/{orgSlug}/projects/{slug}",
+      "error": {
+        "required": "Slug is required",
+        "tooShort": "Slug must be at least 2 characters",
+        "tooLong": "Slug cannot exceed 50 characters",
+        "invalid": "Slug can only contain lowercase letters, numbers, hyphens, and underscores",
+        "exists": "This slug already exists in the organization"
+      }
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "What is this project about?",
+      "description": "Optional description of the project (max 1000 characters)",
+      "error": {
+        "tooLong": "Description cannot exceed 1000 characters"
+      }
+    },
+    "color": {
+      "label": "Color",
+      "description": "Choose a color to identify this project",
+      "error": "Invalid HEX color format"
+    },
+    "icon": {
+      "label": "Icon",
+      "placeholder": "📁",
+      "description": "An emoji or icon to represent this project (max 50 characters)",
+      "error": {
+        "tooLong": "Icon cannot exceed 50 characters"
+      }
+    },
+    "status": {
+      "label": "Status",
+      "description": "Current status of the project"
+    },
+    "settings": {
+      "label": "Project Settings",
+      "description": "Custom settings for this project (JSON format)"
+    }
+  },
+  "actions": {
+    "create": "Create Project",
+    "creating": "Creating...",
+    "back": "Back to Projects",
+    "edit": "Edit Project",
+    "editing": "Editing...",
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "archive": "Archive",
+    "archiving": "Archiving...",
+    "unarchive": "Unarchive",
+    "unarchiving": "Unarchiving...",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "addMember": "Add Member",
+    "removeMember": "Remove Member",
+    "updateRole": "Update Role",
+    "clearFilters": "Clear Filters"
+  },
+  "confirmations": {
+    "archive": {
+      "title": "Archive this project?",
+      "description": "The project will become read-only but can be unarchived later. Members will retain access but cannot make changes.",
+      "confirm": "Archive Project",
+      "cancel": "Cancel"
+    },
+    "unarchive": {
+      "title": "Unarchive this project?",
+      "description": "The project will become active again and members can make changes.",
+      "confirm": "Unarchive Project",
+      "cancel": "Cancel"
+    },
+    "delete": {
+      "title": "Delete project permanently?",
+      "description": "This action cannot be undone. All project data, members, and settings will be permanently deleted.",
+      "warning": "Type the project name to confirm deletion",
+      "placeholder": "Enter project name",
+      "confirm": "Delete Project",
+      "cancel": "Cancel",
+      "mismatch": "Project name does not match"
+    },
+    "removeMember": {
+      "title": "Remove member from project?",
+      "description": "Are you sure you want to remove {name} from this project?",
+      "warning": "They will lose access to all project resources.",
+      "confirm": "Remove Member",
+      "cancel": "Cancel"
+    }
+  },
+  "members": {
+    "title": "Project Members",
+    "subtitle": "Manage who has access to this project",
+    "addButton": "Add Member",
+    "search": "Search members...",
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "joined": "Joined",
+      "actions": "Actions"
+    },
+    "empty": {
+      "title": "No members yet",
+      "description": "Add members to start collaborating on this project",
+      "action": "Add Member"
+    },
+    "addDialog": {
+      "title": "Add Member to Project",
+      "description": "Select a member from your organization to add to this project",
+      "userLabel": "Member",
+      "userPlaceholder": "Select a member",
+      "roleLabel": "Role",
+      "rolePlaceholder": "Select a role",
+      "noMembers": "No available members to add",
+      "alreadyMember": "All organization members are already in this project"
+    }
+  },
+  "settings": {
+    "title": "Project Settings",
+    "subtitle": "Manage project configuration and preferences",
+    "general": {
+      "title": "General Information",
+      "description": "Basic project information and details"
+    },
+    "advanced": {
+      "title": "Advanced Settings",
+      "description": "Custom project configuration (JSON format)",
+      "placeholder": "{\"key\": \"value\"}"
+    },
+    "danger": {
+      "title": "Danger Zone",
+      "description": "Irreversible and destructive actions",
+      "archiveButton": "Archive Project",
+      "deleteButton": "Delete Project"
+    }
+  },
+  "header": {
+    "tabs": {
+      "overview": "Overview",
+      "members": "Members",
+      "settings": "Settings"
+    },
+    "breadcrumbs": {
+      "organization": "Organization",
+      "projects": "Projects"
+    }
+  },
+  "overview": {
+    "title": "Project Overview",
+    "stats": {
+      "members": "Members",
+      "created": "Created",
+      "status": "Status",
+      "lastUpdated": "Last Updated"
+    },
+    "activity": {
+      "title": "Recent Activity",
+      "noActivity": "No recent activity",
+      "placeholder": "Task management coming soon"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "addMembers": "Add Members",
+      "viewSettings": "View Settings",
+      "createTask": "Create Task (Coming Soon)"
+    }
+  },
+  "errors": {
+    "loadFailed": "Failed to load projects",
+    "loadProjectFailed": "Failed to load project",
+    "createFailed": "Failed to create project",
+    "updateFailed": "Failed to update project",
+    "deleteFailed": "Failed to delete project",
+    "archiveFailed": "Failed to archive project",
+    "unarchiveFailed": "Failed to unarchive project",
+    "addMemberFailed": "Failed to add member",
+    "removeMemberFailed": "Failed to remove member",
+    "updateRoleFailed": "Failed to update member role",
+    "forbidden": "You don't have permission to perform this action",
+    "notFound": "Project not found or access denied",
+    "slugExists": "A project with this slug already exists",
+    "alreadyMember": "User is already a member of this project",
+    "userNotInOrg": "User is not a member of this organization",
+    "alreadyArchived": "Project is already archived",
+    "notArchived": "Project is not archived",
+    "networkError": "Network error. Please try again.",
+    "unknownError": "An unexpected error occurred"
+  },
+  "success": {
+    "created": "Project created successfully",
+    "updated": "Project updated successfully",
+    "archived": "Project archived successfully",
+    "unarchived": "Project unarchived successfully",
+    "deleted": "Project deleted successfully",
+    "memberAdded": "{name} added to project",
+    "memberRemoved": "{name} removed from project",
+    "roleUpdated": "Member role updated successfully",
+    "favorited": "Added to favorites",
+    "unfavorited": "Removed from favorites"
+  },
+  "loading": {
+    "projects": "Loading projects...",
+    "project": "Loading project...",
+    "members": "Loading members...",
+    "creating": "Creating project...",
+    "updating": "Updating project...",
+    "deleting": "Deleting project..."
+  }
+}

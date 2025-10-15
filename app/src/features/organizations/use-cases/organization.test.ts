@@ -15,6 +15,7 @@ vi.mock('../services/organization.service', () => ({
   isOrganizationSlugAvailable: vi.fn(),
   getRoleByNameFromDB: vi.fn(),
   addUserToOrganizationInDB: vi.fn(),
+  addFirstOrganizationMemberInDB: vi.fn(),
   getOrganizationBySlugAndCodeFromDB: vi.fn(),
   isUserMemberOfOrganization: vi.fn(),
   getUserOrganizationsFromDB: vi.fn(),
@@ -25,6 +26,7 @@ const createOrganizationInDB = vi.mocked(authService.createOrganizationInDB);
 const isOrganizationSlugAvailable = vi.mocked(authService.isOrganizationSlugAvailable);
 const getRoleByNameFromDB = vi.mocked(authService.getRoleByNameFromDB);
 const addUserToOrganizationInDB = vi.mocked(authService.addUserToOrganizationInDB);
+const addFirstOrganizationMemberInDB = vi.mocked(authService.addFirstOrganizationMemberInDB);
 const getOrganizationBySlugAndCodeFromDB = vi.mocked(authService.getOrganizationBySlugAndCodeFromDB);
 const isUserMemberOfOrganization = vi.mocked(authService.isUserMemberOfOrganization);
 const getUserOrganizationsFromDB = vi.mocked(authService.getUserOrganizationsFromDB);
@@ -67,7 +69,7 @@ describe('Organization use cases', () => {
       vi.mocked(authService.isOrganizationSlugAvailable).mockResolvedValue(true);
       vi.mocked(authService.createOrganizationInDB).mockResolvedValue(ORGANIZATION_RESPONSE as any);
       vi.mocked(authService.getRoleByNameFromDB).mockResolvedValue({ id: 'admin-role-id' } as any);
-      vi.mocked(authService.addUserToOrganizationInDB).mockResolvedValue({} as any);
+      vi.mocked(authService.addFirstOrganizationMemberInDB).mockResolvedValue({} as any);
 
       const result = await createOrganization(ORGANIZATION_PAYLOAD, USER_ID);
 
@@ -80,7 +82,7 @@ describe('Organization use cases', () => {
         },
         USER_ID,
       );
-      expect(addUserToOrganizationInDB).toHaveBeenCalledWith(ORGANIZATION_ID, USER_ID, 'admin-role-id');
+      expect(addFirstOrganizationMemberInDB).toHaveBeenCalledWith(ORGANIZATION_ID, USER_ID, 'admin-role-id');
       expect(result).toEqual(ORGANIZATION_RESPONSE);
       expect(consoleLogSpy).toHaveBeenCalled();
     });
@@ -93,7 +95,7 @@ describe('Organization use cases', () => {
       await expect(createOrganization(ORGANIZATION_PAYLOAD, USER_ID)).rejects.toThrow(
         'System admin role not found',
       );
-      expect(addUserToOrganizationInDB).not.toHaveBeenCalled();
+      expect(addFirstOrganizationMemberInDB).not.toHaveBeenCalled();
     });
 
     it('rejects invalid slugs before hitting the database', async () => {

@@ -34,8 +34,8 @@ import {
 } from 'lucide-react';
 
 export default function OrganizationDashboard() {
-  const t = useTranslations('organization.dashboard');
-  const tErrors = useTranslations('organization.errors');
+  const t = useTranslations('organization');
+  const tErrors = useTranslations('organization');
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
@@ -116,39 +116,39 @@ export default function OrganizationDashboard() {
       {/* Header */}
       <div className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">
-          {t('welcome', { orgName: organization.name })}
+          {t('dashboard.welcome', { orgName: organization.name })}
         </h1>
         <p className="text-muted-foreground">
-          {t('yourRole', { role: userRole })}
+          {t('dashboard.yourRole', { role: userRole })}
         </p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <StatsCard
-          title={t('stats.members')}
+          title={t('dashboard.stats.membersTitle')}
           value={memberCount}
           icon={Users}
-          description={t('stats.members', { count: memberCount })}
+          description={t('dashboard.stats.members', { count: memberCount })}
         />
         <StatsCard
-          title={t('stats.projects')}
+          title={t('dashboard.stats.projectsTitle')}
           value={projectCount}
           icon={FolderKanban}
-          description={t('stats.projects', { count: projectCount })}
+          description={t('dashboard.stats.projects', { count: projectCount })}
         />
         <StatsCard
-          title={t('stats.activity')}
+          title={t('dashboard.stats.activity')}
           value="0"
           icon={TrendingUp}
-          description={t('recentActivity.noActivity')}
+          description={t('dashboard.recentActivity.noActivity')}
         />
       </div>
 
       {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>{t('quickActions.title')}</CardTitle>
+          <CardTitle>{t('dashboard.quickActions.title')}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-4">
           <Button
@@ -156,7 +156,7 @@ export default function OrganizationDashboard() {
             data-testid="create-project-button"
           >
             <Plus className="h-4 w-4 mr-2" />
-            {t('quickActions.createProject')}
+            {t('dashboard.quickActions.createProject')}
           </Button>
           <Button
             variant="outline"
@@ -164,7 +164,7 @@ export default function OrganizationDashboard() {
             data-testid="invite-members-button"
           >
             <UserPlus className="h-4 w-4 mr-2" />
-            {t('quickActions.inviteMembers')}
+            {t('dashboard.quickActions.inviteMembers')}
           </Button>
           <Button
             variant="outline"
@@ -172,7 +172,7 @@ export default function OrganizationDashboard() {
             data-testid="view-settings-button"
           >
             <Settings className="h-4 w-4 mr-2" />
-            {t('quickActions.viewSettings')}
+            {t('dashboard.quickActions.viewSettings')}
           </Button>
         </CardContent>
       </Card>
@@ -180,15 +180,15 @@ export default function OrganizationDashboard() {
       {/* Recent Activity */}
       <Card>
         <CardHeader>
-          <CardTitle>{t('recentActivity.title')}</CardTitle>
+          <CardTitle>{t('dashboard.recentActivity.title')}</CardTitle>
           <CardDescription>
-            {t('recentActivity.noActivity')}
+            {t('dashboard.recentActivity.noActivity')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
             <TrendingUp className="h-12 w-12 mx-auto mb-2 opacity-50" />
-            <p>{t('recentActivity.noActivity')}</p>
+            <p>{t('dashboard.recentActivity.noActivity')}</p>
           </div>
         </CardContent>
       </Card>
@@ -197,9 +197,9 @@ export default function OrganizationDashboard() {
       {projectCount === 0 && (
         <Card className="border-dashed">
           <CardHeader>
-            <CardTitle>{t('empty.noProjects')}</CardTitle>
+            <CardTitle>{t('dashboard.empty.noProjects')}</CardTitle>
             <CardDescription>
-              {t('empty.noProjectsDescription')}
+              {t('dashboard.empty.noProjectsDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -208,7 +208,7 @@ export default function OrganizationDashboard() {
               data-testid="create-first-project-button"
             >
               <Plus className="h-4 w-4 mr-2" />
-              {t('empty.createFirstProject')}
+              {t('dashboard.empty.createFirstProject')}
             </Button>
           </CardContent>
         </Card>

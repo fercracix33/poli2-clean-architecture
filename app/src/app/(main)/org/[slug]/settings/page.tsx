@@ -57,8 +57,8 @@ import { AlertCircle, Copy, Check, Trash2, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function OrganizationSettingsPage() {
-  const t = useTranslations('organization.settings');
-  const tErrors = useTranslations('organization.errors');
+  const t = useTranslations('organization');
+  const tErrors = useTranslations('organization');
   const params = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -133,11 +133,11 @@ export default function OrganizationSettingsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['organization', slug] });
-      toast.success(t('general.success'));
+      toast.success(t('settings.general.success'));
     },
     onError: (error: any) => {
-      toast.error(t('general.error'), {
-        description: error.message || tErrors('unknownError'),
+      toast.error(t('settings.general.error'), {
+        description: error.message || tErrors('errors.unknownError'),
       });
     },
   });
@@ -149,7 +149,7 @@ export default function OrganizationSettingsPage() {
       await navigator.clipboard.writeText(orgData.organization.invite_code);
       setCopiedCode(true);
       setTimeout(() => setCopiedCode(false), 2000);
-      toast.success(t('invite.copyCode'));
+      toast.success(t('settings.invite.copyCode'));
     } catch (error) {
       toast.error('Failed to copy code');
     }
@@ -172,12 +172,12 @@ export default function OrganizationSettingsPage() {
       return await response.json();
     },
     onSuccess: () => {
-      toast.success(t('danger.leave.success'));
+      toast.success(t('settings.danger.leave.success'));
       router.push('/dashboard');
     },
     onError: (error: any) => {
-      toast.error(t('danger.leave.error'), {
-        description: error.message || tErrors('unknownError'),
+      toast.error(t('settings.danger.leave.error'), {
+        description: error.message || tErrors('errors.unknownError'),
       });
     },
   });
@@ -205,12 +205,12 @@ export default function OrganizationSettingsPage() {
       return await response.json();
     },
     onSuccess: () => {
-      toast.success(t('danger.delete.success'));
+      toast.success(t('settings.danger.delete.success'));
       router.push('/dashboard');
     },
     onError: (error: any) => {
-      toast.error(t('danger.delete.error'), {
-        description: error.message || tErrors('unknownError'),
+      toast.error(t('settings.danger.delete.error'), {
+        description: error.message || tErrors('errors.unknownError'),
       });
     },
   });
@@ -231,9 +231,9 @@ export default function OrganizationSettingsPage() {
       <div className="p-6">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>{tErrors('loadFailed')}</AlertTitle>
+          <AlertTitle>{tErrors('errors.loadFailed')}</AlertTitle>
           <AlertDescription>
-            {error?.message || tErrors('unknownError')}
+            {error?.message || tErrors('errors.unknownError')}
           </AlertDescription>
         </Alert>
       </div>
@@ -249,21 +249,21 @@ export default function OrganizationSettingsPage() {
       {/* Header */}
       <div className="space-y-1">
         <h1 className="text-3xl font-bold tracking-tight">
-          {t('title')}
+          {t('settings.title')}
         </h1>
         <p className="text-muted-foreground">
-          {t('subtitle')}
+          {t('settings.subtitle')}
         </p>
       </div>
 
       {/* General Information */}
       <Card>
         <CardHeader>
-          <CardTitle>{t('general.title')}</CardTitle>
+          <CardTitle>{t('settings.general.title')}</CardTitle>
           {!orgData.isAdmin && (
             <Alert>
               <AlertDescription>
-                {t('permissions.adminOnly')}
+                {t('settings.permissions.adminOnly')}
               </AlertDescription>
             </Alert>
           )}
@@ -277,17 +277,17 @@ export default function OrganizationSettingsPage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('general.name.label')}</FormLabel>
+                    <FormLabel>{t('settings.general.name.label')}</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder={t('general.name.placeholder')}
+                        placeholder={t('settings.general.name.placeholder')}
                         disabled={!orgData.isAdmin}
                         data-testid="org-name-input"
                       />
                     </FormControl>
                     <FormDescription>
-                      {t('general.name.description')}
+                      {t('settings.general.name.description')}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -300,20 +300,20 @@ export default function OrganizationSettingsPage() {
                 name="slug"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('general.slug.label')}</FormLabel>
+                    <FormLabel>{t('settings.general.slug.label')}</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder={t('general.slug.placeholder')}
+                        placeholder={t('settings.general.slug.placeholder')}
                         disabled={!orgData.isAdmin}
                         data-testid="org-slug-input"
                       />
                     </FormControl>
                     <FormDescription>
-                      {t('general.slug.description')}
+                      {t('settings.general.slug.description')}
                       <br />
                       <span className="font-mono text-xs">
-                        {t('general.slug.preview', { slug: field.value || 'your-org' })}
+                        {t('settings.general.slug.preview', { slug: field.value || 'your-org' })}
                       </span>
                     </FormDescription>
                     <FormMessage />
@@ -327,18 +327,18 @@ export default function OrganizationSettingsPage() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('general.description.label')}</FormLabel>
+                    <FormLabel>{t('settings.general.description.label')}</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
-                        placeholder={t('general.description.placeholder')}
+                        placeholder={t('settings.general.description.placeholder')}
                         disabled={!orgData.isAdmin}
                         rows={4}
                         data-testid="org-description-input"
                       />
                     </FormControl>
                     <FormDescription>
-                      {t('general.description.description')}
+                      {t('settings.general.description.description')}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -353,7 +353,7 @@ export default function OrganizationSettingsPage() {
                     disabled={updateOrgMutation.isPending || !form.formState.isDirty}
                     data-testid="save-org-settings"
                   >
-                    {updateOrgMutation.isPending ? t('general.saving') : t('general.save')}
+                    {updateOrgMutation.isPending ? t('settings.general.saving') : t('settings.general.save')}
                   </Button>
                   <Button
                     type="button"
@@ -361,7 +361,7 @@ export default function OrganizationSettingsPage() {
                     onClick={() => form.reset()}
                     disabled={!form.formState.isDirty}
                   >
-                    {t('general.cancel')}
+                    {t('settings.general.cancel')}
                   </Button>
                 </div>
               )}
@@ -373,9 +373,9 @@ export default function OrganizationSettingsPage() {
       {/* Invite Code */}
       <Card>
         <CardHeader>
-          <CardTitle>{t('invite.title')}</CardTitle>
+          <CardTitle>{t('settings.invite.title')}</CardTitle>
           <CardDescription>
-            {t('invite.description')}
+            {t('settings.invite.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -390,7 +390,7 @@ export default function OrganizationSettingsPage() {
               type="button"
               size="icon"
               onClick={handleCopyCode}
-              aria-label={copiedCode ? t('invite.copied') : t('invite.copyCode')}
+              aria-label={copiedCode ? t('settings.invite.copied') : t('settings.invite.copyCode')}
             >
               {copiedCode ? (
                 <Check className="h-4 w-4" />
@@ -406,7 +406,7 @@ export default function OrganizationSettingsPage() {
       <Card className="border-destructive">
         <CardHeader>
           <CardTitle className="text-destructive">
-            {t('danger.title')}
+            {t('settings.danger.title')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -420,26 +420,26 @@ export default function OrganizationSettingsPage() {
                   data-testid="leave-org-button"
                 >
                   <LogOut className="h-4 w-4 mr-2" />
-                  {t('danger.leave.button')}
+                  {t('settings.danger.leave.button')}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>{t('danger.leave.title')}</AlertDialogTitle>
+                  <AlertDialogTitle>{t('settings.danger.leave.title')}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    {t('danger.leave.description', { orgName: orgData.organization.name })}
+                    {t('settings.danger.leave.description', { orgName: orgData.organization.name })}
                     <br /><br />
-                    {t('danger.leave.warning')}
+                    {t('settings.danger.leave.warning')}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>{t('danger.leave.cancel')}</AlertDialogCancel>
+                  <AlertDialogCancel>{t('settings.danger.leave.cancel')}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => leaveOrgMutation.mutate()}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     data-testid="confirm-leave-org"
                   >
-                    {t('danger.leave.confirm')}
+                    {t('settings.danger.leave.confirm')}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -456,29 +456,29 @@ export default function OrganizationSettingsPage() {
                   data-testid="delete-org-button"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  {t('danger.delete.button')}
+                  {t('settings.danger.delete.button')}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>{t('danger.delete.title')}</AlertDialogTitle>
+                  <AlertDialogTitle>{t('settings.danger.delete.title')}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    {t('danger.delete.description', { orgName: orgData.organization.name })}
+                    {t('settings.danger.delete.description', { orgName: orgData.organization.name })}
                     <br /><br />
-                    <strong>{t('danger.delete.warning')}</strong>
+                    <strong>{t('settings.danger.delete.warning')}</strong>
                     <br /><br />
-                    {t('danger.delete.confirmText')}
+                    {t('settings.danger.delete.confirmText')}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <Input
-                  placeholder={t('danger.delete.confirmPlaceholder')}
+                  placeholder={t('settings.danger.delete.confirmPlaceholder')}
                   value={deleteConfirmName}
                   onChange={(e) => setDeleteConfirmName(e.target.value)}
                   data-testid="delete-org-confirm-input"
                 />
                 <AlertDialogFooter>
                   <AlertDialogCancel onClick={() => setDeleteConfirmName('')}>
-                    {t('danger.delete.cancel')}
+                    {t('settings.danger.delete.cancel')}
                   </AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => deleteOrgMutation.mutate()}
@@ -486,7 +486,7 @@ export default function OrganizationSettingsPage() {
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     data-testid="confirm-delete-org"
                   >
-                    {t('danger.delete.confirm')}
+                    {t('settings.danger.delete.confirm')}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

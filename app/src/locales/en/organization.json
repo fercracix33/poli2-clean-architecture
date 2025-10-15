@@ -1,6 +1,5 @@
 {
-  "organization": {
-    "dashboard": {
+  "dashboard": {
       "title": "Dashboard",
       "welcome": "Welcome to {orgName}",
       "yourRole": "Your role: {role}",
@@ -9,7 +8,9 @@
       "members": "Members",
       "settings": "Settings",
       "stats": {
+        "membersTitle": "Members",
         "members": "{count, plural, =0 {No members} =1 {1 member} other {# members}}",
+        "projectsTitle": "Projects",
         "projects": "{count, plural, =0 {No projects} =1 {1 project} other {# projects}}",
         "activity": "Recent Activity"
       },
@@ -180,5 +181,4 @@
       "networkError": "Network error. Please try again.",
       "unknownError": "An unexpected error occurred"
     }
-  }
 }

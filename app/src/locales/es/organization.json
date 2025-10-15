@@ -1,6 +1,5 @@
 {
-  "organization": {
-    "dashboard": {
+  "dashboard": {
       "title": "Panel de Control",
       "welcome": "Bienvenido a {orgName}",
       "yourRole": "Tu rol: {role}",
@@ -9,7 +8,9 @@
       "members": "Miembros",
       "settings": "Configuración",
       "stats": {
+        "membersTitle": "Miembros",
         "members": "{count, plural, =0 {Sin miembros} =1 {1 miembro} other {# miembros}}",
+        "projectsTitle": "Proyectos",
         "projects": "{count, plural, =0 {Sin proyectos} =1 {1 proyecto} other {# proyectos}}",
         "activity": "Actividad Reciente"
       },
@@ -180,5 +181,4 @@
       "networkError": "Error de red. Por favor intenta de nuevo.",
       "unknownError": "Ocurrió un error inesperado"
     }
-  }
 }

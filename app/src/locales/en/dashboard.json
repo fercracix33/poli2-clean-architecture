@@ -1,0 +1,42 @@
+{
+  "header": {
+    "title": "Dashboard",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "welcome": {
+    "words": ["productive", "organized", "focused", "efficient", "on track"],
+    "prefix": "We're",
+    "greeting": "to see you,",
+    "status": "Status",
+    "active": "Active"
+  },
+  "organizations": {
+    "title": "Your Organizations",
+    "description": "Workspaces for your teams and projects",
+    "new": "New",
+    "view": "View",
+    "noDescription": "No description",
+    "empty": {
+      "title": "No organizations yet",
+      "description": "Create your first workspace to start organizing projects",
+      "cta": "Create your first organization"
+    }
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "description": "Get started with your projects",
+    "inviteMembers": "Invite team members",
+    "joinCode": "Join with invite code",
+    "editProfile": "Edit profile",
+    "accountSettings": "Account settings"
+  },
+  "stats": {
+    "activeTasks": "Active Tasks",
+    "tasksInProgress": "tasks in progress",
+    "activeProjects": "Active Projects",
+    "acrossTeams": "across all teams",
+    "upcomingDeadlines": "Upcoming Deadlines",
+    "thisWeek": "this week"
+  }
+}

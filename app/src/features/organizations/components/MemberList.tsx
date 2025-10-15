@@ -61,7 +61,7 @@ export function MemberList({
   canManageMembers,
   onRemoveMember
 }: MemberListProps) {
-  const t = useTranslations('organization.members');
+  const t = useTranslations('organization');
   const [searchQuery, setSearchQuery] = useState('');
   const [memberToRemove, setMemberToRemove] = useState<{ id: string; name: string } | null>(null);
   const [isRemoving, setIsRemoving] = useState(false);
@@ -93,8 +93,8 @@ export function MemberList({
     <>
       <Card>
         <CardHeader>
-          <CardTitle>{t('title')}</CardTitle>
-          <CardDescription>{t('subtitle')}</CardDescription>
+          <CardTitle>{t('members.title')}</CardTitle>
+          <CardDescription>{t('members.subtitle')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Search Bar */}
@@ -102,7 +102,7 @@ export function MemberList({
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder={t('search')}
+              placeholder={t('members.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -115,8 +115,8 @@ export function MemberList({
             {filteredMembers.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <UserX className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                <p className="font-medium">{t('empty.title')}</p>
-                <p className="text-sm">{t('empty.description')}</p>
+                <p className="font-medium">{t('members.empty.title')}</p>
+                <p className="text-sm">{t('members.empty.description')}</p>
               </div>
             ) : (
               filteredMembers.map((member) => (
@@ -164,7 +164,7 @@ export function MemberList({
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label={t('actions.removeMember')}
+                          aria-label={t('members.actions.removeMember')}
                           data-testid={`member-actions-${member.user_id}`}
                         >
                           <MoreVertical className="h-4 w-4" />
@@ -180,7 +180,7 @@ export function MemberList({
                           data-testid={`remove-member-${member.user_id}`}
                         >
                           <UserX className="h-4 w-4 mr-2" />
-                          {t('actions.removeMember')}
+                          {t('members.actions.removeMember')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -199,17 +199,17 @@ export function MemberList({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('remove.title')}</AlertDialogTitle>
+            <AlertDialogTitle>{t('members.remove.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('remove.description', { name: memberToRemove?.name || '' })}
+              {t('members.remove.description', { name: memberToRemove?.name || '' })}
               <br />
               <br />
-              {t('remove.warning')}
+              {t('members.remove.warning')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isRemoving}>
-              {t('remove.cancel')}
+              {t('members.remove.cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleRemoveMember}
@@ -217,7 +217,7 @@ export function MemberList({
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               data-testid="confirm-remove-member"
             >
-              {isRemoving ? t('remove.removing') : t('remove.confirm')}
+              {isRemoving ? t('members.remove.removing') : t('members.remove.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

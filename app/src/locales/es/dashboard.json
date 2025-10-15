@@ -1,0 +1,42 @@
+{
+  "header": {
+    "title": "Panel de Control",
+    "settings": "Configuración",
+    "logout": "Cerrar Sesión"
+  },
+  "welcome": {
+    "words": ["productivo", "organizado", "enfocado", "eficiente", "en camino"],
+    "prefix": "Estamos",
+    "greeting": "de verte,",
+    "status": "Estado",
+    "active": "Activo"
+  },
+  "organizations": {
+    "title": "Tus Organizaciones",
+    "description": "Espacios de trabajo para tus equipos y proyectos",
+    "new": "Nueva",
+    "view": "Ver",
+    "noDescription": "Sin descripción",
+    "empty": {
+      "title": "Aún no hay organizaciones",
+      "description": "Crea tu primer espacio de trabajo para comenzar a organizar proyectos",
+      "cta": "Crea tu primera organización"
+    }
+  },
+  "quickActions": {
+    "title": "Acciones Rápidas",
+    "description": "Comienza con tus proyectos",
+    "inviteMembers": "Invitar miembros del equipo",
+    "joinCode": "Unirse con código de invitación",
+    "editProfile": "Editar perfil",
+    "accountSettings": "Configuración de cuenta"
+  },
+  "stats": {
+    "activeTasks": "Tareas Activas",
+    "tasksInProgress": "tareas en progreso",
+    "activeProjects": "Proyectos Activos",
+    "acrossTeams": "en todos los equipos",
+    "upcomingDeadlines": "Fechas Límite Próximas",
+    "thisWeek": "esta semana"
+  }
+}

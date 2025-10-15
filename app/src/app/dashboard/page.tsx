@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,7 +15,8 @@ import { JoinOrganizationDialog } from '@/components/organizations/JoinOrganizat
 
 export default function DashboardPage() {
   const router = useRouter();
-  const welcomeWords = ["productive", "organized", "focused", "efficient", "on track"];
+  const t = useTranslations('dashboard');
+  const welcomeWords = t.raw('welcome.words') as string[];
 
   // Fetch user profile
   const { data: profile, isLoading: profileLoading } = useQuery({
@@ -82,19 +84,19 @@ export default function DashboardPage() {
                 <Building className="h-6 w-6 text-white" />
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
-                Dashboard
+                {t('header.title')}
               </h1>
             </div>
             <div className="flex items-center space-x-2">
               <Link href="/settings/profile">
                 <Button variant="ghost" size="sm" className="hover:bg-blue-50 dark:hover:bg-blue-950">
                   <Settings className="w-4 h-4 mr-2" />
-                  Settings
+                  {t('header.settings')}
                 </Button>
               </Link>
               <Button variant="ghost" size="sm" onClick={handleLogout} className="hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-600 dark:hover:text-red-400">
                 <LogOut className="w-4 h-4 mr-2" />
-                Logout
+                {t('header.logout')}
               </Button>
             </div>
           </div>
@@ -129,7 +131,7 @@ export default function DashboardPage() {
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <CardTitle className="text-2xl">
-                        We're{' '}
+                        {t('welcome.prefix')}{' '}
                         <FlipWords
                           words={welcomeWords}
                           className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent"
@@ -138,7 +140,7 @@ export default function DashboardPage() {
                       </CardTitle>
                     </div>
                     <div className="text-lg font-medium text-slate-700 dark:text-slate-300">
-                      to see you, <span data-testid="user-name" className="text-blue-600 dark:text-blue-400">{profile?.name || 'User'}</span>!
+                      {t('welcome.greeting')} <span data-testid="user-name" className="text-blue-600 dark:text-blue-400">{profile?.name || 'User'}</span>!
                     </div>
                     <CardDescription className="text-slate-600 dark:text-slate-400 mt-1">
                       {profile?.email || 'user@example.com'}
@@ -147,10 +149,10 @@ export default function DashboardPage() {
                 </div>
                 <div className="hidden md:flex items-center space-x-2">
                   <div className="text-right">
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Status</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{t('welcome.status')}</p>
                     <div className="flex items-center mt-1">
                       <div className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse" />
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Active</span>
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('welcome.active')}</span>
                     </div>
                   </div>
                 </div>
@@ -168,17 +170,17 @@ export default function DashboardPage() {
                       <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-2">
                         <Building className="w-4 h-4 text-white" />
                       </div>
-                      Your Organizations
+                      {t('organizations.title')}
                     </CardTitle>
                     <CardDescription className="text-slate-600 dark:text-slate-400 mt-1">
-                      Workspaces for your teams and projects
+                      {t('organizations.description')}
                     </CardDescription>
                   </div>
                   <CreateOrganizationDialog
                     trigger={
                       <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md">
                         <Plus className="w-4 h-4 mr-1" />
-                        New
+                        {t('organizations.new')}
                       </Button>
                     }
                   />
@@ -199,12 +201,17 @@ export default function DashboardPage() {
                           <div>
                             <p className="font-semibold text-slate-900 dark:text-slate-100">{org.name}</p>
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                              {org.description || 'No description'}
+                              {org.description || t('organizations.noDescription')}
                             </p>
                           </div>
                         </div>
-                        <Button size="sm" variant="ghost" className="group-hover:bg-blue-100 dark:group-hover:bg-blue-900">
-                          View
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="group-hover:bg-blue-100 dark:group-hover:bg-blue-900"
+                          onClick={() => router.push(`/org/${org.slug}`)}
+                        >
+                          {t('organizations.view')}
                         </Button>
                       </div>
                     ))}
@@ -214,13 +221,13 @@ export default function DashboardPage() {
                     <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center mx-auto mb-4">
                       <Building className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <p className="text-slate-600 dark:text-slate-400 font-medium">No organizations yet</p>
-                    <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">Create your first workspace to start organizing projects</p>
+                    <p className="text-slate-600 dark:text-slate-400 font-medium">{t('organizations.empty.title')}</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">{t('organizations.empty.description')}</p>
                     <CreateOrganizationDialog
                       trigger={
                         <Button className="mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700" size="sm">
                           <Plus className="w-4 h-4 mr-1" />
-                          Create your first organization
+                          {t('organizations.empty.cta')}
                         </Button>
                       }
                     />
@@ -234,10 +241,10 @@ export default function DashboardPage() {
               <CardHeader>
                 <CardTitle className="flex items-center text-slate-900 dark:text-slate-100">
                   <Zap className="w-5 h-5 mr-2 text-amber-500" />
-                  Quick Actions
+                  {t('quickActions.title')}
                 </CardTitle>
                 <CardDescription className="text-slate-600 dark:text-slate-400">
-                  Get started with your projects
+                  {t('quickActions.description')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -249,7 +256,7 @@ export default function DashboardPage() {
                     <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
                       <Users className="w-4 h-4 text-white" />
                     </div>
-                    <span className="font-medium">Invite team members</span>
+                    <span className="font-medium">{t('quickActions.inviteMembers')}</span>
                   </Button>
                   <JoinOrganizationDialog
                     trigger={
@@ -260,7 +267,7 @@ export default function DashboardPage() {
                         <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
                           <Building className="w-4 h-4 text-white" />
                         </div>
-                        <span className="font-medium">Join with invite code</span>
+                        <span className="font-medium">{t('quickActions.joinCode')}</span>
                       </Button>
                     }
                   />
@@ -272,7 +279,7 @@ export default function DashboardPage() {
                       <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
                         <User className="w-4 h-4 text-white" />
                       </div>
-                      <span className="font-medium">Edit profile</span>
+                      <span className="font-medium">{t('quickActions.editProfile')}</span>
                     </Button>
                   </Link>
                   <Button
@@ -282,7 +289,7 @@ export default function DashboardPage() {
                     <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
                       <Settings className="w-4 h-4 text-white" />
                     </div>
-                    <span className="font-medium">Account settings</span>
+                    <span className="font-medium">{t('quickActions.accountSettings')}</span>
                   </Button>
                 </div>
               </CardContent>
@@ -295,7 +302,7 @@ export default function DashboardPage() {
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                    Active Tasks
+                    {t('stats.activeTasks')}
                   </CardTitle>
                   <Target className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
@@ -305,7 +312,7 @@ export default function DashboardPage() {
                   <div className="text-3xl font-extrabold text-blue-700 dark:text-blue-300">
                     0
                   </div>
-                  <span className="text-sm text-slate-500 dark:text-slate-400">tasks in progress</span>
+                  <span className="text-sm text-slate-500 dark:text-slate-400">{t('stats.tasksInProgress')}</span>
                 </div>
               </CardContent>
             </Card>
@@ -313,7 +320,7 @@ export default function DashboardPage() {
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                    Active Projects
+                    {t('stats.activeProjects')}
                   </CardTitle>
                   <Building className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 </div>
@@ -323,7 +330,7 @@ export default function DashboardPage() {
                   <div className="text-3xl font-extrabold text-emerald-700 dark:text-emerald-300">
                     0
                   </div>
-                  <span className="text-sm text-slate-500 dark:text-slate-400">across all teams</span>
+                  <span className="text-sm text-slate-500 dark:text-slate-400">{t('stats.acrossTeams')}</span>
                 </div>
               </CardContent>
             </Card>
@@ -331,7 +338,7 @@ export default function DashboardPage() {
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                    Upcoming Deadlines
+                    {t('stats.upcomingDeadlines')}
                   </CardTitle>
                   <Zap className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 </div>
@@ -341,7 +348,7 @@ export default function DashboardPage() {
                   <div className="text-3xl font-extrabold text-purple-700 dark:text-purple-300">
                     0
                   </div>
-                  <span className="text-sm text-slate-500 dark:text-slate-400">this week</span>
+                  <span className="text-sm text-slate-500 dark:text-slate-400">{t('stats.thisWeek')}</span>
                 </div>
               </CardContent>
             </Card>

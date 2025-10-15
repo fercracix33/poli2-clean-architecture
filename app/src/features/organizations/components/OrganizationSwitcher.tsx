@@ -37,7 +37,7 @@ export function OrganizationSwitcher({
   organizations,
   isLoading
 }: OrganizationSwitcherProps) {
-  const t = useTranslations('organization.switcher');
+  const t = useTranslations('organization');
   const router = useRouter();
 
   if (isLoading) {
@@ -60,7 +60,7 @@ export function OrganizationSwitcher({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[200px]">
-        <DropdownMenuLabel>{t('current')}</DropdownMenuLabel>
+        <DropdownMenuLabel>{t('switcher.current')}</DropdownMenuLabel>
         <DropdownMenuItem disabled className="font-medium">
           <Building2 className="h-4 w-4 mr-2" />
           {currentOrganization.name}
@@ -69,7 +69,7 @@ export function OrganizationSwitcher({
         {organizations.length > 1 && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel>{t('myOrganizations')}</DropdownMenuLabel>
+            <DropdownMenuLabel>{t('switcher.myOrganizations')}</DropdownMenuLabel>
             {organizations
               .filter(org => org.id !== currentOrganization.id)
               .map((org) => (
@@ -91,7 +91,7 @@ export function OrganizationSwitcher({
           data-testid="create-new-organization"
         >
           <Plus className="h-4 w-4 mr-2" />
-          {t('createNew')}
+          {t('switcher.createNew')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
