@@ -146,9 +146,6 @@ export default function ProfileSettingsPage() {
           <CardTitle>{t('profile.title')}</CardTitle>
           <CardDescription>
             {t('profile.subtitle')}
-          <CardTitle className="text-foreground">Profile Settings</CardTitle>
-          <CardDescription className="text-muted-foreground">
-            Update your profile information
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -280,8 +277,6 @@ export default function ProfileSettingsPage() {
               type="submit"
               data-testid="update-button"
               aria-label={t('profile.submit')}
-              className="w-full h-11"
-              aria-label="Update profile"
               className="w-full h-11 hover:scale-[1.02] active:scale-95 transition-all duration-200"
               disabled={isSubmitting}
             >
@@ -309,10 +304,8 @@ export default function ProfileSettingsPage() {
                 onClick={handleRetry}
                 className="w-full hover:scale-[1.02] active:scale-95 transition-all duration-200"
               >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                {t('profile.retry')}
                 <RefreshCw className="w-4 h-4 mr-2" aria-hidden="true" />
-                Retry
+                {t('profile.retry')}
               </Button>
             )}
           </form>

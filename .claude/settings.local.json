@@ -51,7 +51,8 @@
       "Bash(npm run test:e2e:*)",
       "Bash(npm run:*)",
       "Bash(curl:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
     "ask": []
