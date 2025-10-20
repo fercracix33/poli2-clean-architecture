@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,26 +15,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { CheckCircle, AlertCircle, RefreshCw, Upload, User } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 
-// Schema de validación para el formulario
-const profileUpdateSchema = z.object({
-  name: z.string()
-    .min(1, 'Name cannot be empty')
-    .min(2, 'Name must be at least 2 characters')
-    .max(100, 'Name cannot exceed 100 characters'),
-  email: z.string()
-    .min(1, 'Email is required')
-    .email('Invalid email format'),
-});
-
-type ProfileUpdateData = z.infer<typeof profileUpdateSchema>;
+type ProfileUpdateData = {
+  name: string;
+  email: string;
+};
 
 export default function ProfileSettingsPage() {
+  const t = useTranslations('settings');
+  const tValidation = useTranslations('settings.validation');
+  const tErrors = useTranslations('settings.errors');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const router = useRouter();
+
+  // Create Zod schema INSIDE component to access translations
+  const profileUpdateSchema = z.object({
+    name: z.string()
+      .min(1, tValidation('name.required'))
+      .min(2, tValidation('name.min'))
+      .max(100, tValidation('name.max')),
+    email: z.string()
+      .min(1, tValidation('email.required'))
+      .email(tValidation('email.invalid')),
+  });
 
   // Fetch current profile
   const { data: currentProfile, isLoading } = useQuery({
@@ -73,10 +80,10 @@ export default function ProfileSettingsPage() {
 
       if (!response.ok) {
         if (response.status === 500) {
-          throw new Error('Something went wrong. Please try again later.');
+          throw new Error(tErrors('serverError'));
         }
-        const error = await response.json().catch(() => ({ error: 'Network error. Please try again.' }));
-        throw new Error(error.error || 'Network error. Please try again.');
+        const error = await response.json().catch(() => ({ error: tErrors('network') }));
+        throw new Error(error.error || tErrors('network'));
       }
 
       return response.json();
@@ -91,7 +98,7 @@ export default function ProfileSettingsPage() {
   const onSubmit = async (data: ProfileUpdateData) => {
     // Validate name is not empty
     if (!data.name || data.name.trim() === '') {
-      form.setError('name', { message: 'Name cannot be empty' });
+      form.setError('name', { message: tValidation('name.required') });
       return;
     }
 
@@ -136,9 +143,9 @@ export default function ProfileSettingsPage() {
         }}
       >
         <CardHeader>
-          <CardTitle>Profile Settings</CardTitle>
+          <CardTitle>{t('profile.title')}</CardTitle>
           <CardDescription>
-            Update your profile information
+            {t('profile.subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -151,12 +158,12 @@ export default function ProfileSettingsPage() {
           >
             {/* Avatar Upload */}
             <div className="space-y-2">
-              <Label>Profile Picture</Label>
+              <Label>{t('profile.avatar.label')}</Label>
               <div className="flex items-center space-x-4">
                 {avatarPreview ? (
                   <img
                     src={avatarPreview}
-                    alt="Avatar preview"
+                    alt={t('profile.avatar.preview')}
                     data-testid="avatar-preview"
                     className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
                   />
@@ -181,7 +188,7 @@ export default function ProfileSettingsPage() {
                     className="flex items-center"
                   >
                     <Upload className="w-4 h-4 mr-2" />
-                    Upload Photo
+                    {t('profile.avatar.upload')}
                   </Button>
                 </div>
               </div>
@@ -190,14 +197,14 @@ export default function ProfileSettingsPage() {
             {/* Name Field */}
             <div className="space-y-2">
               <Label htmlFor="name" className="text-sm font-medium">
-                Full name
+                {t('profile.name.label')}
               </Label>
               <Input
                 id="name"
                 type="text"
-                placeholder="Enter your full name"
+                placeholder={t('profile.name.placeholder')}
                 data-testid="name-input"
-                aria-label="Full name"
+                aria-label={t('profile.name.aria')}
                 {...form.register('name')}
                 disabled={isSubmitting}
                 style={{ width: '100%' }}
@@ -216,14 +223,14 @@ export default function ProfileSettingsPage() {
             {/* Email Field */}
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium">
-                Email address
+                {t('profile.email.label')}
               </Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="your@email.com"
+                placeholder={t('profile.email.placeholder')}
                 data-testid="email-input"
-                aria-label="Email address"
+                aria-label={t('profile.email.aria')}
                 {...form.register('email')}
                 disabled={isSubmitting}
                 style={{ width: '100%' }}
@@ -247,7 +254,7 @@ export default function ProfileSettingsPage() {
               >
                 <CheckCircle className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-800 dark:text-green-200">
-                  Profile updated successfully
+                  {t('profile.success')}
                 </AlertDescription>
               </Alert>
             )}
@@ -269,7 +276,7 @@ export default function ProfileSettingsPage() {
             <Button
               type="submit"
               data-testid="update-button"
-              aria-label="Update profile"
+              aria-label={t('profile.submit')}
               className="w-full h-11"
               disabled={isSubmitting}
             >
@@ -280,10 +287,10 @@ export default function ProfileSettingsPage() {
                     variant="circle"
                     className="w-4 h-4 mr-2"
                   />
-                  <span>Updating...</span>
+                  <span>{t('profile.submitting')}</span>
                 </>
               ) : (
-                <span>Update Profile</span>
+                <span>{t('profile.submit')}</span>
               )}
             </Button>
 
@@ -297,7 +304,7 @@ export default function ProfileSettingsPage() {
                 className="w-full"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
-                Retry
+                {t('profile.retry')}
               </Button>
             )}
           </form>
