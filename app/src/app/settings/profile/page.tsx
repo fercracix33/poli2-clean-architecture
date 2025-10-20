@@ -135,9 +135,9 @@ export default function ProfileSettingsPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background animate-fade-in">
       <Card
-        className="w-full mx-auto"
+        className="w-full mx-auto border-border bg-card hover:shadow-lg transition-all duration-300 animate-scale-in"
         style={{
           maxWidth: window.innerWidth < 768 ? '100%' : window.innerWidth < 1024 ? '600px' : '500px'
         }}
@@ -146,6 +146,9 @@ export default function ProfileSettingsPage() {
           <CardTitle>{t('profile.title')}</CardTitle>
           <CardDescription>
             {t('profile.subtitle')}
+          <CardTitle className="text-foreground">Profile Settings</CardTitle>
+          <CardDescription className="text-muted-foreground">
+            Update your profile information
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -278,6 +281,8 @@ export default function ProfileSettingsPage() {
               data-testid="update-button"
               aria-label={t('profile.submit')}
               className="w-full h-11"
+              aria-label="Update profile"
+              className="w-full h-11 hover:scale-[1.02] active:scale-95 transition-all duration-200"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
@@ -286,6 +291,7 @@ export default function ProfileSettingsPage() {
                     data-testid="loading-spinner"
                     variant="circle"
                     className="w-4 h-4 mr-2"
+                    aria-hidden="true"
                   />
                   <span>{t('profile.submitting')}</span>
                 </>
@@ -301,10 +307,12 @@ export default function ProfileSettingsPage() {
                 variant="outline"
                 data-testid="retry-button"
                 onClick={handleRetry}
-                className="w-full"
+                className="w-full hover:scale-[1.02] active:scale-95 transition-all duration-200"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
                 {t('profile.retry')}
+                <RefreshCw className="w-4 h-4 mr-2" aria-hidden="true" />
+                Retry
               </Button>
             )}
           </form>

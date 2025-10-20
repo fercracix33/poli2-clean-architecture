@@ -39,6 +39,7 @@ PRDs/
 │   ├── 02-test-template.md
 │   ├── 03-implementation-template.md
 │   ├── 04-ui-template.md
+│   ├── rls-migration-template.md  # Template para políticas RLS
 │   └── _status-template.md
 │
 ├── _examples/                     # Ejemplos de referencia
@@ -115,14 +116,31 @@ graph TD
 - Consideraciones técnicas
 
 ### 🗄️ 01-supabase-template.md
-**Usado por:** Supabase Agent  
-**Propósito:** Implementar infraestructura de base de datos  
+**Usado por:** Supabase Agent
+**Propósito:** Implementar infraestructura de base de datos
 **Secciones clave:**
 - Schema de base de datos con SQL
 - Políticas de Row Level Security (RLS)
 - Servicios de datos (Data Access Layer)
 - Migraciones y funciones de BD
 - Validaciones y constraints
+
+### 🔐 rls-migration-template.md
+**Usado por:** Supabase Agent
+**Propósito:** Template SQL para crear políticas RLS optimizadas y sin conflictos
+**Secciones clave:**
+- Documentación obligatoria de consulta a Context7
+- Funciones security definer para evitar políticas circulares
+- Políticas RLS con mejores prácticas (SELECT, INSERT, UPDATE, DELETE)
+- Checklist de verificación de performance (EXPLAIN ANALYZE)
+- Anti-patterns explícitos a evitar
+- Validación post-implementación
+
+**Uso obligatorio:**
+- SIEMPRE consultar Context7 antes de usar este template
+- Documentar findings en la sección de verificación
+- Ejecutar `/validate-rls` después de crear la migración
+- Verificar índices en todas las columnas usadas en políticas
 
 ### 🧪 02-test-template.md
 **Usado por:** Test Agent  
@@ -341,11 +359,16 @@ El archivo `_status.md` debe actualizarse:
 5. **Documentar decisiones técnicas** importantes
 
 ### Para Supabase Agents
-1. **Siempre habilitar RLS** en todas las tablas
-2. **Crear políticas de seguridad específicas** para cada rol
-3. **Optimizar queries** con índices apropiados
-4. **Documentar funciones complejas** de base de datos
-5. **Probar migraciones** en ambiente de desarrollo
+1. **SIEMPRE consultar Context7** antes de crear políticas RLS (OBLIGATORIO)
+2. **Usar rls-migration-template.md** para todas las políticas RLS
+3. **Siempre habilitar RLS** en todas las tablas
+4. **Evitar políticas circulares** usando funciones security definer
+5. **Crear índices ANTES de políticas** en columnas user_id, organization_id
+6. **Ejecutar /validate-rls** después de crear migraciones
+7. **Documentar findings de Context7** en comentarios de migración
+8. **Verificar performance** con EXPLAIN ANALYZE
+9. **Optimizar queries** con índices apropiados
+10. **Probar migraciones** en ambiente de desarrollo
 
 ### Para Test Agents
 1. **Cubrir todos los criterios de aceptación** con tests
@@ -456,6 +479,15 @@ tree PRDs/[domain]/[number]-[feature-name]
 
 # Buscar ejemplos
 find PRDs/_examples -name "*.md" | head -5
+
+# Validar políticas RLS (CRÍTICO después de crear migraciones)
+/validate-rls
+
+# Validar arquitectura general
+/validate-architecture
+
+# Validar completitud de PRD
+/prd-checklist [domain]/[number]-[feature-name]
 ```
 
 ### Checklist de Validación

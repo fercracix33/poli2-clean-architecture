@@ -580,7 +580,7 @@ export async function getOrganizationMembersFromDB(
       .from('organization_members')
       .select(`
         *,
-        user_profile:user_profiles(*),
+        user_profile:user_profiles!organization_members_user_id_fkey(*),
         role:roles(name)
       `)
       .eq('organization_id', organizationId)

@@ -177,10 +177,10 @@ export default function CreateProjectPage() {
   }
 
   return (
-    <div className="container py-8 space-y-6">
+    <div className="container py-8 space-y-6 animate-fade-in">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link href={`/org/${organizationSlug}/projects`} className="hover:text-foreground">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground animate-slide-in-up">
+        <Link href={`/org/${organizationSlug}/projects`} className="hover:text-foreground transition-colors duration-200">
           {t('list.title')}
         </Link>
         <span>/</span>
@@ -188,16 +188,16 @@ export default function CreateProjectPage() {
       </div>
 
       {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold">{t('actions.create')}</h1>
+      <div className="animate-slide-in-up" style={{ animationDelay: '50ms' }}>
+        <h1 className="text-3xl font-bold text-foreground">{t('actions.create')}</h1>
         <p className="text-muted-foreground mt-1">{t('form.name.description')}</p>
       </div>
 
       {/* Create Form */}
-      <Card>
+      <Card className="border-border bg-card hover:shadow-lg transition-all duration-300 animate-slide-in-up" style={{ animationDelay: '100ms' }}>
         <CardHeader>
-          <CardTitle>{t('form.title')}</CardTitle>
-          <CardDescription>{t('form.subtitle')}</CardDescription>
+          <CardTitle className="text-foreground">{t('form.title')}</CardTitle>
+          <CardDescription className="text-muted-foreground">{t('form.subtitle')}</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -364,6 +364,7 @@ export default function CreateProjectPage() {
                   variant="outline"
                   onClick={() => router.push(`/org/${organizationSlug}/projects`)}
                   disabled={createMutation.isPending}
+                  className="hover:scale-[1.02] active:scale-95 transition-all duration-200"
                 >
                   {t('actions.cancel')}
                 </Button>
@@ -371,10 +372,11 @@ export default function CreateProjectPage() {
                   type="submit"
                   disabled={createMutation.isPending}
                   data-testid="submit-create-project"
+                  className="hover:scale-[1.02] active:scale-95 transition-all duration-200"
                 >
                   {createMutation.isPending ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                       {t('actions.creating')}
                     </>
                   ) : (

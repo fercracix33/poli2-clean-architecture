@@ -10,20 +10,29 @@ import * as projectService from '../services/project.service';
 import {
   getUserPermissionsInOrganization,
   isUserMemberOfOrganization,
+  getOrganizationBySlugFromDB,
 } from '@/features/organizations/services/organization.service';
 
-const OrganizationIdSchema = z.string().uuid();
+const OrganizationSlugSchema = z.string().min(2).max(50).regex(/^[a-z0-9\-_]+$/);
 
 export async function getProjectBySlug(
   userId: string,
-  organizationId: string,
+  organizationSlug: string,
   slug: string
 ): Promise<Project> {
-  // Validate organization ID
-  const validationResult = OrganizationIdSchema.safeParse(organizationId);
+  // Validate organization slug format
+  const validationResult = OrganizationSlugSchema.safeParse(organizationSlug);
   if (!validationResult.success) {
     throw new Error(validationResult.error.issues[0].message);
   }
+
+  // Convert organization slug to UUID
+  const organization = await getOrganizationBySlugFromDB(organizationSlug);
+  if (!organization) {
+    throw new Error('NOT_FOUND');
+  }
+
+  const organizationId = organization.id;
 
   // Check membership
   const isMember = await isUserMemberOfOrganization(userId, organizationId);

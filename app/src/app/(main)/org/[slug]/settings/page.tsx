@@ -245,10 +245,10 @@ export default function OrganizationSettingsPage() {
   };
 
   return (
-    <div className="space-y-6 p-6 max-w-3xl">
+    <div className="space-y-6 p-6 max-w-3xl animate-fade-in">
       {/* Header */}
-      <div className="space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight">
+      <div className="space-y-1 animate-slide-in-up">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
           {t('settings.title')}
         </h1>
         <p className="text-muted-foreground">
@@ -257,12 +257,12 @@ export default function OrganizationSettingsPage() {
       </div>
 
       {/* General Information */}
-      <Card>
+      <Card className="border-border bg-card hover:shadow-lg transition-all duration-300 animate-slide-in-up" style={{ animationDelay: '100ms' }}>
         <CardHeader>
-          <CardTitle>{t('settings.general.title')}</CardTitle>
+          <CardTitle className="text-foreground">{t('settings.general.title')}</CardTitle>
           {!orgData.isAdmin && (
-            <Alert>
-              <AlertDescription>
+            <Alert className="border-border bg-secondary">
+              <AlertDescription className="text-muted-foreground">
                 {t('settings.permissions.adminOnly')}
               </AlertDescription>
             </Alert>
@@ -352,6 +352,7 @@ export default function OrganizationSettingsPage() {
                     type="submit"
                     disabled={updateOrgMutation.isPending || !form.formState.isDirty}
                     data-testid="save-org-settings"
+                    className="hover:scale-[1.02] active:scale-95 transition-all duration-200"
                   >
                     {updateOrgMutation.isPending ? t('settings.general.saving') : t('settings.general.save')}
                   </Button>
@@ -360,6 +361,7 @@ export default function OrganizationSettingsPage() {
                     variant="outline"
                     onClick={() => form.reset()}
                     disabled={!form.formState.isDirty}
+                    className="hover:scale-[1.02] active:scale-95 transition-all duration-200"
                   >
                     {t('settings.general.cancel')}
                   </Button>
@@ -371,10 +373,10 @@ export default function OrganizationSettingsPage() {
       </Card>
 
       {/* Invite Code */}
-      <Card>
+      <Card className="border-border bg-card hover:shadow-lg transition-all duration-300 animate-slide-in-up" style={{ animationDelay: '200ms' }}>
         <CardHeader>
-          <CardTitle>{t('settings.invite.title')}</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-foreground">{t('settings.invite.title')}</CardTitle>
+          <CardDescription className="text-muted-foreground">
             {t('settings.invite.description')}
           </CardDescription>
         </CardHeader>
@@ -383,7 +385,7 @@ export default function OrganizationSettingsPage() {
             <Input
               value={orgData.organization.invite_code}
               readOnly
-              className="font-mono text-lg"
+              className="font-mono text-lg border-border bg-background text-foreground"
               data-testid="org-invite-code"
             />
             <Button
@@ -391,11 +393,12 @@ export default function OrganizationSettingsPage() {
               size="icon"
               onClick={handleCopyCode}
               aria-label={copiedCode ? t('settings.invite.copied') : t('settings.invite.copyCode')}
+              className="hover:scale-[1.02] active:scale-95 transition-all duration-200"
             >
               {copiedCode ? (
-                <Check className="h-4 w-4" />
+                <Check className="h-4 w-4" aria-hidden="true" />
               ) : (
-                <Copy className="h-4 w-4" />
+                <Copy className="h-4 w-4" aria-hidden="true" />
               )}
             </Button>
           </div>
@@ -403,7 +406,7 @@ export default function OrganizationSettingsPage() {
       </Card>
 
       {/* Danger Zone */}
-      <Card className="border-destructive">
+      <Card className="border-destructive bg-card hover:shadow-lg transition-all duration-300 animate-slide-in-up" style={{ animationDelay: '300ms' }}>
         <CardHeader>
           <CardTitle className="text-destructive">
             {t('settings.danger.title')}
@@ -416,10 +419,10 @@ export default function OrganizationSettingsPage() {
               <AlertDialogTrigger asChild>
                 <Button
                   variant="destructive"
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto hover:scale-[1.02] active:scale-95 transition-all duration-200"
                   data-testid="leave-org-button"
                 >
-                  <LogOut className="h-4 w-4 mr-2" />
+                  <LogOut className="h-4 w-4 mr-2" aria-hidden="true" />
                   {t('settings.danger.leave.button')}
                 </Button>
               </AlertDialogTrigger>
@@ -452,10 +455,10 @@ export default function OrganizationSettingsPage() {
               <AlertDialogTrigger asChild>
                 <Button
                   variant="destructive"
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto hover:scale-[1.02] active:scale-95 transition-all duration-200"
                   data-testid="delete-org-button"
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
+                  <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />
                   {t('settings.danger.delete.button')}
                 </Button>
               </AlertDialogTrigger>

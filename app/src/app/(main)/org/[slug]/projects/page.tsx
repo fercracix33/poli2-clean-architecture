@@ -82,25 +82,27 @@ export default function ProjectsPage() {
   }, [projects, filters]);
 
   return (
-    <div className="container py-8 space-y-6">
+    <div className="container py-8 space-y-6 animate-fade-in">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-slide-in-up">
         <div>
-          <h1 className="text-3xl font-bold">{t('list.title')}</h1>
+          <h1 className="text-3xl font-bold text-foreground">{t('list.title')}</h1>
           <p className="text-muted-foreground mt-1">{t('list.subtitle')}</p>
         </div>
         <Button
           onClick={() => setCreateDialogOpen(true)}
-          className="gap-2"
+          className="gap-2 hover:scale-[1.02] active:scale-95 transition-all duration-200"
           data-testid="create-project-button"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4" aria-hidden="true" />
           {t('list.createButton')}
         </Button>
       </div>
 
       {/* Filters */}
-      <ProjectFilters onFilterChange={setFilters} />
+      <div className="animate-slide-in-up" style={{ animationDelay: '100ms' }}>
+        <ProjectFilters onFilterChange={setFilters} />
+      </div>
 
       {/* Content */}
       {isLoading ? (
