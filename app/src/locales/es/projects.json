@@ -220,7 +220,30 @@
       "addMembers": "Añadir Miembros",
       "viewSettings": "Ver Configuración",
       "createTask": "Crear Tarea (Próximamente)"
+    },
+    "details": {
+      "title": "Detalles del Proyecto",
+      "created": "Creado",
+      "lastUpdated": "Última Actualización",
+      "archived": "Archivado"
+    },
+    "dates": {
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "daysAgo": "{count, plural, =1 {hace 1 día} other {hace # días}}",
+      "weeksAgo": "{count, plural, =1 {hace 1 semana} other {hace # semanas}}",
+      "monthsAgo": "{count, plural, =1 {hace 1 mes} other {hace # meses}}",
+      "yearsAgo": "{count, plural, =1 {hace 1 año} other {hace # años}}"
     }
+  },
+  "roles": {
+    "viewer": "Observador",
+    "member": "Miembro",
+    "admin": "Administrador"
+  },
+  "count": {
+    "projects": "{count, plural, =0 {Sin proyectos} =1 {1 proyecto} other {# proyectos}}",
+    "members": "{count, plural, =0 {Sin miembros} =1 {1 miembro} other {# miembros}}"
   },
   "errors": {
     "loadFailed": "Error al cargar proyectos",

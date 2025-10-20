@@ -220,7 +220,30 @@
       "addMembers": "Add Members",
       "viewSettings": "View Settings",
       "createTask": "Create Task (Coming Soon)"
+    },
+    "details": {
+      "title": "Project Details",
+      "created": "Created",
+      "lastUpdated": "Last Updated",
+      "archived": "Archived"
+    },
+    "dates": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "daysAgo": "{count, plural, =1 {1 day ago} other {# days ago}}",
+      "weeksAgo": "{count, plural, =1 {1 week ago} other {# weeks ago}}",
+      "monthsAgo": "{count, plural, =1 {1 month ago} other {# months ago}}",
+      "yearsAgo": "{count, plural, =1 {1 year ago} other {# years ago}}"
     }
+  },
+  "roles": {
+    "viewer": "Viewer",
+    "member": "Member",
+    "admin": "Admin"
+  },
+  "count": {
+    "projects": "{count, plural, =0 {No projects} =1 {1 project} other {# projects}}",
+    "members": "{count, plural, =0 {No members} =1 {1 member} other {# members}}"
   },
   "errors": {
     "loadFailed": "Failed to load projects",
