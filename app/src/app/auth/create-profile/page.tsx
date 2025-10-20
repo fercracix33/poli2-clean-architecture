@@ -163,16 +163,16 @@ export default function CreateProfilePage() {
   }, [avatarPreview]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="w-full max-w-[500px]">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <div className="w-full max-w-[500px] animate-fade-in">
         <BackgroundGradient className="rounded-[22px] w-full p-1">
           <Card
-            className="w-full"
+            className="w-full border-border bg-card shadow-lg"
             style={{ maxWidth: '500px' }}
           >
             <CardHeader className="text-center">
-              <CardTitle>{t('createProfile.title')}</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-3xl font-bold text-foreground">{t('createProfile.title')}</CardTitle>
+              <CardDescription className="text-muted-foreground">
                 {t('createProfile.subtitle')}
               </CardDescription>
             </CardHeader>
@@ -185,7 +185,7 @@ export default function CreateProfilePage() {
               >
                 {/* Name Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-medium">
+                  <Label htmlFor="name" className="text-sm font-medium text-foreground">
                     {t('createProfile.name.label')}
                   </Label>
                   <Input
@@ -198,12 +198,14 @@ export default function CreateProfilePage() {
                     aria-describedby={form.formState.errors.name ? "name-error" : undefined}
                     {...form.register('name')}
                     disabled={isSubmitting}
+                    className="border-border focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
                   />
                   {form.formState.errors.name && (
                     <div
                       id="name-error"
                       data-testid="name-error"
                       role="alert"
+                      aria-live="assertive"
                       className="text-sm text-destructive"
                     >
                       {nameError}
@@ -213,7 +215,7 @@ export default function CreateProfilePage() {
 
                 {/* Avatar Upload Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="avatar" className="text-sm font-medium">
+                  <Label htmlFor="avatar" className="text-sm font-medium text-foreground">
                     {t('createProfile.avatar.label')}
                   </Label>
                   <div className="space-y-4">
@@ -225,17 +227,17 @@ export default function CreateProfilePage() {
                       data-testid="avatar-input"
                       aria-label={t('createProfile.avatar.aria')}
                       disabled={isSubmitting}
-                      className="cursor-pointer"
+                      className="cursor-pointer border-border file:text-foreground transition-all duration-200"
                     />
 
                     {/* Avatar Preview */}
                     {avatarPreview && (
-                      <div data-testid="avatar-preview" className="flex items-center justify-center">
+                      <div data-testid="avatar-preview" className="flex items-center justify-center animate-fade-in">
                         <div className="relative">
                           <img
                             src={avatarPreview}
                             alt={t('createProfile.avatar.preview')}
-                            className="w-24 h-24 rounded-full object-cover border-4 border-gray-200 dark:border-gray-700"
+                            className="w-24 h-24 rounded-full object-cover border-4 border-border transition-all duration-300 hover:scale-105"
                           />
                           <div className="absolute inset-0 w-24 h-24 rounded-full ring-2 ring-primary/20 animate-pulse"></div>
                         </div>
@@ -244,8 +246,8 @@ export default function CreateProfilePage() {
 
                     {!avatarPreview && (
                       <div className="flex items-center justify-center">
-                        <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                          <User className="w-12 h-12 text-gray-400" />
+                        <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center border-2 border-border">
+                          <User className="w-12 h-12 text-muted-foreground" />
                         </div>
                       </div>
                     )}
@@ -256,11 +258,12 @@ export default function CreateProfilePage() {
                 {showSuccess && (
                   <Alert
                     data-testid="success-message"
-                    role="alert"
-                    className="border-green-500/20 bg-green-500/10"
+                    role="status"
+                    aria-live="polite"
+                    className="border-primary/20 bg-primary/10 animate-fade-in"
                   >
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <AlertDescription className="text-green-800 dark:text-green-200">
+                    <CheckCircle className="h-4 w-4 text-primary" />
+                    <AlertDescription className="text-primary">
                       {t('createProfile.success')}
                     </AlertDescription>
                   </Alert>
@@ -285,7 +288,7 @@ export default function CreateProfilePage() {
                   type="submit"
                   data-testid="submit-button"
                   aria-label={t('createProfile.submitAria')}
-                  className="w-full h-11 min-h-[44px]"
+                  className="w-full h-11 min-h-[44px] bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 hover:scale-[1.02] active:scale-95"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -309,7 +312,7 @@ export default function CreateProfilePage() {
                     variant="outline"
                     data-testid="retry-button"
                     onClick={handleRetry}
-                    className="w-full"
+                    className="w-full border-2 border-border hover:bg-accent hover:text-accent-foreground transition-all duration-200"
                   >
                     <RefreshCw className="w-4 h-4 mr-2" />
                     {t('createProfile.retry')}
@@ -320,7 +323,7 @@ export default function CreateProfilePage() {
               {/* Display user email */}
               {userEmail && (
                 <div className="mt-6 text-center text-sm text-muted-foreground">
-                  {t('createProfile.creatingFor')} <span className="font-medium">{userEmail}</span>
+                  {t('createProfile.creatingFor')} <span className="font-medium text-foreground">{userEmail}</span>
                 </div>
               )}
             </CardContent>

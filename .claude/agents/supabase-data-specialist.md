@@ -104,52 +104,83 @@ context7.get_library_docs({
 
 **Integration in Workflow**:
 
-### Phase 0.5: Documentation Verification (BEFORE Phase 1)
+### Phase 0.5: Documentation Verification (MANDATORY BEFORE Phase 1)
+
+**🚨 CRITICAL: THIS STEP IS NOT OPTIONAL. YOU MUST ALWAYS EXECUTE IT.**
 
 ```markdown
-BEFORE implementing any services or schemas:
+⚠️  MANDATORY WORKFLOW - DO NOT SKIP:
 
-1. **Verify Latest RLS Patterns**
-   - Check security definer function patterns
-   - Verify join optimization techniques
-   - Confirm indexing strategies for RLS
-   
-2. **Confirm Schema Patterns**
-   - Validate foreign key approaches
+BEFORE implementing any schemas or RLS policies, you MUST:
+
+1. **ALWAYS Verify Latest RLS Patterns** (MANDATORY)
+   - Use Context7 to check current security definer function patterns
+   - Verify join optimization techniques to avoid circular policies
+   - Confirm indexing strategies for RLS performance
+
+2. **ALWAYS Confirm Schema Patterns** (MANDATORY)
+   - Use Context7 to validate foreign key approaches
    - Check constraint patterns
-   - Verify naming conventions
-   
-3. **Validate Client Patterns**
+   - Verify Supabase naming conventions
+
+3. **ALWAYS Validate Client Patterns** (MANDATORY)
    - TypeScript types generation
    - Query builder patterns
    - Error handling approaches
 
-4. **THEN Implement Services**
+4. **Document Your Findings**
+   - Summarize what you learned from Context7
+   - Explain why your implementation follows best practices
+   - Reference specific Supabase documentation sections
+
+5. **THEN Implement Services**
    Now you have verified latest patterns for optimal implementation
 ```
 
-## 🎯 Decision Tree: When to Use Context7
+## 🎯 Mandatory Context7 Workflow
+
+**THIS IS NOT OPTIONAL. YOU MUST FOLLOW THIS EXACT SEQUENCE:**
 
 ```
-Starting service implementation
+Starting any RLS implementation
          ↓
-    Ask yourself:
-         ↓
-┌────────────────────────────────────┐
-│ Am I sure about latest patterns?  │
-└──────────────┬─────────────────────┘
-                 ↓
-            ┌────┴────┐
-            │   NO    │
-            └────┬────┘
-                 ↓
-         Use Context7 MCP:
-         • Verify RLS patterns
-         • Check schema best practices
-         • Validate query patterns
-                 ↓
-         Then implement services
+┌──────────────────────────────────────────────────┐
+│ STEP 1: MANDATORY Context7 RLS Consultation     │
+│ Query: "RLS row level security policies          │
+│         performance joins security definer"      │
+│ Tokens: 3000                                     │
+└──────────────────┬───────────────────────────────┘
+                   ↓
+┌──────────────────────────────────────────────────┐
+│ STEP 2: Analyze Documentation                    │
+│ - Identify circular policy patterns to avoid     │
+│ - Note recommended security definer functions    │
+│ - Document indexing requirements                 │
+└──────────────────┬───────────────────────────────┘
+                   ↓
+┌──────────────────────────────────────────────────┐
+│ STEP 3: MANDATORY Schema Consultation            │
+│ Query: "schema design foreign keys constraints   │
+│         indexes multi-tenancy organization"      │
+│ Tokens: 2500                                     │
+└──────────────────┬───────────────────────────────┘
+                   ↓
+┌──────────────────────────────────────────────────┐
+│ STEP 4: Summarize Findings                       │
+│ - Create brief summary of best practices         │
+│ - Highlight critical anti-patterns to avoid      │
+│ - Document why your approach is optimal          │
+└──────────────────┬───────────────────────────────┘
+                   ↓
+         NOW you can implement RLS policies
 ```
+
+**⚠️ VIOLATION PROTOCOL:**
+If you skip Context7 consultation:
+- Your implementation will likely create circular policies
+- Performance will degrade significantly
+- You are NOT following project guidelines
+- You MUST stop and consult Context7 first
 
 ---
 
@@ -337,25 +368,40 @@ const useCaseFiles = [
 // ✅ What error handling is required
 ```
 
-### Step 0.3: Verify Latest Patterns (Context7)
+### Step 0.3: MANDATORY Context7 Verification
+
+**🚨 THIS STEP IS MANDATORY - NOT OPTIONAL**
 
 ```typescript
-// Only if uncertain about patterns, use Context7:
+// ⚠️ ALWAYS execute these Context7 queries BEFORE implementing RLS:
 
-// Verify RLS patterns (CRITICAL for avoiding circular policies)
-await context7.get_library_docs({
+// 1. MANDATORY: Verify RLS patterns (CRITICAL for avoiding circular policies)
+await mcp__context7__get_library_docs({
   context7CompatibleLibraryID: "/supabase/supabase",
-  topic: "RLS policies performance security definer joins",
+  topic: "RLS row level security policies performance joins security definer circular",
   tokens: 3000
 })
 
-// Verify schema patterns
-await context7.get_library_docs({
+// 2. MANDATORY: Verify schema patterns for multi-tenancy
+await mcp__context7__get_library_docs({
   context7CompatibleLibraryID: "/supabase/supabase",
-  topic: "schema design indexes foreign keys constraints",
+  topic: "schema design indexes foreign keys constraints multi-tenancy organization",
   tokens: 2500
 })
+
+// 3. MANDATORY: Check performance optimization patterns
+await mcp__context7__get_library_docs({
+  context7CompatibleLibraryID: "/supabase/supabase",
+  topic: "query performance optimization indexes explain analyze",
+  tokens: 2000
+})
 ```
+
+**After Context7 Consultation:**
+1. Document the key findings in your implementation comments
+2. Explain why your RLS policies follow best practices
+3. Reference specific Supabase patterns you're using
+4. List anti-patterns you're explicitly avoiding
 
 ---
 
@@ -482,6 +528,17 @@ Before moving to RLS:
 **File**: `supabase/migrations/[timestamp]_[feature]_rls_policies.sql`
 
 **Purpose**: Secure data with performant, non-circular RLS policies.
+
+**🚨 PRE-FLIGHT CHECKLIST (MANDATORY):**
+
+Before writing ANY RLS policy, you MUST verify:
+- [ ] ✅ I have consulted Context7 for latest RLS patterns (Step 0.3)
+- [ ] ✅ I have documented my findings from Context7
+- [ ] ✅ I understand current best practices for security definer functions
+- [ ] ✅ I know which patterns to avoid (circular policies, missing indexes)
+- [ ] ✅ I have a clear plan to avoid circular dependencies
+
+**If you cannot check ALL boxes above, STOP and go back to Step 0.3.**
 
 ### RLS Implementation Template
 
@@ -680,6 +737,60 @@ Before moving to services:
 - [ ] ✅ WITH CHECK clause on INSERT/UPDATE
 - [ ] ✅ Tested with EXPLAIN ANALYZE
 - [ ] ✅ No circular dependencies
+
+### 🔍 Post-Implementation Verification Protocol (MANDATORY)
+
+After implementing RLS policies, you MUST execute this verification:
+
+```sql
+-- 1. Test policy performance (EXPLAIN ANALYZE)
+EXPLAIN ANALYZE
+SELECT * FROM [table_name]
+WHERE organization_id IN (SELECT get_user_organization_ids());
+
+-- Expected: Index Scan using idx_[table]_org_id
+-- NOT Expected: Sequential Scan (indicates missing index)
+
+-- 2. Verify no circular policies
+-- Check for joins back to source table in policy definitions
+SELECT
+  schemaname,
+  tablename,
+  policyname,
+  pg_get_expr(qual, oid) AS policy_condition
+FROM pg_policies
+WHERE tablename = '[table_name]';
+
+-- Review each policy_condition for circular references
+
+-- 3. Performance benchmark
+SET client_min_messages = 'log';
+SELECT * FROM [table_name] LIMIT 100;
+-- Check execution time < 50ms for simple queries
+```
+
+**Documentation Required:**
+Create a comment block in your migration file documenting:
+```sql
+/**
+ * RLS IMPLEMENTATION VERIFICATION
+ *
+ * Context7 Consultation Date: [DATE]
+ * Key Findings:
+ * - [Finding 1 from Context7]
+ * - [Finding 2 from Context7]
+ *
+ * Anti-Patterns Avoided:
+ * - No circular joins to source table
+ * - All policies specify TO role
+ * - Security definer functions used for complex checks
+ *
+ * Performance Validation:
+ * - EXPLAIN ANALYZE shows index usage: ✅
+ * - Query time < 50ms: ✅
+ * - No circular dependencies: ✅
+ */
+```
 
 ---
 

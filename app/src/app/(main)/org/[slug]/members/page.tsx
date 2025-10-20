@@ -136,11 +136,11 @@ export default function OrganizationMembersPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 animate-slide-in-up">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
             {t('members.title')}
           </h1>
           <p className="text-muted-foreground">
@@ -152,22 +152,25 @@ export default function OrganizationMembersPage() {
           <Button
             onClick={() => setInviteDialogOpen(true)}
             data-testid="invite-members-button"
+            className="hover:scale-[1.02] active:scale-95 transition-all duration-200"
           >
-            <UserPlus className="h-4 w-4 mr-2" />
+            <UserPlus className="h-4 w-4 mr-2" aria-hidden="true" />
             {t('members.inviteButton')}
           </Button>
         )}
       </div>
 
       {/* Members List */}
-      <MemberList
-        members={members}
-        currentUserId={orgDetails.organization.created_by}
-        canManageMembers={orgDetails.canManageMembers}
-        onRemoveMember={async (memberId, userName) => {
-          await removeMemberMutation.mutateAsync({ memberId, userName });
-        }}
-      />
+      <div className="animate-slide-in-up" style={{ animationDelay: '100ms' }}>
+        <MemberList
+          members={members}
+          currentUserId={orgDetails.organization.created_by}
+          canManageMembers={orgDetails.canManageMembers}
+          onRemoveMember={async (memberId, userName) => {
+            await removeMemberMutation.mutateAsync({ memberId, userName });
+          }}
+        />
+      </div>
 
       {/* Invite Dialog */}
       <InviteDialog

@@ -55,11 +55,14 @@ export default function OrganizationDashboard() {
     },
   });
 
-  // Fetch organization stats via API route
+  // Extract organization ID for dependent query (prevents accessing undefined)
+  const organizationId = orgDetails?.organization?.id;
+
+  // Fetch organization stats via API route (dependent query)
   const { data: stats, isLoading: isLoadingStats } = useQuery({
-    queryKey: ['organization-stats', orgDetails?.organization.id],
+    queryKey: ['organization-stats', organizationId],
     queryFn: async () => {
-      if (!orgDetails?.organization.id) throw new Error('Organization not loaded');
+      if (!organizationId) throw new Error('Organization not loaded');
 
       const response = await fetch(`/api/organizations/${slug}/stats`);
 
@@ -70,7 +73,8 @@ export default function OrganizationDashboard() {
 
       return await response.json();
     },
-    enabled: !!orgDetails?.organization.id,
+    // The query will not execute until organizationId exists
+    enabled: !!organizationId,
   });
 
   // Extract stats with defaults
@@ -112,10 +116,10 @@ export default function OrganizationDashboard() {
   const { organization, userRole } = orgDetails;
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6 animate-fade-in">
       {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">
+      <div className="space-y-2 animate-slide-in-up">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
           {t('dashboard.welcome', { orgName: organization.name })}
         </h1>
         <p className="text-muted-foreground">
@@ -124,7 +128,7 @@ export default function OrganizationDashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
         <StatsCard
           title={t('dashboard.stats.membersTitle')}
           value={memberCount}
@@ -146,48 +150,51 @@ export default function OrganizationDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <Card>
+      <Card className="border-border bg-card hover:shadow-lg transition-all duration-300">
         <CardHeader>
-          <CardTitle>{t('dashboard.quickActions.title')}</CardTitle>
+          <CardTitle className="text-foreground">{t('dashboard.quickActions.title')}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-4">
           <Button
             onClick={() => router.push(`/org/${slug}/projects/create`)}
             data-testid="create-project-button"
+            className="hover:scale-[1.02] active:scale-95 transition-all duration-200"
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
             {t('dashboard.quickActions.createProject')}
           </Button>
           <Button
             variant="outline"
             onClick={() => router.push(`/org/${slug}/members`)}
             data-testid="invite-members-button"
+            className="hover:scale-[1.02] active:scale-95 transition-all duration-200"
           >
-            <UserPlus className="h-4 w-4 mr-2" />
+            <UserPlus className="h-4 w-4 mr-2" aria-hidden="true" />
             {t('dashboard.quickActions.inviteMembers')}
           </Button>
           <Button
             variant="outline"
             onClick={() => router.push(`/org/${slug}/settings`)}
             data-testid="view-settings-button"
+            className="hover:scale-[1.02] active:scale-95 transition-all duration-200"
           >
-            <Settings className="h-4 w-4 mr-2" />
+            <Settings className="h-4 w-4 mr-2" aria-hidden="true" />
             {t('dashboard.quickActions.viewSettings')}
           </Button>
         </CardContent>
       </Card>
 
       {/* Recent Activity */}
-      <Card>
+      <Card className="border-border bg-card hover:shadow-lg transition-all duration-300">
         <CardHeader>
-          <CardTitle>{t('dashboard.recentActivity.title')}</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-foreground">{t('dashboard.recentActivity.title')}</CardTitle>
+          <CardDescription className="text-muted-foreground">
             {t('dashboard.recentActivity.noActivity')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
-            <TrendingUp className="h-12 w-12 mx-auto mb-2 opacity-50" />
+            <TrendingUp className="h-12 w-12 mx-auto mb-2 opacity-50" aria-hidden="true" />
             <p>{t('dashboard.recentActivity.noActivity')}</p>
           </div>
         </CardContent>
@@ -195,10 +202,10 @@ export default function OrganizationDashboard() {
 
       {/* Empty State - No Projects */}
       {projectCount === 0 && (
-        <Card className="border-dashed">
+        <Card className="border-dashed border-border bg-card hover:shadow-lg transition-all duration-300">
           <CardHeader>
-            <CardTitle>{t('dashboard.empty.noProjects')}</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-foreground">{t('dashboard.empty.noProjects')}</CardTitle>
+            <CardDescription className="text-muted-foreground">
               {t('dashboard.empty.noProjectsDescription')}
             </CardDescription>
           </CardHeader>
@@ -206,8 +213,9 @@ export default function OrganizationDashboard() {
             <Button
               onClick={() => router.push(`/org/${slug}/projects/create`)}
               data-testid="create-first-project-button"
+              className="hover:scale-[1.02] active:scale-95 transition-all duration-200"
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
               {t('dashboard.empty.createFirstProject')}
             </Button>
           </CardContent>
