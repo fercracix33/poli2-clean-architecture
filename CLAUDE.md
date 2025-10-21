@@ -102,6 +102,7 @@ cd app
 - Prepare the "construction ground" by creating directory structure and data contracts (entities)
 
 **Exclusive Responsibilities:**
+- **Invoke Skill**: MUST use `architect-deep-analysis.md` skill at phase start
 - **Architecture Guardian**: ONLY agent authorized to modify project directory structure
 - **PRD Generation**: Create immutable Product Requirements Documents following strict template
 - **Entity Implementation**: Implement pure `entities.ts` files with Zod schemas and TypeScript types
@@ -126,14 +127,16 @@ cd app
 **Role:** Test Architect and Living Specification Guardian - Defines what must be implemented
 
 **Core Mission:**
-- Create tests for ALL layers (use cases, services, APIs) that FAIL appropriately
+- Create tests for ALL layers (use cases, services, APIs, E2E) that FAIL appropriately
 - Act as the living specification of the entire system
 
 **Exclusive Responsibilities:**
-- **Complete Coverage**: Test use cases, data services, API endpoints, validations
+- **Invoke Skill**: MUST use `test-architect-tdd.md` skill at phase start
+- **Complete Coverage**: Test use cases, data services, API endpoints, validations, **E2E user flows**
 - **Interface Definition**: Define expected function signatures before they exist
 - **Mock Configuration**: Set up all external dependency mocks (Supabase client, etc.)
-- **Failure Validation**: Ensure all tests fail with "function not defined" initially
+- **E2E Specification**: Define complete user workflows with Playwright (navigation → interaction → assertion)
+- **Failure Validation**: Ensure all tests fail with "function not defined" initially (E2E fail with "page not found")
 - **Specification Authority**: Tests become immutable truth for other agents
 
 **Strict Limitations:**
@@ -143,9 +146,10 @@ cd app
 - **NEVER** create temporary solutions or workarounds
 
 **Deliverables:**
-- Complete failing test suite for all layers
+- Complete failing test suite for all layers (unit, integration, **E2E**)
 - Clearly defined function interfaces
 - Configured mocks and test fixtures
+- E2E tests with accessibility requirements (keyboard navigation, ARIA)
 - >90% coverage target for all layers
 
 ---
@@ -158,6 +162,7 @@ cd app
 - Follow strict TDD: Red → Green → Refactor
 
 **Exclusive Responsibilities:**
+- **Invoke Skill**: MUST use `implementer-tdd.md` skill at phase start
 - **Use Cases Only**: Implement pure business logic orchestration
 - **Test Compliance**: Make use case tests pass without modifying them
 - **Validation Logic**: Create business rules, authorization, input validation
@@ -187,6 +192,7 @@ cd app
 - Create pure database access without business logic
 
 **Exclusive Responsibilities:**
+- **Invoke Skill**: MUST use `supabase-specialist-rls.md` skill at phase start
 - **Data Services Only**: Implement pure CRUD operations and data access
 - **Database Schema**: Design tables, relationships, constraints, indexes
 - **RLS Implementation**: Row Level Security policies for multi-tenant isolation
@@ -216,6 +222,7 @@ cd app
 - Integrate with implemented use cases to create complete user experience
 
 **Exclusive Responsibilities:**
+- **Invoke Skill**: MUST use `ui-ux-a11y-expert.md` skill at phase start
 - **React Components**: UI components using only approved stack (shadcn/ui, Tailwind)
 - **E2E Test Compliance**: Make Playwright E2E tests pass without modifying them
 - **Accessibility**: WCAG 2.1 AA compliance mandatory
@@ -240,6 +247,65 @@ cd app
 2. **Green**: Each agent makes THEIR tests pass without modifying tests
 3. **Refactor**: Each agent improves code keeping tests green
 4. **PROHIBITED**: Any agent modifying tests to make implementation pass
+
+### 🎯 Specialized Skills (MANDATORY)
+
+**Every agent MUST invoke their specialized skill at the start of their phase.**
+
+Each agent has a dedicated skill file in `.claude/skills/` that provides:
+- **Rigorous step-by-step workflow** with mandatory checkpoints
+- **Context7 consultation requirements** for latest best practices
+- **Detailed templates and code examples**
+- **Validation checklists** to prevent common mistakes
+- **Architectural guardrails** to avoid violations
+
+#### Available Skills
+
+| Agent | Skill File | Purpose |
+|-------|-----------|---------|
+| **Architect** | `architect-deep-analysis.md` | PRD creation, entities design, structure setup |
+| **Test Agent** | `test-architect-tdd.md` | Comprehensive test suite (unit, integration, E2E) |
+| **Implementer** | `implementer-tdd.md` | Use case implementation following TDD |
+| **Supabase Agent** | `supabase-specialist-rls.md` | Data services, RLS policies, DB schema |
+| **UI/UX Expert** | `ui-ux-a11y-expert.md` | Accessible components, E2E compliance |
+| **Bug Fixer** | `bug-fixer-diagnosis.md` | Root cause diagnosis and fixes |
+| **UI Improver** | `ui-improver-consistency.md` | Visual improvements without logic changes |
+
+#### How to Use Skills
+
+When an agent starts their phase, they **MUST**:
+
+1. **Announce skill invocation**:
+   ```
+   "I'll use the [skill-name] skill to ensure comprehensive [phase] implementation."
+   ```
+
+2. **Follow all phases sequentially** (cannot skip checkpoints)
+
+3. **Consult Context7 as mandated** by the skill
+
+4. **Complete all checklists** before handoff
+
+5. **Update status** and execute handoff command
+
+**Example**:
+```
+User: "Create the task creation feature"
+→ Architect: "I'll use the architect-deep-analysis skill for this feature"
+  [Follows 6 phases: Discovery, Research, Design, Documentation, Validation, Handoff]
+→ Test Agent: "I'll use the test-architect-tdd skill to create the test suite"
+  [Follows 6 phases: Analysis, Research, Strategy, Implementation, Validation, Handoff]
+→ ...and so on
+```
+
+**Benefits of Using Skills**:
+- ✅ **Consistency**: Every agent follows the same rigorous approach
+- ✅ **Quality**: Context7 ensures up-to-date best practices
+- ✅ **Prevention**: Mandatory checkpoints catch errors early
+- ✅ **Completeness**: Checklists ensure nothing is forgotten
+- ✅ **Architectural Integrity**: Built-in validation prevents violations
+
+**CRITICAL**: Skills are NOT optional. They are the **mandatory workflow** for each agent.
 
 ## Architecture Patterns
 

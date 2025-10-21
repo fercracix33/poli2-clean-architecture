@@ -52,7 +52,13 @@
       "Bash(npm run:*)",
       "Bash(curl:*)",
       "Bash(git rm:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "mcp__supabase__list_projects",
+      "mcp__supabase__list_tables",
+      "mcp__supabase__execute_sql",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "SlashCommand(/agent-handoff PRDs/projects/001-customizable-kanban-boards test-agent completed)"
     ],
     "deny": [],
     "ask": []

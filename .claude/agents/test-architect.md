@@ -99,6 +99,13 @@ context7.get_library_docs({
   topic: "testing queries mutations mocking",
   tokens: 2000
 })
+
+// 5. Check Playwright E2E patterns
+context7.get_library_docs({
+  context7CompatibleLibraryID: "/microsoft/playwright",
+  topic: "test user flows accessibility selectors",
+  tokens: 2500
+})
 ```
 
 **Integration in Workflow**:
@@ -313,6 +320,47 @@ vi.mock('@/lib/supabase-server', () => ({
 }))
 ```
 
+### E2E Testing: Playwright
+
+**Why Playwright** (for end-to-end tests):
+- Cross-browser testing (Chrome, Firefox, Safari)
+- Auto-wait for elements (no manual waits)
+- Powerful selectors (data-testid, ARIA, text)
+- Built-in accessibility testing
+- Trace viewer for debugging
+
+**Key Playwright Features You Use**:
+```typescript
+import { test, expect } from '@playwright/test'
+
+// Navigation and interaction
+await page.goto('/path')
+await page.click('[data-testid="button"]')
+await page.fill('[data-testid="input"]', 'value')
+await page.press('Enter')
+
+// Assertions
+await expect(page.locator('[data-testid="element"]')).toBeVisible()
+await expect(page.locator('[data-testid="element"]')).toContainText('text')
+await expect(page.locator('[data-testid="element"]')).toHaveAttribute('aria-label')
+
+// Waiting
+await page.waitForURL('/dashboard')
+await page.waitForLoadState('networkidle')
+
+// Accessibility
+await expect(page.locator('button')).toBeFocused()
+await page.keyboard.press('Tab')
+await page.keyboard.press('Escape')
+```
+
+**E2E Test Principles**:
+1. **Test User Behavior**: What the user sees and does
+2. **Use data-testid**: Stable selectors (not CSS classes)
+3. **Test Complete Flows**: From navigation to persistence
+4. **Verify Loading States**: Spinners, disabled buttons
+5. **Test Accessibility**: Keyboard navigation, ARIA labels
+
 ---
 
 # PRIMARY WORKFLOW: PRD → COMPLETE TEST SUITE
@@ -400,6 +448,13 @@ await context7.get_library_docs({
   context7CompatibleLibraryID: "/colinhacks/zod",
   topic: "safeParse testing error validation",
   tokens: 2000
+})
+
+// Verify Playwright E2E patterns
+await context7.get_library_docs({
+  context7CompatibleLibraryID: "/microsoft/playwright",
+  topic: "user flow testing accessibility keyboard navigation data-testid",
+  tokens: 2500
 })
 ```
 
@@ -1798,6 +1853,228 @@ For EACH API endpoint:
 
 ---
 
+## Phase 4.5: Create E2E Tests (User Flows)
+
+**Files**: `app/e2e/[feature-name].spec.ts`
+
+**Purpose**: Define complete user workflows from UI interaction to data persistence. These tests ensure the entire stack works together and will guide the UI/UX Agent's implementation.
+
+### E2E Test Template
+
+```typescript
+/**
+ * [Feature] E2E Tests
+ *
+ * Tests complete user workflows with Playwright.
+ * These tests FAIL initially because no UI exists yet.
+ * UI/UX Agent will make these tests PASS.
+ *
+ * Created by: Test Agent
+ * Date: YYYY-MM-DD
+ */
+
+import { test, expect } from '@playwright/test'
+
+test.describe('[Feature] - User Flows', () => {
+  // Setup: Authenticate and navigate
+  test.beforeEach(async ({ page }) => {
+    // 1. Login
+    await page.goto('/login')
+    await page.fill('[data-testid="email"]', 'test@example.com')
+    await page.fill('[data-testid="password"]', 'password123')
+    await page.click('[data-testid="submit"]')
+
+    // 2. Wait for auth
+    await page.waitForURL('/dashboard')
+
+    // 3. Navigate to feature
+    await page.goto('/[feature-path]')
+  })
+
+  test.describe('Create [Entity] Flow', () => {
+    test('should create entity with valid data', async ({ page }) => {
+      // Arrange: Open create form
+      await page.click('[data-testid="create-button"]')
+      await expect(page.locator('[data-testid="create-modal"]')).toBeVisible()
+
+      // Act: Fill and submit
+      await page.fill('[data-testid="field1-input"]', 'Valid Value')
+      await page.click('[data-testid="submit-button"]')
+
+      // Assert: Success feedback
+      await expect(page.locator('[data-testid="success-message"]')).toBeVisible()
+
+      // Assert: Entity in list
+      await expect(page.locator('[data-testid="entity-list"]')).toContainText('Valid Value')
+    })
+
+    test('should show validation error for invalid data', async ({ page }) => {
+      await page.click('[data-testid="create-button"]')
+      await page.fill('[data-testid="field1-input"]', 'x') // Too short
+      await page.click('[data-testid="submit-button"]')
+
+      // Assert: Validation error shown
+      await expect(page.locator('[data-testid="field1-error"]')).toBeVisible()
+      await expect(page.locator('[data-testid="field1-error"]')).toContainText('at least 5')
+    })
+
+    test('should show loading state during submission', async ({ page }) => {
+      await page.click('[data-testid="create-button"]')
+      await page.fill('[data-testid="field1-input"]', 'Valid Value')
+
+      const submitButton = page.locator('[data-testid="submit-button"]')
+      await submitButton.click()
+
+      // Assert: Loading state
+      await expect(submitButton).toBeDisabled()
+      await expect(page.locator('[data-testid="loading-spinner"]')).toBeVisible()
+
+      // Assert: Eventually completes
+      await expect(submitButton).not.toBeDisabled({ timeout: 5000 })
+    })
+  })
+
+  test.describe('Read [Entity] Flow', () => {
+    test('should display list of entities', async ({ page }) => {
+      // Assert: List is visible
+      await expect(page.locator('[data-testid="entity-list"]')).toBeVisible()
+
+      // Assert: At least one entity shown
+      const entityItems = page.locator('[data-testid="entity-item"]')
+      await expect(entityItems).toHaveCount(await entityItems.count())
+    })
+
+    test('should display entity details on click', async ({ page }) => {
+      // Act: Click first entity
+      await page.click('[data-testid="entity-item"]:first-child')
+
+      // Assert: Details modal opens
+      await expect(page.locator('[data-testid="entity-details"]')).toBeVisible()
+
+      // Assert: Contains entity data
+      await expect(page.locator('[data-testid="entity-details"]')).toContainText(/field1/i)
+    })
+  })
+
+  test.describe('Update [Entity] Flow', () => {
+    test('should update entity with valid data', async ({ page }) => {
+      // Arrange: Open edit form
+      await page.click('[data-testid="entity-item"]:first-child')
+      await page.click('[data-testid="edit-button"]')
+
+      // Act: Update field
+      await page.fill('[data-testid="field1-input"]', 'Updated Value')
+      await page.click('[data-testid="submit-button"]')
+
+      // Assert: Success feedback
+      await expect(page.locator('[data-testid="success-message"]')).toBeVisible()
+
+      // Assert: List updated
+      await expect(page.locator('[data-testid="entity-list"]')).toContainText('Updated Value')
+    })
+  })
+
+  test.describe('Delete [Entity] Flow', () => {
+    test('should delete entity after confirmation', async ({ page }) => {
+      // Arrange: Open delete confirmation
+      await page.click('[data-testid="entity-item"]:first-child')
+      await page.click('[data-testid="delete-button"]')
+
+      // Assert: Confirmation dialog shown
+      await expect(page.locator('[data-testid="delete-confirmation"]')).toBeVisible()
+
+      // Act: Confirm deletion
+      await page.click('[data-testid="confirm-delete"]')
+
+      // Assert: Success feedback
+      await expect(page.locator('[data-testid="success-message"]')).toBeVisible()
+
+      // Assert: Entity removed from list
+      const entityList = page.locator('[data-testid="entity-list"]')
+      await expect(entityList).not.toContainText('Deleted Entity')
+    })
+  })
+
+  test.describe('Accessibility', () => {
+    test('should support keyboard navigation', async ({ page }) => {
+      // Focus create button
+      await page.locator('[data-testid="create-button"]').focus()
+
+      // Press Enter to open
+      await page.keyboard.press('Enter')
+      await expect(page.locator('[data-testid="create-modal"]')).toBeVisible()
+
+      // Tab through fields
+      await page.keyboard.press('Tab')
+      await page.keyboard.type('Value 1')
+
+      // Escape to close
+      await page.keyboard.press('Escape')
+      await expect(page.locator('[data-testid="create-modal"]')).not.toBeVisible()
+    })
+
+    test('should have proper ARIA labels', async ({ page }) => {
+      await page.click('[data-testid="create-button"]')
+
+      const form = page.locator('form')
+      await expect(form).toHaveAttribute('aria-label', /create/i)
+
+      await expect(page.locator('[data-testid="field1-input"]')).toHaveAttribute('aria-label')
+    })
+
+    test('should show focus indicators', async ({ page }) => {
+      const createButton = page.locator('[data-testid="create-button"]')
+
+      // Focus button
+      await createButton.focus()
+
+      // Assert: Button is focused
+      await expect(createButton).toBeFocused()
+    })
+  })
+
+  test.describe('Error Handling', () => {
+    test('should show error message on network failure', async ({ page }) => {
+      // Simulate network error (implementation specific)
+      await page.route('**/api/[feature]', route => route.abort())
+
+      // Try to create entity
+      await page.click('[data-testid="create-button"]')
+      await page.fill('[data-testid="field1-input"]', 'Test')
+      await page.click('[data-testid="submit-button"]')
+
+      // Assert: Error message shown
+      await expect(page.locator('[data-testid="error-message"]')).toBeVisible()
+      await expect(page.locator('[data-testid="error-message"]')).toContainText(/network/i)
+    })
+  })
+})
+```
+
+### E2E Test Checklist
+
+- [ ] ✅ All CRUD flows tested (create, read, update, delete)
+- [ ] ✅ Validation errors shown to user
+- [ ] ✅ Loading states tested (spinners, disabled buttons)
+- [ ] ✅ Success/error messages tested
+- [ ] ✅ Keyboard navigation tested (Tab, Enter, Esc)
+- [ ] ✅ ARIA labels tested
+- [ ] ✅ Focus indicators tested
+- [ ] ✅ All selectors use data-testid (not CSS classes)
+- [ ] ✅ Tests isolated (don't depend on each other)
+- [ ] ✅ All tests FAIL (no UI exists yet)
+
+### Where E2E Fits in TDD
+
+1. Test Architect creates E2E tests → FAIL (no UI)
+2. Implementer implements use cases → E2E still FAIL
+3. Supabase Agent implements services → E2E still FAIL
+4. **UI/UX Agent implements components → E2E PASS** ✅
+
+E2E tests are the FINAL validation that the entire feature works.
+
+---
+
 ## Phase 5: Validate Initial State
 
 **CRITICAL**: Before handoff, ensure ALL tests FAIL appropriately.
@@ -1807,22 +2084,28 @@ For EACH API endpoint:
 Run these checks:
 
 ```bash
-# 1. Run all tests - they should ALL fail
+# 1. Run all unit/integration tests - they should ALL fail
 npm run test
 
 # Expected output:
-# ✗ entities.test.ts - FAIL (functions not defined)
+# ✗ entities.test.ts - PASS (schemas exist from Architect)
 # ✗ use-cases/*.test.ts - FAIL (functions not defined)
 # ✗ services/*.test.ts - FAIL (class not defined)
 # ✗ route.test.ts - FAIL (handlers not defined)
 
-# 2. Check coverage configuration
+# 2. Run E2E tests - they should ALL fail
+npm run test:e2e
+
+# Expected output:
+# ✗ e2e/[feature].spec.ts - FAIL (page not found / locators not found)
+
+# 3. Check coverage configuration
 npm run test:coverage
 
 # Expected output:
 # Coverage: 0% (no implementation exists)
 
-# 3. Verify no accidental passing tests
+# 4. Verify no accidental passing tests
 grep -r "it.skip\|test.skip" app/src/features/[feature]/**/*.test.ts
 # Should return nothing (no skipped tests)
 ```
@@ -1864,14 +2147,17 @@ After completing all tests, create handoff document:
    - ✅ Use case tests: `use-cases/*.test.ts` (create, get, update, delete)
    - ✅ Service tests: `services/[feature].service.test.ts`
    - ✅ API route tests: `app/api/[feature]/route.test.ts`
+   - ✅ E2E tests: `e2e/[feature-name].spec.ts`
 
 2. **Interface Definitions**:
    - ✅ Function signatures defined through test expectations
    - ✅ Expected input/output contracts clear
    - ✅ Error handling requirements specified
+   - ✅ UI behavior defined through E2E tests
 
 3. **Test Configuration**:
    - ✅ Vitest configured
+   - ✅ Playwright configured
    - ✅ Mocks set up (Supabase, use cases)
    - ✅ Test utilities ready
    - ✅ Coverage targets set (>90%)
@@ -1880,7 +2166,10 @@ After completing all tests, create handoff document:
 
 ```bash
 npm run test
-# Result: All tests FAIL (expected: functions not defined)
+# Result: Unit/integration tests FAIL (expected: functions not defined)
+
+npm run test:e2e
+# Result: E2E tests FAIL (expected: no UI exists)
 
 npm run test:coverage
 # Result: 0% coverage (expected: no implementation)
@@ -2052,13 +2341,15 @@ Your test suite is complete when:
 4. **Use safeParse** - For Zod validations in tests
 5. **Test behavior** - Not implementation details
 6. **One concern per test** - Clear, focused tests
-7. **Vitest, not Jest** - Use correct imports and patterns
+7. **Vitest for unit/integration** - Use correct imports
+8. **Playwright for E2E** - Test complete user flows
 
 Your success is measured by:
 - ✅ **Completeness**: All requirements from PRD have tests?
 - ✅ **Clarity**: Can implementer understand what to build?
 - ✅ **Failure**: Do all tests fail appropriately?
 - ✅ **Coverage**: Are edge cases and errors covered?
+- ✅ **E2E Coverage**: Are all user flows defined?
 
 ---
 
