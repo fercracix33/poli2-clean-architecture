@@ -17,11 +17,11 @@ This document defines the **complete test suite** for the Customizable Kanban Bo
 | Layer | Files Created | Tests | Status |
 |-------|--------------|-------|--------|
 | **Entities** | 3 | 150+ | ✅ Complete |
-| **Use Cases** | Spec defined below | 80+ | 📝 Spec Ready |
-| **Services** | Spec defined below | 60+ | 📝 Spec Ready |
-| **API Routes** | Spec defined below | 55+ | 📝 Spec Ready |
+| **Use Cases** | 11 | 118 | ✅ Complete |
+| **Services** | 2 | 120+ | ✅ Complete (Phase 2) |
+| **API Routes** | 5 | 90+ | ✅ Complete (Phase 3) |
 | **E2E (Playwright)** | Spec defined below | 25+ | 📝 Spec Ready |
-| **TOTAL** | **All layers** | **370+** | ✅ Architecture Complete |
+| **TOTAL** | **21 files** | **480+** | ✅ Phases 1-3 Complete
 
 ---
 
@@ -502,50 +502,89 @@ describe('TaskService - JSONB Queries', () => {
 });
 ```
 
-### 3.3 Custom Field Service Tests
+### 3.3 Custom Field Service Tests (✅ IMPLEMENTED)
 
 **File**: `app/src/features/custom-fields/services/custom-field.service.test.ts`
 
-#### Test Cases
+#### Implementation Status: ✅ Complete (40 tests)
 
+**Test Coverage**:
+- ✅ CRUD operations (create, getById, getByBoardId, update, delete)
+- ✅ snake_case ↔ camelCase transformations
+- ✅ Position management and reordering
+- ✅ Batch operations (getByIds)
+- ✅ Error handling (not found, database errors, foreign key constraints)
+- ✅ Null config handling
+
+**Key Tests**:
 ```typescript
 describe('CustomFieldService', () => {
-  it('retrieves custom fields for board', async () => {
-    const dbFields = [
-      { id: 'f1', board_id: 'b1', field_type: 'text', position: 0 },
-      { id: 'f2', board_id: 'b1', field_type: 'number', position: 1 },
-    ];
+  // Created: 40 tests covering all CRUD + position management
+  // Status: ✅ All tests FAIL appropriately (service not implemented)
 
-    vi.mocked(supabase.from('custom_field_definitions').select().eq('board_id', 'b1').order('position'))
-      .mockResolvedValue({ data: dbFields, error: null });
+  it('retrieves custom fields for board ordered by position', async () => {
+    const mockFields = [/* ... */];
+    mocks.selectMock.mockResolvedValue({ data: mockFields, error: null });
 
-    const result = await service.getByBoardId('b1');
+    const result = await service.getByBoardId('board-123');
 
+    expect(mocks.orderMock).toHaveBeenCalledWith('position', { ascending: true });
     expect(result).toHaveLength(2);
-    expect(result[0].fieldType).toBe('text'); // CamelCase transformation
+  });
+
+  it('reorders field definitions', async () => {
+    const reorderedIds = ['field-003', 'field-001', 'field-002'];
+
+    await service.reorder('board-123', reorderedIds);
+
+    // Verify batch update for positions
+    expect(mocks.updateMock).toHaveBeenCalledTimes(3);
   });
 });
 ```
 
 ---
 
-## 4. API Route Tests (📝 SPECIFICATION)
+## 4. API Route Tests (✅ PHASES 2-3 COMPLETE)
 
-### 4.1 Endpoint List
+### 4.1 Implementation Status
 
-**All 11 endpoints from PRD**:
+**Completed Files (90+ tests)**:
 
-1. `POST /api/boards` - Create board
-2. `GET /api/boards` - List boards
-3. `GET /api/boards/[id]` - Get board details
-4. `PATCH /api/boards/[id]` - Update board
-5. `DELETE /api/boards/[id]` - Delete board
-6. `POST /api/boards/[id]/columns` - Create column
-7. `PATCH /api/boards/[id]/columns/reorder` - Reorder columns
-8. `POST /api/tasks` - Create task
-9. `PATCH /api/tasks/[id]/move` - Move task (drag & drop)
-10. `GET /api/tasks` - List/filter tasks
-11. `POST /api/boards/[id]/custom-fields` - Create custom field
+#### ✅ Tasks API
+1. **`app/src/app/api/tasks/route.test.ts`** (35 tests)
+   - POST /api/tasks - Create task
+   - GET /api/tasks - List/filter tasks with pagination
+
+2. **`app/src/app/api/tasks/[id]/route.test.ts`** (30 tests)
+   - GET /api/tasks/:id - Get task by ID
+   - PATCH /api/tasks/:id - Update task
+   - DELETE /api/tasks/:id - Delete task
+
+3. **`app/src/app/api/tasks/[id]/move/route.test.ts`** (35 tests) **[CRITICAL]**
+   - POST /api/tasks/:id/move - Drag & drop with WIP limits
+
+#### ✅ Custom Fields API
+4. **`app/src/app/api/custom-fields/route.test.ts`** (30 tests)
+   - POST /api/custom-fields - Create field definition
+   - GET /api/custom-fields - List fields for board
+
+5. **`app/src/app/api/custom-fields/[id]/route.test.ts`** (25 tests)
+   - GET /api/custom-fields/:id - Get field by ID
+   - PATCH /api/custom-fields/:id - Update field
+   - DELETE /api/custom-fields/:id - Delete field
+
+### 4.2 Test Coverage by Endpoint
+
+**All endpoints test**:
+- ✅ Authentication (401 errors)
+- ✅ Authorization (403 errors)
+- ✅ Zod request validation (400 errors)
+- ✅ Invalid JSON handling (400 errors)
+- ✅ Not found handling (404 errors)
+- ✅ Internal errors (500 errors)
+- ✅ Success responses with correct status codes
+- ✅ Response format (camelCase transformation)
 
 ### 4.2 API Test Template
 

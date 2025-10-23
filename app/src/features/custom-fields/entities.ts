@@ -39,12 +39,13 @@ export const SelectFieldConfigSchema = z.object({
 
 /**
  * Configuration for number-type custom fields
- * Optional min/max bounds and step increment
+ * Optional min/max bounds, step increment, and decimal control
  */
 export const NumberFieldConfigSchema = z.object({
   min: z.number().optional(),
   max: z.number().optional(),
   step: z.number().positive().optional(),
+  allow_decimals: z.boolean().optional().default(true), // false = integers only
 }).refine(
   (data) => {
     if (data.min !== undefined && data.max !== undefined) {
@@ -52,7 +53,7 @@ export const NumberFieldConfigSchema = z.object({
     }
     return true;
   },
-  { message: 'Minimum value must be less than maximum value' }
+  { message: 'min cannot be greater than max' }
 );
 
 /**
@@ -148,6 +149,7 @@ export const CustomFieldDefinitionCreateSchema = CustomFieldDefinitionSchema.omi
  */
 export const CustomFieldDefinitionUpdateSchema = CustomFieldDefinitionSchema.pick({
   name: true,
+  field_type: true, // Allowed to pass (but will be rejected in business logic)
   config: true,
   required: true,
 }).partial();
@@ -188,11 +190,17 @@ export function getCustomFieldValueSchema(
       case 'number': {
         const numberConfig = config as z.infer<typeof NumberFieldConfigSchema> | undefined;
         let schema = z.number();
+
+        // Validate integers when allow_decimals is false
+        if (numberConfig?.allow_decimals === false) {
+          schema = schema.int('Value must be an integer (no decimals allowed)');
+        }
+
         if (numberConfig?.min !== undefined) {
-          schema = schema.min(numberConfig.min);
+          schema = schema.min(numberConfig.min, `Value must be at least ${numberConfig.min}`);
         }
         if (numberConfig?.max !== undefined) {
-          schema = schema.max(numberConfig.max);
+          schema = schema.max(numberConfig.max, `Value must be at most ${numberConfig.max}`);
         }
         return schema;
       }
@@ -214,7 +222,14 @@ export function getCustomFieldValueSchema(
         }
         if (selectConfig.multiple) {
           // Multi-select: array of enum values
-          return z.array(z.enum(selectConfig.options as [string, ...string[]]));
+          let schema = z.array(z.enum(selectConfig.options as [string, ...string[]]));
+
+          // If required, array must have at least 1 element
+          if (required) {
+            schema = schema.min(1, 'At least one option must be selected');
+          }
+
+          return schema;
         } else {
           // Single-select: single enum value
           return z.enum(selectConfig.options as [string, ...string[]]);

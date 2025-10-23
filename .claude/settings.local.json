@@ -58,7 +58,8 @@
       "mcp__supabase__execute_sql",
       "mcp__context7__resolve-library-id",
       "mcp__context7__get-library-docs",
-      "SlashCommand(/agent-handoff PRDs/projects/001-customizable-kanban-boards test-agent completed)"
+      "SlashCommand(/agent-handoff PRDs/projects/001-customizable-kanban-boards test-agent completed)",
+      "Bash(cut:*)"
     ],
     "deny": [],
     "ask": []
