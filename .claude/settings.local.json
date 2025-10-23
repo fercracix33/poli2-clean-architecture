@@ -59,7 +59,9 @@
       "mcp__context7__resolve-library-id",
       "mcp__context7__get-library-docs",
       "SlashCommand(/agent-handoff PRDs/projects/001-customizable-kanban-boards test-agent completed)",
-      "Bash(cut:*)"
+      "Bash(cut:*)",
+      "Bash(do echo \"=== Feature: $dir ===\")",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
