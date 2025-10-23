@@ -44,15 +44,18 @@ export default getRequestConfig(async () => {
   // Each JSON file represents a namespace that components can access via useTranslations()
   const commonMessages = (await import(`@/locales/${locale}/common.json`)).default;
   const authMessages = (await import(`@/locales/${locale}/auth.json`)).default;
+  const dashboardMessages = (await import(`@/locales/${locale}/dashboard.json`)).default;
 
   // Merge all namespaces into a single messages object
-  // Pattern: { ...common, auth: authMessages }
+  // Pattern: { ...common, auth: authMessages, dashboard: dashboardMessages }
   // This allows:
   // - useTranslations() to access common.* keys directly
   // - useTranslations('auth') to access auth.* keys
+  // - useTranslations('dashboard') to access dashboard.* keys
   const messages = {
     ...commonMessages,
     auth: authMessages,
+    dashboard: dashboardMessages,
   };
 
   return {

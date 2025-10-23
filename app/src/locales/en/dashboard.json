@@ -1,0 +1,20 @@
+{
+  "header": {
+    "title": "Dashboard",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "welcome": {
+    "prefix": "Welcome to",
+    "words": ["your workspace", "productivity", "success", "innovation"],
+    "greeting": "Hello",
+    "subtitle": "Ready to start your journey"
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "editProfile": "Edit Profile",
+    "accountSettings": "Account Settings",
+    "documentation": "Documentation",
+    "support": "Get Support"
+  }
+}

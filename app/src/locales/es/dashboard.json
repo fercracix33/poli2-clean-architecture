@@ -1,0 +1,20 @@
+{
+  "header": {
+    "title": "Panel de Control",
+    "settings": "Configuración",
+    "logout": "Cerrar Sesión"
+  },
+  "welcome": {
+    "prefix": "Bienvenido a",
+    "words": ["tu espacio de trabajo", "la productividad", "el éxito", "la innovación"],
+    "greeting": "Hola",
+    "subtitle": "Listo para comenzar tu viaje"
+  },
+  "quickActions": {
+    "title": "Acciones Rápidas",
+    "editProfile": "Editar Perfil",
+    "accountSettings": "Configuración de Cuenta",
+    "documentation": "Documentación",
+    "support": "Obtener Soporte"
+  }
+}
