@@ -61,7 +61,11 @@
       "SlashCommand(/agent-handoff PRDs/projects/001-customizable-kanban-boards test-agent completed)",
       "Bash(cut:*)",
       "Bash(do echo \"=== Feature: $dir ===\")",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(rm:*)",
+      "Bash(rmdir:*)"
     ],
     "deny": [],
     "ask": []
