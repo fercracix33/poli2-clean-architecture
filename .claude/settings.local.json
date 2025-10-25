@@ -65,7 +65,14 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(rm:*)",
-      "Bash(rmdir:*)"
+      "Bash(rmdir:*)",
+      "Skill(skill-creator)",
+      "Bash(python:*)",
+      "Skill(rbac-permissions-architect)",
+      "mcp__supabase__search_docs",
+      "Bash(chmod:*)",
+      "Bash(./scripts/validate-agent.sh:*)",
+      "Skill(agent-creator)"
     ],
     "deny": [],
     "ask": []

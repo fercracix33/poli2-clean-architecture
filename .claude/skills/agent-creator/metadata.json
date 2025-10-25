@@ -1,0 +1,50 @@
+{
+  "name": "agent-creator",
+  "version": "1.1.0",
+  "description": "Guide for creating Claude Code agents following Anthropic official best practices. Includes automatic handoff to skill-creator for complete agent + skill package creation.",
+  "category": "development",
+  "technologies": [
+    "claude-code",
+    "yaml",
+    "markdown",
+    "bash"
+  ],
+  "mcps_required": [
+    "context7"
+  ],
+  "mcps_optional": [],
+  "references_count": 5,
+  "scripts_count": 2,
+  "assets_count": 2,
+  "target_users": [
+    "agent-creators",
+    "system-architects",
+    "skill-developers"
+  ],
+  "features": [
+    "6-phase agent creation workflow",
+    "YAML frontmatter validation",
+    "Automatic skill scaffold creation",
+    "Handoff to skill-creator (Phase 6)",
+    "Progressive disclosure pattern",
+    "Context7 mandatory checkpoints"
+  ],
+  "handoff_integration": {
+    "skill": "skill-creator",
+    "phase": 6,
+    "automatic": true,
+    "provides_context": [
+      "agent-name",
+      "color",
+      "role",
+      "responsibilities",
+      "technologies",
+      "mcp-integrations"
+    ]
+  },
+  "last_updated": "2025-10-24",
+  "author": "Agent Creator Skill (self-referential)",
+  "related_skills": [
+    "skill-creator"
+  ]
+}

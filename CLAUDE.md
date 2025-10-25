@@ -85,144 +85,223 @@ cd app
 - `npm run test:e2e` - Run Playwright E2E tests
 - `npm run test:e2e:ui` - Run E2E tests with UI mode
 
-## 🚨 MANDATORY TDD Process
+## 🚨 MANDATORY TDD Process - ITERATIVE WORKFLOW
 
-### Agent Sequence (IMMUTABLE ORDER)
+### ⚡ New Iterative Flow (IMMUTABLE)
+
+**CRITICAL CHANGE**: The workflow is now **iterative with mandatory architectural review** at each phase.
+
 ```
-1. Arquitecto → 2. Test Agent → 3. Implementer Agent → 4. Supabase Agent → 5. UI/UX Expert Agent
+Usuario → Arquitecto (PRD Master)
+              ↓
+    ┌─────────────────────┐
+    │   ITERATION LOOP    │
+    │  (Per Agent Phase)  │
+    └─────────────────────┘
+              ↓
+    Arquitecto escribe 00-request.md para Agente
+              ↓
+    Agente trabaja en 01-iteration.md
+              ↓
+    Arquitecto + Usuario revisan
+              ↓
+    ┌─────────────────────────────────┐
+    │ ¿Aprobado?                      │
+    ├─────────────────────────────────┤
+    │ NO → Agente corrige (02-, 03-...) │
+    │      Volver a revisión           │
+    │                                  │
+    │ SÍ → Continuar siguiente agente  │
+    └─────────────────────────────────┘
 ```
+
+**Sequence Order**:
+1. Test Agent → Review → Approval
+2. Implementer Agent → Review → Approval
+3. Supabase Agent → Review → Approval
+4. UI/UX Expert Agent → Review → Approval
 
 ### Agent Responsibilities (STRICT)
 
-#### 1. **Arquitecto (Architect Agent)**
-**Role:** Chief Architect and Technical Product Manager - Bridge between human and development team
+#### 1. **Arquitecto (Architect Agent)** ⭐ COORDINATOR & REVIEWER
+
+**Role:** Chief Architect, Technical Product Manager, and **Iteration Reviewer** - Bridge and quality gate
 
 **Core Mission:**
 - Translate high-level user requirements into clear, detailed technical specifications (PRDs)
+- **NEW**: Review and approve/reject EVERY iteration of EVERY agent before progression
+- **NEW**: Coordinate information flow between agents (agents work in isolation)
 - Prepare the "construction ground" by creating directory structure and data contracts (entities)
 
 **Exclusive Responsibilities:**
 - **Invoke Skill**: MUST use `architect-deep-analysis.md` skill at phase start
+- **PRD Generation**: Create SINGLE master PRD (ONLY Arquitecto writes PRDs)
+- **Request Writing**: Write `00-request.md` for EACH agent with specific requirements
+- **Iteration Review**: Review EVERY `XX-iteration.md` from agents with Usuario
+- **Approval Authority**: Approve or reject agent work (rejection = new iteration required)
+- **Handoff Coordination**: (Optional) Prepare `handoff-XXX.md` to enable parallelism between agents
+- **Information Translator**: Agents read ONLY their folder; Arquitecto bridges information
 - **Architecture Guardian**: ONLY agent authorized to modify project directory structure
-- **PRD Generation**: Create immutable Product Requirements Documents following strict template
 - **Entity Implementation**: Implement pure `entities.ts` files with Zod schemas and TypeScript types
-- **Structure Creation**: Create complete feature directory structure for other agents
-- **Requirements Clarification**: Ask clarifying questions to eliminate ambiguity before implementation
+- **Coherence Maintenance**: Ensure consistency across all agent deliverables
 
 **Strict Limitations:**
 - **NEVER** implement business logic, services, components, or tests
-- **NEVER** modify PRDs once delivered (unless human explicitly requests changes)
+- **NEVER** modify master PRD once delivered (unless human explicitly requests changes)
+- **NEVER** approve agent work without thorough review with Usuario
+- **NEVER** allow agents to advance without explicit approval
 - **NEVER** create dependencies outside the canonical tech stack
-- Must deliver artifacts in correct order: PRD → Directory Structure → Entities → Hand-off to Test Agent
 
 **Deliverables:**
-- Complete PRD with acceptance criteria, data contracts, API specifications
-- Directory structure following Clean Architecture layers
-- Pure `entities.ts` files with Zod schemas
-- Clear interfaces for all other agents
+- `PRDs/domain/XXX-feature/architect/00-master-prd.md` (ÚNICO PRD del sistema)
+- `PRDs/domain/XXX-feature/{agent}/00-request.md` (petición inicial para cada agente)
+- `PRDs/domain/XXX-feature/{agent}/handoff-XXX.md` (opcional, para paralelismo)
+- Directory structure: `PRDs/domain/XXX-feature/{test-agent, implementer, supabase-agent, ui-ux-expert}/`
+- `src/features/[feature]/entities.ts` with Zod schemas
+- Approval/rejection decisions documented in `_status.md`
 
 ---
 
-#### 2. **Test Agent (Test Architect)**
+#### 2. **Test Agent (Test Architect)** 🧪
+
 **Role:** Test Architect and Living Specification Guardian - Defines what must be implemented
 
 **Core Mission:**
 - Create tests for ALL layers (use cases, services, APIs, E2E) that FAIL appropriately
 - Act as the living specification of the entire system
+- **NEW**: Work in iterations until approved by Arquitecto + Usuario
 
 **Exclusive Responsibilities:**
 - **Invoke Skill**: MUST use `test-architect-tdd.md` skill at phase start
+- **Read Scope**: ONLY read `PRDs/domain/XXX-feature/test-agent/` folder
+- **Request-Based Work**: Start from `00-request.md` written by Arquitecto
+- **Iterative Development**: Create `01-iteration.md`, then `02-`, `03-`... if corrections needed
 - **Complete Coverage**: Test use cases, data services, API endpoints, validations, **E2E user flows**
 - **Interface Definition**: Define expected function signatures before they exist
 - **Mock Configuration**: Set up all external dependency mocks (Supabase client, etc.)
 - **E2E Specification**: Define complete user workflows with Playwright (navigation → interaction → assertion)
 - **Failure Validation**: Ensure all tests fail with "function not defined" initially (E2E fail with "page not found")
-- **Specification Authority**: Tests become immutable truth for other agents
+- **Handoff Preparation**: (Optional) If requested, prepare `handoff-001.md` for Implementer
 
 **Strict Limitations:**
 - **NEVER** implement any functional logic
-- **NEVER** modify tests once created (they are immutable specification)
+- **NEVER** modify tests once approved (they become immutable specification)
 - **NEVER** touch entities, services, or components
+- **NEVER** read other agents' folders (Arquitecto coordinates info)
+- **NEVER** advance to production code until Arquitecto approves iteration
 - **NEVER** create temporary solutions or workarounds
 
-**Deliverables:**
-- Complete failing test suite for all layers (unit, integration, **E2E**)
-- Clearly defined function interfaces
-- Configured mocks and test fixtures
-- E2E tests with accessibility requirements (keyboard navigation, ARIA)
-- >90% coverage target for all layers
+**Deliverables (Per Iteration):**
+- `XX-iteration.md` documenting:
+  - Complete failing test suite for all layers (unit, integration, **E2E**)
+  - Clearly defined function interfaces
+  - Configured mocks and test fixtures
+  - E2E tests with accessibility requirements
+  - >90% coverage target
+  - Decisions, blockers resolved, evidences (screenshots, logs)
+- (Optional) `handoff-XXX.md` if Arquitecto requests parallelism
 
 ---
 
-#### 3. **Implementer Agent (Business Logic Developer)**
+#### 3. **Implementer Agent (Business Logic Developer)** ⚙️
+
 **Role:** Business Logic Developer - Implements use cases to pass tests
 
 **Core Mission:**
 - Implement use cases (Use Case Layer) that make tests pass without modifying them
 - Follow strict TDD: Red → Green → Refactor
+- **NEW**: Work in iterations until approved by Arquitecto + Usuario
 
 **Exclusive Responsibilities:**
 - **Invoke Skill**: MUST use `implementer-tdd.md` skill at phase start
+- **Read Scope**: ONLY read `PRDs/domain/XXX-feature/implementer/` folder
+- **Request-Based Work**: Start from `00-request.md` written by Arquitecto
+- **Handoff Integration**: May read `test-agent/handoff-XXX.md` if parallelism enabled
+- **Iterative Development**: Create `01-iteration.md`, then `02-`, `03-`... if corrections needed
 - **Use Cases Only**: Implement pure business logic orchestration
 - **Test Compliance**: Make use case tests pass without modifying them
 - **Validation Logic**: Create business rules, authorization, input validation
 - **Service Orchestration**: Coordinate calls to data services (without implementing them)
 - **Error Handling**: Implement specific error handling and propagation
+- **Handoff Preparation**: (Optional) If requested, prepare `handoff-001.md` for Supabase Agent
 
 **Strict Limitations:**
 - **NEVER** modify test files (they are immutable specification)
 - **NEVER** implement data services (Supabase Agent responsibility)
-- **NEVER** modify entities (Architect responsibility)
+- **NEVER** modify entities (Arquitecto responsibility)
 - **NEVER** access database directly (must use services)
+- **NEVER** read other agents' folders except allowed handoffs
+- **NEVER** advance until Arquitecto approves iteration
 - **NEVER** over-engineer beyond what tests require (YAGNI principle)
 
-**Deliverables:**
-- Use cases that pass all tests
-- Clear interfaces for required data services
-- Business logic, validations, and orchestration
-- >90% test coverage for implemented use cases
+**Deliverables (Per Iteration):**
+- `XX-iteration.md` documenting:
+  - Use cases that pass all tests
+  - Clear interfaces for required data services
+  - Business logic, validations, and orchestration
+  - >90% test coverage for implemented use cases
+  - Decisions, blockers resolved, code artifacts
+- (Optional) `handoff-XXX.md` if Arquitecto requests parallelism
 
 ---
 
-#### 4. **Supabase Agent (Data Specialist)**
+#### 4. **Supabase Agent (Data Specialist)** 🗄️
+
 **Role:** Data Specialist and Database Architect - Implements pure data access
 
 **Core Mission:**
 - Implement data services (Interface Adapter Layer) that make service tests pass
 - Create pure database access without business logic
+- **NEW**: Work in iterations until approved by Arquitecto + Usuario
 
 **Exclusive Responsibilities:**
 - **Invoke Skill**: MUST use `supabase-specialist-rls.md` skill at phase start
+- **Read Scope**: ONLY read `PRDs/domain/XXX-feature/supabase-agent/` folder
+- **Request-Based Work**: Start from `00-request.md` written by Arquitecto
+- **Handoff Integration**: May read `implementer/handoff-XXX.md` if parallelism enabled
+- **Iterative Development**: Create `01-iteration.md`, then `02-`, `03-`... if corrections needed
 - **Data Services Only**: Implement pure CRUD operations and data access
 - **Database Schema**: Design tables, relationships, constraints, indexes
 - **RLS Implementation**: Row Level Security policies for multi-tenant isolation
 - **Query Optimization**: Efficient database queries and performance tuning
 - **Migration Management**: Database schema versioning and evolution
+- **Handoff Preparation**: (Optional) If requested, prepare `handoff-001.md` for UI/UX Expert
 
 **Strict Limitations:**
 - **NEVER** add business validations to services (use cases handle business logic)
 - **NEVER** modify service tests (they are immutable specification)
 - **NEVER** implement business logic in data services
 - **NEVER** touch use cases or entities
+- **NEVER** read other agents' folders except allowed handoffs
+- **NEVER** advance until Arquitecto approves iteration
 - Services must be pure: input → database operation → output
 
-**Deliverables:**
-- Pure data services passing all tests
-- Complete database schema with RLS
-- Optimized queries with proper indexing
-- Database migrations and security policies
+**Deliverables (Per Iteration):**
+- `XX-iteration.md` documenting:
+  - Pure data services passing all tests
+  - Complete database schema with RLS
+  - Optimized queries with proper indexing
+  - Database migrations and security policies
+  - Decisions, performance benchmarks, migration scripts
+- (Optional) `handoff-XXX.md` if Arquitecto requests parallelism
 
 ---
 
-#### 5. **UI/UX Expert Agent (Interface Specialist)**
+#### 5. **UI/UX Expert Agent (Interface Specialist)** 🎨
+
 **Role:** UI/UX Designer and Interface Specialist - Creates user interfaces
 
 **Core Mission:**
 - Create accessible React components using shadcn/ui that pass E2E tests
 - Integrate with implemented use cases to create complete user experience
+- **NEW**: Work in iterations until approved by Arquitecto + Usuario
 
 **Exclusive Responsibilities:**
 - **Invoke Skill**: MUST use `ui-ux-a11y-expert.md` skill at phase start
+- **Read Scope**: ONLY read `PRDs/domain/XXX-feature/ui-ux-expert/` folder
+- **Request-Based Work**: Start from `00-request.md` written by Arquitecto
+- **Handoff Integration**: May read `supabase-agent/handoff-XXX.md` if parallelism enabled
+- **Iterative Development**: Create `01-iteration.md`, then `02-`, `03-`... if corrections needed
 - **React Components**: UI components using only approved stack (shadcn/ui, Tailwind)
 - **E2E Test Compliance**: Make Playwright E2E tests pass without modifying them
 - **Accessibility**: WCAG 2.1 AA compliance mandatory
@@ -234,19 +313,29 @@ cd app
 - **NEVER** modify E2E tests (they are immutable specification)
 - **NEVER** access data services directly (must use implemented use cases)
 - **NEVER** use non-approved UI libraries
+- **NEVER** read other agents' folders except allowed handoffs
+- **NEVER** advance until Arquitecto approves iteration
 - **NEVER** create non-accessible components
 
-**Deliverables:**
-- Complete functional UI passing all E2E tests
-- WCAG 2.1 AA accessible components
-- Responsive design for multiple breakpoints
-- Optimized performance (Core Web Vitals green)
+**Deliverables (Per Iteration):**
+- `XX-iteration.md` documenting:
+  - Complete functional UI passing all E2E tests
+  - WCAG 2.1 AA accessible components
+  - Responsive design for multiple breakpoints
+  - Optimized performance (Core Web Vitals green)
+  - Decisions, accessibility audits, performance metrics, screenshots
 
-### TDD Principles (IMMUTABLE)
+### TDD Principles (IMMUTABLE) - Iterative Edition
+
 1. **Red**: Test Agent creates tests for EVERYTHING that FAIL
-2. **Green**: Each agent makes THEIR tests pass without modifying tests
-3. **Refactor**: Each agent improves code keeping tests green
-4. **PROHIBITED**: Any agent modifying tests to make implementation pass
+2. **Review**: Arquitecto + Usuario review and approve/reject Test Agent iteration
+3. **Green**: Implementer/Supabase agents make tests pass without modifying them
+4. **Review**: Arquitecto + Usuario review and approve/reject implementation iterations
+5. **Refactor**: Each agent improves code keeping tests green (within their iteration)
+6. **Review**: Arquitecto + Usuario review refactored code before final approval
+7. **PROHIBITED**: Any agent modifying tests after approval
+8. **PROHIBITED**: Any agent advancing without explicit Arquitecto approval
+9. **PROHIBITED**: Any agent reading folders outside their designated scope
 
 ### 🎯 Specialized Skills (MANDATORY)
 
@@ -358,93 +447,129 @@ Each feature follows strict layered architecture:
 - Environment variables loaded automatically in tests
 - **Tests are IMMUTABLE once created by Test Agent**
 
-## 📋 PRD System (Product Requirements Documents)
+## 📋 PRD System (Product Requirements Documents) - ITERATIVE EDITION
 
 ### Purpose and Objectives
-The PRD system maintains organization, traceability, and coherence in feature development using our specialized agent ecosystem. Located in `/PRDs/`, this system provides:
+The **NEW iterative PRD system** maintains organization, traceability, and coherence through **versioned iterations** with **mandatory architectural review**. Located in `/PRDs/`, this system provides:
 
-- **Organization**: Clear and scalable structure for documentation
-- **Traceability**: Complete tracking from requirement to implementation
-- **Coherence**: Uniform standards for all agents
-- **Efficiency**: Reusable templates and optimized processes
-- **Quality**: Validation and review at each stage
+- **Organization**: Agent-isolated folders for clarity and focus
+- **Traceability**: Complete version history through numbered iterations
+- **Coherence**: Arquitecto as single coordinator and translator between agents
+- **Efficiency**: Iterative refinement until approval (no rework after approval)
+- **Quality**: Arquitecto + Usuario review EVERY iteration before progression
 
-### Directory Structure
+### Directory Structure (NEW)
 ```
 PRDs/
-├── _templates/                    # Reusable templates
-│   ├── 00-master-prd-template.md # Architect template
-│   ├── 01-supabase-template.md   # Supabase Agent template
-│   ├── 02-test-template.md       # Test Agent template
-│   ├── 03-implementation-template.md # Implementer template
-│   ├── 04-ui-template.md         # UI/UX Expert template
+├── _templates/                    # Simplified templates
+│   ├── 00-master-prd-template.md # ONLY for Architect (unique PRD)
+│   ├── agent-request-template.md # For Architect to write 00-request.md
+│   ├── agent-iteration-template.md # For agents to write XX-iteration.md
+│   ├── agent-handoff-template.md # Optional handoffs for parallelism
+│   ├── rls-migration-template.md # Technical SQL template
 │   └── _status-template.md       # Status tracking template
 │
 ├── _examples/                     # Reference examples
-│   └── 001-example-task-comments/ # Complete feature example
+│   ├── 001-example-task-comments/ # OLD linear example
+│   └── 002-iterative-example/    # NEW iterative example ⭐
 │
 ├── [domain]/                      # Feature domains (tasks, projects, auth)
 │   └── [number]-[feature-name]/   # Individual features
-│       ├── 00-master-prd.md      # Master PRD (Architect)
-│       ├── 01-supabase-spec.md   # DB specifications (Supabase Agent)
-│       ├── 02-test-spec.md       # Test specifications (Test Agent)
-│       ├── 03-implementation-spec.md # Implementation guide (Implementer)
-│       ├── 04-ui-spec.md         # UI/UX specifications (UI/UX Expert)
-│       └── _status.md            # Progress tracking
+│       ├── architect/             # ⭐ Architect's workspace
+│       │   └── 00-master-prd.md  # ÚNICO PRD master
+│       ├── test-agent/            # ⭐ Test Agent's workspace
+│       │   ├── 00-request.md     # Architect writes requirements
+│       │   ├── 01-iteration.md   # Agent's first iteration
+│       │   ├── 02-iteration.md   # Corrections (if rejected)
+│       │   ├── 03-iteration.md   # More corrections (if needed)
+│       │   └── handoff-001.md    # Optional handoff to next agent
+│       ├── implementer/           # ⭐ Implementer's workspace
+│       │   ├── 00-request.md
+│       │   ├── 01-iteration.md
+│       │   └── handoff-001.md
+│       ├── supabase-agent/        # ⭐ Supabase Agent's workspace
+│       │   ├── 00-request.md
+│       │   └── 01-iteration.md
+│       ├── ui-ux-expert/          # ⭐ UI/UX Expert's workspace
+│       │   ├── 00-request.md
+│       │   └── 01-iteration.md
+│       └── _status.md             # Unified status for whole feature
 │
-└── GUIA-USO-PRD.md              # Comprehensive usage guide
+└── GUIA-USO-PRD.md              # Comprehensive usage guide (UPDATED)
+└── WORKFLOW-ITERATIVO.md        # Detailed iterative workflow guide ⭐
+└── EJEMPLOS-ITERACIONES.md      # Iteration examples and patterns ⭐
 ```
 
-### Agent-Template Mapping
-- **00-master-prd-template.md**: Architect → Complete requirements, data contracts, API specifications
-- **01-supabase-template.md**: Supabase Agent → Database schema, RLS policies, data services
-- **02-test-template.md**: Test Agent → Complete test suite (unit, integration, mocking)
-- **03-implementation-template.md**: Implementer Agent → Use cases, API endpoints, business logic
-- **04-ui-template.md**: UI/UX Expert Agent → React components, E2E tests, accessibility
-- **_status-template.md**: All Agents → Progress tracking, metrics, blockers
+### Key Changes from Old System
 
-### Naming Conventions
-- **Feature ID**: `[domain]-[number]` (e.g., `tasks-001`, `auth-003`)
-- **Directory**: `[number]-[feature-name-kebab-case]` (e.g., `001-create-task`)
-- **Files**: Always use the numbered prefixes (`00-`, `01-`, `02-`, etc.)
+| Aspect | OLD System | NEW System |
+|--------|-----------|------------|
+| **PRD Authorship** | Each agent writes spec | ONLY Architect writes PRD master |
+| **Templates** | 5 agent templates | 1 master + 3 generic (request, iteration, handoff) |
+| **Agent Scope** | Agents read all docs | Agents read ONLY their folder |
+| **Workflow** | Linear sequential | Iterative with review loops |
+| **Approval** | Implicit advancement | Explicit Architect + User approval |
+| **Versioning** | Single document | Numbered iterations (01-, 02-, 03-...) |
+| **Coordination** | Direct agent-to-agent | Architect as translator/coordinator |
+| **Parallelism** | Not supported | Optional via handoff documents |
 
-### Workflow Process
-1. **Architect** creates PRD master from user requirements
-2. **Sequential agent execution** following TDD agent order
-3. **Each agent** copies their template and completes it
-4. **Status tracking** updated by each agent upon completion
-5. **Continuous validation** against acceptance criteria
+### Iteration Workflow (NEW)
 
-### Key Features of PRD System
-- **Immutable templates**: Templates provide consistent structure
-- **Status tracking**: Real-time progress monitoring with metrics
-- **Agent coordination**: Clear handoffs between specialized agents
-- **Quality gates**: Validation criteria at each stage
-- **Reusable examples**: Reference implementations for guidance
+**Per Agent Phase:**
+```
+1. Architect writes {agent}/00-request.md
+   ↓
+2. Agent reads 00-request.md and works
+   ↓
+3. Agent creates 01-iteration.md with deliverables
+   ↓
+4. Agent notifies completion
+   ↓
+5. Architect + Usuario review iteration
+   ↓
+6. APPROVED? → Continue to next agent
+   REJECTED? → Agent creates 02-iteration.md → back to step 4
+```
 
-### Usage Commands
+### Naming Conventions (UPDATED)
+- **Feature ID**: `[domain]-[number]` (unchanged)
+- **Directory**: `[number]-[feature-name-kebab-case]` (unchanged)
+- **Agent Folders**: `test-agent/`, `implementer/`, `supabase-agent/`, `ui-ux-expert/`
+- **Request**: Always `00-request.md` (written by Architect)
+- **Iterations**: `01-iteration.md`, `02-iteration.md`, `03-iteration.md`...
+- **Handoffs**: `handoff-001.md`, `handoff-002.md`... (optional)
+
+### Usage Commands (UPDATED)
 ```bash
-# Create new feature directory
-mkdir PRDs/[domain]/[number]-[feature-name]
+# Create new feature structure
+mkdir -p PRDs/[domain]/[number]-[feature-name]/{architect,test-agent,implementer,supabase-agent,ui-ux-expert}
 
-# Copy templates for new feature
-cp PRDs/_templates/*.md PRDs/[domain]/[number]-[feature-name]/
+# Architect creates master PRD
+cp PRDs/_templates/00-master-prd-template.md PRDs/[domain]/[number]-[feature-name]/architect/00-master-prd.md
+
+# Architect creates request for Test Agent
+cp PRDs/_templates/agent-request-template.md PRDs/[domain]/[number]-[feature-name]/test-agent/00-request.md
+
+# Test Agent creates iteration
+cp PRDs/_templates/agent-iteration-template.md PRDs/[domain]/[number]-[feature-name]/test-agent/01-iteration.md
 
 # View feature status
 cat PRDs/[domain]/[number]-[feature-name]/_status.md
-
-# Reference examples
-find PRDs/_examples -name "*.md"
 ```
 
-### Critical PRD Rules
-- **Always use templates**: Never create PRD documents from scratch
-- **Follow agent sequence**: Respect the TDD agent execution order
-- **Update status files**: Each agent must update `_status.md` upon completion
-- **Document decisions**: Record technical decisions and rationale
-- **Maintain traceability**: Link implementation back to requirements
+### Critical PRD Rules (UPDATED)
+- **ONLY Architect writes master PRD**: No other agent creates PRD documents
+- **Agents work in isolation**: Read ONLY their own folder (+ handoffs if allowed)
+- **Architect coordinates info**: Writes `00-request.md` translating requirements for each agent
+- **Versioned iterations**: Each correction = new numbered iteration file
+- **Mandatory approval**: NO advancement without Architect + User explicit approval
+- **Handoffs are optional**: Architect decides when to enable parallelism
+- **Status is unified**: Single `_status.md` tracks all agents, not per-agent status
 
-For complete details, see `PRDs/GUIA-USO-PRD.md`.
+For complete details, see:
+- `PRDs/GUIA-USO-PRD.md` (complete guide)
+- `PRDs/WORKFLOW-ITERATIVO.md` (detailed workflow)
+- `PRDs/EJEMPLOS-ITERACIONES.md` (real examples)
 
 
 ## 🌐 Internationalization (i18n) - MANDATORY

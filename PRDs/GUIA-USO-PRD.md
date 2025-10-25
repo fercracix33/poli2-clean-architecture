@@ -1,508 +1,628 @@
-# Guía de Uso del Sistema de PRDs
+# Guía de Uso del Sistema de PRDs - ITERATIVE EDITION
+
+**Versión**: 2.0 (Sistema Iterativo)
+**Fecha**: 2025-10-24
+**Estado**: Activo
+
+---
 
 ## 📋 Tabla de Contenidos
+
 1. [Introducción](#introducción)
-2. [Estructura del Sistema](#estructura-del-sistema)
-3. [Flujo de Trabajo](#flujo-de-trabajo)
-4. [Plantillas Disponibles](#plantillas-disponibles)
-5. [Convenciones de Naming](#convenciones-de-naming)
-6. [Roles y Responsabilidades](#roles-y-responsabilidades)
-7. [Proceso de Creación](#proceso-de-creación)
-8. [Tracking y Monitoreo](#tracking-y-monitoreo)
-9. [Mejores Prácticas](#mejores-prácticas)
-10. [Troubleshooting](#troubleshooting)
+2. [Cambios Fundamentales vs v1.0](#cambios-fundamentales-vs-v10)
+3. [Estructura del Sistema](#estructura-del-sistema)
+4. [Flujo de Trabajo Iterativo](#flujo-de-trabajo-iterativo)
+5. [Roles y Responsabilidades](#roles-y-responsabilidades)
+6. [Templates Disponibles](#templates-disponibles)
+7. [Convenciones de Naming](#convenciones-de-naming)
+8. [Proceso Detallado por Fase](#proceso-detallado-por-fase)
+9. [Sistema de Aprobaciones](#sistema-de-aprobaciones)
+10. [Handoffs y Paralelismo](#handoffs-y-paralelismo)
+11. [Troubleshooting](#troubleshooting)
+12. [Ejemplos Prácticos](#ejemplos-prácticos)
 
 ---
 
 ## Introducción
 
-Este sistema de PRDs (Product Requirements Documents) está diseñado para mantener la organización, trazabilidad y coherencia en el desarrollo de features usando nuestro ecosistema de agentes especializados.
+### ¿Qué es el Sistema de PRDs Iterativo?
 
-### Objetivos del Sistema
-- **Organización:** Estructura clara y escalable para documentación
-- **Trazabilidad:** Seguimiento completo desde requisito hasta implementación
-- **Coherencia:** Estándares uniformes para todos los agentes
-- **Eficiencia:** Plantillas reutilizables y procesos optimizados
-- **Calidad:** Validación y revisión en cada etapa
+Este sistema mantiene organización, trazabilidad y calidad en el desarrollo de features mediante un **flujo iterativo** con **revisión arquitectónica obligatoria** en cada fase.
+
+### Objetivos Principales
+
+- **Calidad sobre Velocidad**: Cada iteración se revisa antes de avanzar
+- **Aislamiento de Agentes**: Cada agente trabaja solo en su carpeta, sin interferencias
+- **Arquitecto como Coordinador**: Único punto de traducción de información entre agentes
+- **Trazabilidad Completa**: Versiones incrementales documentan toda la evolución
+- **Paralelismo Controlado**: Handoffs opcionales permiten trabajo simultáneo cuando es seguro
+
+---
+
+## Cambios Fundamentales vs v1.0
+
+### ❌ Sistema Antiguo (v1.0)
+
+```
+Usuario → Arquitecto (escribe 00-master-prd.md)
+    ↓
+Test Agent (escribe 02-test-spec.md) → Automático
+    ↓
+Implementer (escribe 03-implementation-spec.md) → Automático
+    ↓
+Supabase Agent (escribe 01-supabase-spec.md) → Automático
+    ↓
+UI/UX Expert (escribe 04-ui-spec.md) → Automático
+```
+
+**Problemas**:
+- ❌ Flujo lineal sin revisión intermedia
+- ❌ Errores se detectan al final
+- ❌ Agentes leen documentos de otros agentes (acoplamiento)
+- ❌ Cada agente escribe su propio "spec" (redundancia)
+
+### ✅ Sistema Nuevo (v2.0)
+
+```
+Usuario ←→ Arquitecto (escribe architect/00-master-prd.md)
+            ↓
+            Arquitecto escribe test-agent/00-request.md
+            ↓
+            Test Agent trabaja → 01-iteration.md
+            ↓
+            Arquitecto + Usuario REVISAN
+            ↓
+         ¿Aprobado?
+         ↙️      ↘️
+      SÍ          NO
+       ↓          ↓
+    Continuar   Test Agent corrige → 02-iteration.md
+                ↓
+                Volver a revisión
+```
+
+**Beneficios**:
+- ✅ Revisión obligatoria en cada fase
+- ✅ Errores se detectan inmediatamente
+- ✅ Agentes aislados (solo leen su carpeta)
+- ✅ Solo Arquitecto escribe PRDs/requests
+- ✅ Versiones incrementales (historial completo)
+- ✅ Paralelismo opcional y seguro
 
 ---
 
 ## Estructura del Sistema
 
-### Directorio Principal: `/PRDs/`
+### Directorio Completo
 
 ```
 PRDs/
-├── _templates/                    # Plantillas reutilizables
-│   ├── 00-master-prd-template.md
-│   ├── 01-supabase-template.md
-│   ├── 02-test-template.md
-│   ├── 03-implementation-template.md
-│   ├── 04-ui-template.md
-│   ├── rls-migration-template.md  # Template para políticas RLS
-│   └── _status-template.md
+├── _templates/                          # Templates reutilizables
+│   ├── 00-master-prd-template.md       # Solo Arquitecto
+│   ├── agent-request-template.md       # Arquitecto escribe 00-request.md
+│   ├── agent-iteration-template.md     # Agentes usan para XX-iteration.md
+│   ├── agent-handoff-template.md       # Handoffs opcionales
+│   ├── rls-migration-template.md       # Template SQL técnico
+│   └── _status-template.md             # Status unificado
 │
-├── _examples/                     # Ejemplos de referencia
-│   └── 001-example-feature/
+├── _examples/
+│   ├── 001-example-task-comments/      # Ejemplo OLD (v1.0)
+│   └── 002-iterative-example/          # Ejemplo NEW (v2.0) ⭐
+│       ├── architect/
+│       │   └── 00-master-prd.md
+│       ├── test-agent/
+│       │   ├── 00-request.md
+│       │   ├── 01-iteration.md
+│       │   ├── 02-iteration.md         # Ejemplo de corrección
+│       │   └── handoff-001.md
+│       ├── implementer/
+│       │   ├── 00-request.md
+│       │   └── 01-iteration.md
+│       ├── supabase-agent/
+│       │   ├── 00-request.md
+│       │   └── 01-iteration.md
+│       ├── ui-ux-expert/
+│       │   ├── 00-request.md
+│       │   └── 01-iteration.md
+│       └── _status.md
 │
-├── tasks/                         # Features relacionadas con tareas
-│   ├── 001-create-task/
-│   ├── 002-edit-task/
-│   └── 003-task-comments/
+├── tasks/                               # Dominio: tasks
+│   └── 001-create-task/
+│       ├── architect/
+│       │   └── 00-master-prd.md
+│       ├── test-agent/
+│       │   ├── 00-request.md
+│       │   └── 01-iteration.md
+│       ├── implementer/
+│       │   ├── 00-request.md
+│       │   └── 01-iteration.md
+│       ├── supabase-agent/
+│       │   ├── 00-request.md
+│       │   └── 01-iteration.md
+│       ├── ui-ux-expert/
+│       │   ├── 00-request.md
+│       │   └── 01-iteration.md
+│       └── _status.md
 │
-├── projects/                      # Features relacionadas con proyectos
-│   ├── 001-create-project/
-│   └── 002-project-members/
+├── auth/                                # Dominio: auth
+│   └── 001-user-login/
+│       └── [misma estructura]
 │
-├── auth/                          # Features de autenticación
-│   ├── 001-user-registration/
-│   ├── 002-login-logout/
-│   └── 003-password-reset/
-│
-└── GUIA-USO-PRD.md               # Esta guía
+├── GUIA-USO-PRD.md                      # Esta guía
+├── WORKFLOW-ITERATIVO.md                # Workflow detallado ⭐
+└── EJEMPLOS-ITERACIONES.md              # Ejemplos prácticos ⭐
 ```
 
-### Estructura de Feature Individual
+### Anatomía de una Feature
 
 ```
 [domain]/[number]-[feature-name]/
-├── 00-master-prd.md              # PRD principal (Arquitecto)
-├── 01-supabase-spec.md           # Especificaciones de DB (Supabase Agent)
-├── 02-test-spec.md               # Especificaciones de testing (Test Agent)
-├── 03-implementation-spec.md     # Guía de implementación (Implementer Agent)
-├── 04-ui-spec.md                 # Especificaciones de UI/UX (UI/UX Expert Agent)
-└── _status.md                    # Tracking de estado y progreso
+├── architect/                # ⭐ Solo Arquitecto escribe aquí
+│   └── 00-master-prd.md     # ÚNICO PRD de la feature
+│
+├── test-agent/               # ⭐ Solo Test Agent trabaja aquí
+│   ├── 00-request.md        # Arquitecto escribe requirements
+│   ├── 01-iteration.md      # Test Agent: primera entrega
+│   ├── 02-iteration.md      # Test Agent: correcciones (si rechazado)
+│   ├── 03-iteration.md      # Test Agent: más correcciones (si necesario)
+│   └── handoff-001.md       # Opcional: handoff a Implementer
+│
+├── implementer/              # ⭐ Solo Implementer trabaja aquí
+│   ├── 00-request.md        # Arquitecto escribe requirements
+│   ├── 01-iteration.md      # Implementer: primera entrega
+│   └── handoff-001.md       # Opcional: handoff a Supabase
+│
+├── supabase-agent/           # ⭐ Solo Supabase Agent trabaja aquí
+│   ├── 00-request.md        # Arquitecto escribe requirements
+│   ├── 01-iteration.md      # Supabase: primera entrega
+│   └── handoff-001.md       # Opcional: handoff a UI/UX
+│
+├── ui-ux-expert/             # ⭐ Solo UI/UX Expert trabaja aquí
+│   ├── 00-request.md        # Arquitecto escribe requirements
+│   └── 01-iteration.md      # UI/UX: primera entrega
+│
+└── _status.md                # Status UNIFICADO de toda la feature
 ```
 
 ---
 
-## Flujo de Trabajo
+## Flujo de Trabajo Iterativo
 
-### 1. Inicio del Proyecto (Usuario Humano → Arquitecto)
-```mermaid
-graph LR
-    A[Usuario: Requisito] --> B[Arquitecto: Clarificación]
-    B --> C[Arquitecto: PRD Master]
-    C --> D[Arquitecto: Estructura + Entidades]
+### Fase 0: Inicio (Usuario ←→ Arquitecto)
+
+```
+1. Usuario describe requisito
+   ↓
+2. Arquitecto clarifica (hace preguntas)
+   ↓
+3. Arquitecto crea estructura:
+   mkdir -p PRDs/domain/XXX-feature/{architect,test-agent,implementer,supabase-agent,ui-ux-expert}
+   ↓
+4. Arquitecto escribe architect/00-master-prd.md
+   ↓
+5. Usuario aprueba PRD master
+   ↓
+6. Arquitecto crea entities.ts
 ```
 
-### 2. Desarrollo Secuencial por Agentes
-```mermaid
-graph TD
-    A[Arquitecto: PRD + Estructura] --> B[Supabase Agent: DB + Servicios]
-    B --> C[Test Agent: Tests que fallan]
-    C --> D[Implementer Agent: Lógica + API]
-    D --> E[UI/UX Expert: Componentes + E2E]
+### Fase 1: Test Agent (Iterativo)
+
+```
+1. Arquitecto escribe test-agent/00-request.md
+   (traduce del PRD master lo que Test Agent necesita)
+   ↓
+2. Test Agent lee SOLO su carpeta (test-agent/)
+   ↓
+3. Test Agent trabaja y crea 01-iteration.md
+   ↓
+4. Test Agent notifica: "Iteración lista para revisión"
+   ↓
+5. Arquitecto + Usuario revisan 01-iteration.md
+   ↓
+6. ¿Aprobado?
+      ├─ SÍ → Fase 2 (Implementer)
+      └─ NO → Test Agent corrige en 02-iteration.md
+              Volver a paso 5
 ```
 
-### 3. Tracking Continuo
-- Cada agente actualiza `_status.md` al completar su trabajo
-- El estado se monitorea en tiempo real
-- Los bloqueadores se identifican y resuelven rápidamente
+### Fase 2: Implementer (Iterativo)
+
+```
+1. Arquitecto escribe implementer/00-request.md
+   ↓
+2. (Opcional) Arquitecto prepara test-agent/handoff-001.md
+   para permitir que Implementer vea interfaces de tests
+   ↓
+3. Implementer lee:
+   - implementer/00-request.md (obligatorio)
+   - test-agent/handoff-001.md (si existe)
+   ↓
+4. Implementer trabaja y crea 01-iteration.md
+   ↓
+5. Implementer notifica: "Iteración lista para revisión"
+   ↓
+6. Arquitecto + Usuario revisan
+   ↓
+7. ¿Aprobado?
+      ├─ SÍ → Fase 3 (Supabase)
+      └─ NO → Implementer corrige en 02-iteration.md
+```
+
+### Fase 3: Supabase Agent (Iterativo)
+
+[Mismo patrón que Fase 2]
+
+### Fase 4: UI/UX Expert (Iterativo - Final)
+
+[Mismo patrón que Fase 2]
+
+**Resultado Final**: Feature completa, revisada y aprobada en CADA fase.
 
 ---
 
-## Plantillas Disponibles
+## Roles y Responsabilidades
 
-### 📋 00-master-prd-template.md
-**Usado por:** Arquitecto  
-**Propósito:** Definir requisitos completos y contratos de datos  
-**Secciones clave:**
-- User Story y contexto de negocio
-- Criterios de aceptación funcionales y no funcionales
-- Contratos de datos con schemas de Zod
-- Contratos de API endpoints
-- Especificaciones de UI/UX
+### 🏗️ Arquitecto (Coordinator & Reviewer)
+
+**Responsabilidades NUEVAS**:
+- ✅ Escribir ÚNICO PRD master (`architect/00-master-prd.md`)
+- ✅ Escribir `00-request.md` para CADA agente
+- ✅ Revisar y aprobar/rechazar CADA iteración de CADA agente
+- ✅ Traducir información entre agentes (agentes NO se comunican directamente)
+- ✅ Decidir cuándo habilitar handoffs para paralelismo
+- ✅ Mantener coherencia entre todas las fases
+- ✅ Actualizar `_status.md` con decisiones de aprobación
+
+**Herramientas**:
+- Template: `00-master-prd-template.md`
+- Template: `agent-request-template.md`
+- Template: `agent-handoff-template.md` (opcional)
+
+**Limitaciones**:
+- ❌ NUNCA implementar lógica de negocio, servicios, componentes, tests
+- ❌ NUNCA aprobar trabajo sin revisión exhaustiva con Usuario
+- ❌ NUNCA permitir que agentes lean carpetas de otros agentes
+
+---
+
+### 🧪 Test Agent
+
+**Responsabilidades NUEVAS**:
+- ✅ Leer SOLO `test-agent/` folder
+- ✅ Empezar desde `00-request.md` escrito por Arquitecto
+- ✅ Crear `01-iteration.md` con suite de tests que fallan
+- ✅ Si rechazado, corregir en `02-iteration.md`, `03-iteration.md`...
+- ✅ (Opcional) Preparar `handoff-001.md` si Arquitecto lo solicita
+
+**Herramientas**:
+- Lee: `test-agent/00-request.md`
+- Escribe: `test-agent/XX-iteration.md`
+- Template: `agent-iteration-template.md`
+
+**Limitaciones**:
+- ❌ NO leer otras carpetas (salvo handoffs permitidos)
+- ❌ NO modificar tests una vez aprobados
+- ❌ NO avanzar sin aprobación explícita
+
+---
+
+### ⚙️ Implementer Agent
+
+[Mismo patrón que Test Agent]
+
+### 🗄️ Supabase Agent
+
+[Mismo patrón que Test Agent]
+
+### 🎨 UI/UX Expert Agent
+
+[Mismo patrón que Test Agent]
+
+---
+
+## Templates Disponibles
+
+### 1. `00-master-prd-template.md`
+
+**Usado por**: SOLO Arquitecto
+**Propósito**: PRD único y completo de la feature
+**Ubicación**: `architect/00-master-prd.md`
+
+**Secciones clave**:
+- User Story y contexto
+- Criterios de aceptación
+- Contratos de datos (Zod schemas)
+- API endpoints
 - Consideraciones técnicas
 
-### 🗄️ 01-supabase-template.md
-**Usado por:** Supabase Agent
-**Propósito:** Implementar infraestructura de base de datos
-**Secciones clave:**
-- Schema de base de datos con SQL
-- Políticas de Row Level Security (RLS)
-- Servicios de datos (Data Access Layer)
-- Migraciones y funciones de BD
-- Validaciones y constraints
+---
 
-### 🔐 rls-migration-template.md
-**Usado por:** Supabase Agent
-**Propósito:** Template SQL para crear políticas RLS optimizadas y sin conflictos
-**Secciones clave:**
-- Documentación obligatoria de consulta a Context7
-- Funciones security definer para evitar políticas circulares
-- Políticas RLS con mejores prácticas (SELECT, INSERT, UPDATE, DELETE)
-- Checklist de verificación de performance (EXPLAIN ANALYZE)
-- Anti-patterns explícitos a evitar
-- Validación post-implementación
+### 2. `agent-request-template.md`
 
-**Uso obligatorio:**
-- SIEMPRE consultar Context7 antes de usar este template
-- Documentar findings en la sección de verificación
-- Ejecutar `/validate-rls` después de crear la migración
-- Verificar índices en todas las columnas usadas en políticas
+**Usado por**: SOLO Arquitecto
+**Propósito**: Traducir requirements del PRD master para cada agente
+**Ubicación**: `{agent}/00-request.md`
 
-### 🧪 02-test-template.md
-**Usado por:** Test Agent  
-**Propósito:** Crear suite completa de tests que fallan  
-**Secciones clave:**
-- Tests unitarios de use cases
-- Tests de integración de API endpoints
-- Estrategia de mocking
-- Tests de performance y seguridad
-- Cobertura y métricas
+**Secciones clave**:
+- Context (por qué este agente está trabajando)
+- Objectives (qué debe lograr)
+- Detailed Requirements
+- Technical Specifications
+- Limitations and Constraints
+- Expected Deliverables
+- Quality Checklist
 
-### ⚙️ 03-implementation-template.md
-**Usado por:** Implementer Agent  
-**Propósito:** Implementar lógica de negocio y API  
-**Secciones clave:**
-- Use cases con validaciones de negocio
-- API endpoints con manejo de errores
-- Autenticación y autorización
-- Optimizaciones de performance
-- Logging y monitoreo
+---
 
-### 🎨 04-ui-template.md
-**Usado por:** UI/UX Expert Agent  
-**Propósito:** Crear interfaz de usuario completa  
-**Secciones clave:**
-- Componentes de React con shadcn/ui
-- Integración con API usando TanStack Query
-- Tests end-to-end con Playwright
-- Implementación de accesibilidad
-- Optimizaciones de performance
+### 3. `agent-iteration-template.md`
 
-### 📊 _status-template.md
-**Usado por:** Todos los agentes  
-**Propósito:** Tracking de progreso y estado  
-**Secciones clave:**
-- Estado por agente con métricas
-- Bloqueadores y riesgos
-- Próximos pasos y dependencias
-- Decisiones técnicas y lecciones aprendidas
+**Usado por**: Todos los agentes (Test, Implementer, Supabase, UI/UX)
+**Propósito**: Documentar trabajo de cada iteración
+**Ubicación**: `{agent}/XX-iteration.md`
+
+**Secciones clave**:
+- Context and Scope
+- Work Completed
+- Technical Decisions
+- Blockers Encountered and Resolved
+- Artifacts and Deliverables
+- Evidence and Validation (tests, screenshots, metrics)
+- Coverage Against Requirements
+- Next Steps
+- Quality Checklist
+- Review Status (Arquitecto + Usuario)
+
+---
+
+### 4. `agent-handoff-template.md`
+
+**Usado por**: SOLO Arquitecto
+**Propósito**: Habilitar paralelismo seguro entre agentes
+**Ubicación**: `{source-agent}/handoff-XXX.md`
+
+**Secciones clave**:
+- Important Notice (permisos de lectura)
+- Context (por qué handoff)
+- Information Transfer (qué puede usar el siguiente agente)
+- Constraints (qué NO debe hacer)
+- Coordination Points
+- Verification Checklist
+
+**Ejemplo de uso**:
+```
+Arquitecto prepara: test-agent/handoff-001.md
+Implementer lee: test-agent/handoff-001.md
+    (pero NO lee test-agent/01-iteration.md directamente)
+```
+
+---
+
+### 5. `rls-migration-template.md`
+
+**Usado por**: Supabase Agent
+**Propósito**: Template SQL para políticas RLS
+**Ubicación**: Migraciones SQL
+
+(Técnico, no es PRD)
+
+---
+
+### 6. `_status-template.md`
+
+**Usado por**: Arquitecto (actualiza), Todos leen
+**Propósito**: Status unificado de toda la feature
+**Ubicación**: `_status.md` (raíz de feature)
+
+**Secciones clave**:
+- Estado general de feature
+- Estado por agente (Not Started, In Progress, In Review, Approved, Rejected)
+- Iteraciones completadas por agente
+- Decisiones de aprobación
+- Bloqueadores activos
+- Próximos pasos
 
 ---
 
 ## Convenciones de Naming
 
 ### Identificadores de Feature
-**Formato:** `[domain]-[number]`
-- **domain:** tasks, projects, auth, users, etc.
-- **number:** 001, 002, 003... (secuencial por dominio)
-- **Ejemplos:** `tasks-001`, `auth-003`, `projects-002`
+- **Formato**: `[domain]-[number]`
+- **Ejemplos**: `tasks-001`, `auth-003`, `projects-002`
 
-### Nombres de Directorios
-**Formato:** `[number]-[feature-name-kebab-case]`
-- **Ejemplos:** 
-  - `001-create-task`
-  - `002-user-registration`
-  - `003-project-dashboard`
+### Directorios de Feature
+- **Formato**: `[number]-[feature-name-kebab-case]`
+- **Ejemplos**: `001-create-task`, `002-user-login`, `003-task-comments`
 
-### Nombres de Archivos
-- **PRD Master:** `00-master-prd.md`
-- **Supabase:** `01-supabase-spec.md`
-- **Testing:** `02-test-spec.md`
-- **Implementation:** `03-implementation-spec.md`
-- **UI/UX:** `04-ui-spec.md`
-- **Status:** `_status.md`
+### Carpetas de Agentes
+- **Nombres fijos**: `architect/`, `test-agent/`, `implementer/`, `supabase-agent/`, `ui-ux-expert/`
 
-### Versionado
-- **Versión inicial:** 1.0
-- **Mejoras menores:** 1.1, 1.2, 1.3...
-- **Cambios mayores:** 2.0, 3.0...
+### Archivos de Agentes
+- **Request**: Siempre `00-request.md` (Arquitecto escribe)
+- **Iterations**: `01-iteration.md`, `02-iteration.md`, `03-iteration.md`...
+- **Handoffs**: `handoff-001.md`, `handoff-002.md`...
+- **PRD Master**: Siempre `00-master-prd.md` (solo en `architect/`)
 
 ---
 
-## Roles y Responsabilidades
+## Proceso Detallado por Fase
 
-### 🏗️ Arquitecto (architect-agent)
-**Responsabilidades:**
-- Crear PRD master basado en requisitos del usuario
-- Definir estructura de directorios para la feature
-- Implementar archivo `entities.ts` con schemas de Zod
-- Validar coherencia arquitectónica
-- Coordinar entrega a otros agentes
+### Comandos Útiles
 
-**Artefactos que produce:**
-- `00-master-prd.md`
-- Estructura de directorios
-- `src/features/[feature]/entities.ts`
-
-### 🗄️ Supabase Agent (supabase-agent)
-**Responsabilidades:**
-- Traducir entidades a schema de base de datos
-- Implementar políticas de Row Level Security
-- Crear servicios de acceso a datos
-- Ejecutar migraciones de base de datos
-- Optimizar queries y performance
-
-**Artefactos que produce:**
-- `01-supabase-spec.md`
-- Archivos de migración SQL
-- `src/features/[feature]/services/[feature].service.ts`
-
-### 🧪 Test Agent (test-agent)
-**Responsabilidades:**
-- Crear tests unitarios que fallan apropiadamente
-- Implementar tests de integración de API
-- Configurar mocks y fixtures
-- Definir estrategia de cobertura
-- Validar criterios de aceptación
-
-**Artefactos que produce:**
-- `02-test-spec.md`
-- `src/features/[feature]/use-cases/[use-case].test.ts`
-- `src/app/api/[feature]/route.test.ts`
-
-### ⚙️ Implementer Agent (implementer-agent)
-**Responsabilidades:**
-- Implementar use cases de lógica de negocio
-- Crear API endpoints con validaciones
-- Hacer pasar todos los tests
-- Implementar manejo de errores robusto
-- Optimizar performance de backend
-
-**Artefactos que produce:**
-- `03-implementation-spec.md`
-- `src/features/[feature]/use-cases/[use-case].ts`
-- `src/app/api/[feature]/route.ts`
-
-### 🎨 UI/UX Expert Agent (ui-ux-expert-agent)
-**Responsabilidades:**
-- Crear componentes de React accesibles
-- Implementar páginas con diseño responsivo
-- Integrar con API usando TanStack Query
-- Crear tests end-to-end con Playwright
-- Validar accesibilidad y performance
-
-**Artefactos que produce:**
-- `04-ui-spec.md`
-- `src/features/[feature]/components/[Component].tsx`
-- `src/app/(main)/[feature]/page.tsx`
-- `tests/e2e/[feature].spec.ts`
-
----
-
-## Proceso de Creación
-
-### Paso 1: Preparación
-1. **Identificar el dominio** de la feature (tasks, projects, auth, etc.)
-2. **Asignar número secuencial** dentro del dominio
-3. **Crear directorio** siguiendo convención de naming
-4. **Copiar plantillas** desde `_templates/`
-
-### Paso 2: Ejecución Secuencial
 ```bash
-# 1. Arquitecto crea PRD master
-cp _templates/00-master-prd-template.md tasks/001-create-task/00-master-prd.md
+# 1. Crear estructura completa de feature
+mkdir -p PRDs/tasks/001-create-task/{architect,test-agent,implementer,supabase-agent,ui-ux-expert}
 
-# 2. Supabase Agent implementa DB
-cp _templates/01-supabase-template.md tasks/001-create-task/01-supabase-spec.md
+# 2. Arquitecto: Copiar template de PRD master
+cp PRDs/_templates/00-master-prd-template.md PRDs/tasks/001-create-task/architect/00-master-prd.md
 
-# 3. Test Agent crea tests
-cp _templates/02-test-template.md tasks/001-create-task/02-test-spec.md
+# 3. Arquitecto: Copiar template de request para Test Agent
+cp PRDs/_templates/agent-request-template.md PRDs/tasks/001-create-task/test-agent/00-request.md
 
-# 4. Implementer Agent desarrolla lógica
-cp _templates/03-implementation-template.md tasks/001-create-task/03-implementation-spec.md
+# 4. Test Agent: Copiar template de iteración
+cp PRDs/_templates/agent-iteration-template.md PRDs/tasks/001-create-task/test-agent/01-iteration.md
 
-# 5. UI/UX Expert crea interfaz
-cp _templates/04-ui-template.md tasks/001-create-task/04-ui-spec.md
+# 5. (Opcional) Arquitecto: Copiar template de handoff
+cp PRDs/_templates/agent-handoff-template.md PRDs/tasks/001-create-task/test-agent/handoff-001.md
 
-# 6. Inicializar tracking
-cp _templates/_status-template.md tasks/001-create-task/_status.md
+# 6. Ver status
+cat PRDs/tasks/001-create-task/_status.md
 ```
 
-### Paso 3: Validación y Entrega
-1. **Cada agente** completa su artefacto específico
-2. **Actualiza** el archivo `_status.md` con su progreso
-3. **Valida** que cumple con los criterios de completitud
-4. **Entrega** al siguiente agente en la cadena
+---
+
+## Sistema de Aprobaciones
+
+### Estados Posibles de una Iteración
+
+| Estado | Descripción | Siguiente Paso |
+|--------|-------------|----------------|
+| **In Progress** | Agente trabajando | Esperar notificación de agente |
+| **Ready for Review** | Agente notificó completitud | Arquitecto + Usuario revisan |
+| **Approved** | Aprobado por Arquitecto + Usuario | Continuar siguiente fase |
+| **Rejected** | No cumple requisitos | Agente corrige en nueva iteración |
+
+### Criterios de Aprobación
+
+**Arquitecto evalúa**:
+- ✅ Cumple todos los objetivos de `00-request.md`
+- ✅ Sigue Clean Architecture
+- ✅ Usa solo tech stack canónico
+- ✅ Documentación completa
+- ✅ Decisiones técnicas justificadas
+
+**Usuario evalúa**:
+- ✅ Cumple expectativas de negocio
+- ✅ UX es aceptable (si UI)
+- ✅ Performance es adecuada
+
+### Proceso de Rechazo
+
+```
+1. Arquitecto + Usuario identifican problemas específicos
+   ↓
+2. Arquitecto documenta feedback claro en iteración
+   (sección "Review Status")
+   ↓
+3. Agente lee feedback y corrige
+   ↓
+4. Agente crea NUEVA iteración (02-, 03-...)
+   ↓
+5. Agente notifica: "Iteración X lista para revisión"
+   ↓
+6. Repetir revisión
+```
+
+**Importante**:
+- ❌ NO editar iteraciones anteriores
+- ✅ Crear nueva iteración con correcciones
+- ✅ Documentar qué cambió vs iteración anterior
 
 ---
 
-## Tracking y Monitoreo
+## Handoffs y Paralelismo
 
-### Estados de Feature
-- 🔴 **Not Started:** Aún no se ha iniciado el trabajo
-- 🟡 **In Progress:** Uno o más agentes trabajando activamente
-- 🟢 **Completed:** Todos los agentes han completado su trabajo
-- 🔵 **Testing:** En fase de validación y testing
-- ⚫ **Blocked:** Bloqueado por dependencias o problemas
+### ¿Cuándo Usar Handoffs?
 
-### Estados de Agente
-- ✅ **Completado:** Trabajo terminado y validado
-- 🔄 **En Progreso:** Trabajando activamente
-- ⏳ **Pendiente:** Esperando su turno
-- ❌ **Bloqueado:** No puede continuar por algún impedimento
+**Usar handoff SI**:
+- Trabajo del siguiente agente puede empezar antes de aprobación final
+- Interfaces están suficientemente estables
+- Paralelismo acelera entrega sin riesgo
 
-### Métricas Clave
-- **Progreso general:** Porcentaje de completitud
-- **Cobertura de tests:** Porcentaje de código cubierto
-- **Performance:** Tiempos de respuesta de API
-- **Calidad:** Número de bugs y issues
+**NO usar handoff SI**:
+- Trabajo del agente anterior aún puede cambiar mucho
+- Dependencias son muy acopladas
+- Riesgo de retrabajo es alto
 
-### Reportes Automáticos
-El archivo `_status.md` debe actualizarse:
-- **Diariamente** durante desarrollo activo
-- **Al completar** cada milestone
-- **Cuando hay bloqueadores** o cambios significativos
+### Ejemplo de Handoff
 
----
+```
+Escenario: Test Agent ha definido interfaces estables
 
-## Mejores Prácticas
+1. Arquitecto prepara:
+   test-agent/handoff-001.md
 
-### Para Arquitectos
-1. **Hacer preguntas específicas** para eliminar ambigüedades
-2. **Definir criterios de aceptación claros** y medibles
-3. **Incluir consideraciones de seguridad** desde el inicio
-4. **Validar schemas de Zod** antes de entregar
-5. **Documentar decisiones técnicas** importantes
+2. Handoff contiene:
+   - Interfaces de funciones (signatures)
+   - Contratos de datos (schemas)
+   - Tests que deben pasar
 
-### Para Supabase Agents
-1. **SIEMPRE consultar Context7** antes de crear políticas RLS (OBLIGATORIO)
-2. **Usar rls-migration-template.md** para todas las políticas RLS
-3. **Siempre habilitar RLS** en todas las tablas
-4. **Evitar políticas circulares** usando funciones security definer
-5. **Crear índices ANTES de políticas** en columnas user_id, organization_id
-6. **Ejecutar /validate-rls** después de crear migraciones
-7. **Documentar findings de Context7** en comentarios de migración
-8. **Verificar performance** con EXPLAIN ANALYZE
-9. **Optimizar queries** con índices apropiados
-10. **Probar migraciones** en ambiente de desarrollo
+3. Implementer lee:
+   - implementer/00-request.md (obligatorio)
+   - test-agent/handoff-001.md (opcional, permitido)
 
-### Para Test Agents
-1. **Cubrir todos los criterios de aceptación** con tests
-2. **Incluir casos borde** y validaciones de entrada
-3. **Mockear dependencias externas** apropiadamente
-4. **Mantener tests independientes** y determinísticos
-5. **Documentar estrategia de testing** claramente
+4. Implementer puede empezar MIENTRAS Test Agent itera correcciones
 
-### Para Implementer Agents
-1. **Seguir principios TDD** estrictamente
-2. **Implementar validaciones robustas** de entrada
-3. **Manejar errores** de forma consistente
-4. **Optimizar performance** desde el inicio
-5. **Documentar lógica de negocio compleja**
+5. Si Test Agent es rechazado y interfaces cambian:
+   - Arquitecto actualiza handoff-001.md → handoff-002.md
+   - Notifica a Implementer del cambio
+```
 
-### Para UI/UX Experts
-1. **Priorizar accesibilidad** en todos los componentes
-2. **Implementar diseño responsivo** desde mobile-first
-3. **Optimizar performance** de carga y renderizado
-4. **Crear tests E2E** para flujos críticos
-5. **Mantener consistencia visual** con el design system
+### Reglas de Handoffs
 
-### Generales
-1. **Actualizar `_status.md`** regularmente
-2. **Comunicar bloqueadores** inmediatamente
-3. **Revisar trabajo** de agentes anteriores antes de empezar
-4. **Documentar decisiones** y cambios importantes
-5. **Validar completitud** antes de marcar como terminado
+1. **Solo Arquitecto prepara handoffs**
+2. **Handoffs son read-only para agentes receptores**
+3. **Handoffs se versionan** (handoff-001, handoff-002)
+4. **Handoffs NO reemplazan `00-request.md`** (son complementarios)
+5. **Agentes NO pueden solicitar handoffs** (solo Arquitecto decide)
 
 ---
 
 ## Troubleshooting
 
-### Problemas Comunes
+### Problema: "Agente leyó carpeta de otro agente"
 
-#### "No encuentro la plantilla correcta"
-**Solución:** Todas las plantillas están en `PRDs/_templates/`. Usa la numeración para identificar la correcta:
-- `00-` = Arquitecto
-- `01-` = Supabase Agent
-- `02-` = Test Agent
-- `03-` = Implementer Agent
-- `04-` = UI/UX Expert Agent
+**Solución**:
+- ❌ PROHIBIDO: Agentes solo leen su carpeta
+- ✅ Arquitecto debe preparar handoff si información es necesaria
+- ✅ Rechazar trabajo del agente y corregir
 
-#### "El agente anterior no completó su trabajo"
-**Solución:** 
-1. Revisar `_status.md` para entender el estado
-2. Identificar qué falta específicamente
-3. Comunicar con el agente anterior o escalate
-4. No continuar hasta que las dependencias estén completas
+### Problema: "Agente modificó iteración anterior"
 
-#### "Los tests están fallando después de implementar"
-**Solución:**
-1. Revisar que la implementación sigue exactamente el PRD
-2. Verificar que los mocks están configurados correctamente
-3. Validar que las validaciones de Zod coinciden
-4. Ejecutar tests individualmente para aislar el problema
+**Solución**:
+- ❌ PROHIBIDO: Iteraciones son inmutables
+- ✅ Crear nueva iteración (XX+1)
+- ✅ Documentar cambios vs iteración anterior
 
-#### "La estructura de directorios no coincide"
-**Solución:**
-1. Seguir exactamente la convención de naming
-2. Verificar que el Arquitecto creó la estructura correcta
-3. No crear directorios adicionales sin aprobación
-4. Usar paths absolutos en imports
+### Problema: "No sé si aprobar o rechazar"
 
-#### "El archivo _status.md está desactualizado"
-**Solución:**
-1. Cada agente debe actualizar su sección al completar
-2. Usar la plantilla `_status-template.md` como referencia
-3. Incluir métricas específicas y fechas
-4. Documentar bloqueadores y próximos pasos
+**Solución**:
+1. Revisar checklist de `XX-iteration.md`
+2. Verificar contra `00-request.md`
+3. Consultar PRD master `architect/00-master-prd.md`
+4. Si hay duda, rechazar con feedback específico (mejor rechazar que aprobar con dudas)
 
-### Escalación de Problemas
+### Problema: "Handoff quedó desactualizado"
 
-#### Nivel 1: Auto-resolución
-- Revisar esta guía y las plantillas
-- Verificar trabajo de agentes anteriores
-- Consultar ejemplos en `_examples/`
-
-#### Nivel 2: Comunicación entre agentes
-- Actualizar `_status.md` con el problema
-- Comunicar directamente con agente relevante
-- Documentar la resolución aplicada
-
-#### Nivel 3: Escalación humana
-- Problemas que bloquean múltiples agentes
-- Decisiones que requieren cambios al PRD
-- Problemas de arquitectura fundamental
+**Solución**:
+1. Arquitecto crea handoff-00X+1.md
+2. Arquitecto notifica a agente receptor
+3. Agente receptor ajusta su trabajo según nuevo handoff
 
 ---
 
-## Recursos Adicionales
+## Ejemplos Prácticos
 
-### Enlaces Útiles
-- **Documentación de Arquitectura:** `.trae/rules/project_rules.md`
-- **Guías de Agentes:** `agentes/[agent-name].md`
-- **Ejemplos de Referencia:** `PRDs/_examples/`
+Ver documentos complementarios:
 
-### Comandos Útiles
-```bash
-# Crear nueva feature
-mkdir PRDs/[domain]/[number]-[feature-name]
-
-# Copiar plantillas
-cp PRDs/_templates/*.md PRDs/[domain]/[number]-[feature-name]/
-
-# Verificar estructura
-tree PRDs/[domain]/[number]-[feature-name]
-
-# Buscar ejemplos
-find PRDs/_examples -name "*.md" | head -5
-
-# Validar políticas RLS (CRÍTICO después de crear migraciones)
-/validate-rls
-
-# Validar arquitectura general
-/validate-architecture
-
-# Validar completitud de PRD
-/prd-checklist [domain]/[number]-[feature-name]
-```
-
-### Checklist de Validación
-Antes de marcar una feature como completa:
-
-- [ ] Todos los archivos requeridos están presentes
-- [ ] Cada agente ha completado su checklist específico
-- [ ] El archivo `_status.md` está actualizado
-- [ ] Todos los tests están pasando
-- [ ] La documentación está completa
-- [ ] No hay bloqueadores pendientes
+1. **PRDs/WORKFLOW-ITERATIVO.md**: Workflow paso a paso completo
+2. **PRDs/EJEMPLOS-ITERACIONES.md**: Ejemplos reales de iteraciones
+3. **PRDs/_examples/002-iterative-example/**: Feature completa de ejemplo
 
 ---
 
-**Versión de la Guía:** 1.0  
-**Última Actualización:** [YYYY-MM-DD]  
-**Próxima Revisión:** [YYYY-MM-DD]  
-**Mantenedor:** Arquitecto Principal
+## Resumen: Reglas de Oro
+
+1. **SOLO Arquitecto escribe PRDs master**
+2. **Agentes trabajan en AISLAMIENTO** (solo su carpeta)
+3. **CADA iteración se REVISA antes de avanzar**
+4. **Iteraciones son INMUTABLES** (no editar, crear nueva)
+5. **Handoffs son OPCIONALES** (Arquitecto decide)
+6. **Status es UNIFICADO** (un solo `_status.md` por feature)
+7. **NO assumptions** (si hay duda, preguntar a Arquitecto)
+
+---
+
+**Versión**: 2.0
+**Última Actualización**: 2025-10-24
+**Próxima Revisión**: Después de implementar primera feature con v2.0
+**Mantenedor**: Architect Agent

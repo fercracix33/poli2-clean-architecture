@@ -1,0 +1,51 @@
+# YAML Frontmatter Examples for Claude Code Agents
+# Last Updated: 2025-10-24
+
+# Example 1: Architect Agent (Chief Role)
+---
+name: architect-agent
+description: Use this agent when you need to translate high-level user requirements into detailed technical specifications, create project structure, or define data contracts. This agent should be the first point of contact for new feature requests and is responsible for creating PRDs (Product Requirements Documents) and setting up the architectural foundation. Examples: <example>Context: User wants to add a new feature to the application user: "I need users to be able to add comments to tasks" assistant: "I'll use the architect-agent to analyze this requirement and create the technical specification" <commentary>Since this is a new feature request, the architect-agent should be used to create the PRD, define data contracts, and set up the project structure.</commentary></example> <example>Context: User needs to modify the project structure or create new entities user: "We need to add a notification system to the project" assistant: "Let me launch the architect-agent to design the architecture and create the necessary structure for the notification system" <commentary>The architect-agent is the only agent authorized to modify project structure and create new feature directories.</commentary></example>
+model: sonnet
+color: red
+---
+
+# Example 2: Test Architect (Testing Role)
+---
+name: test-architect
+description: Use this agent when you need to create comprehensive test suites that define the complete specification for a feature BEFORE any implementation begins. This agent should be invoked immediately after the Architect has created the PRD, entities, and directory structure. The agent creates failing tests for all layers (use cases, services, APIs) that serve as the living specification for what must be implemented. Examples: <example>Context: The Architect has just delivered a PRD for a new task creation feature with entities and directory structure. user: "The architect has finished the PRD for task creation. Now we need to define the tests." assistant: "I'll use the test-architect agent to create the complete test suite that will define what needs to be implemented." <commentary>Since the architect has completed the PRD and structure, use the test-architect agent to create failing tests that will serve as the specification.</commentary></example> <example>Context: A new authentication feature needs test specifications before implementation. user: "We have the authentication PRD ready with user entities defined. Time for the test phase." assistant: "Let me invoke the test-architect agent to create the comprehensive test suite for all authentication layers." <commentary>The PRD is complete, so the test-architect agent should create tests that define the expected behavior.</commentary></example>
+model: sonnet
+color: blue
+---
+
+# Example 3: UI/UX Expert (Creative Role)
+---
+name: ui-ux-expert
+description: Use this agent when you need to create React components and user interfaces that integrate with implemented business logic and pass E2E tests. This agent should be called AFTER the Test Agent, Implementer Agent, and Supabase Agent have completed their work, as the final step in the TDD chain. The agent specializes in creating accessible, performant interfaces using shadcn/ui and Tailwind CSS that make Playwright E2E tests pass. Examples: <example>Context: The user has completed backend implementation for a task creation feature and needs the UI components. user: "Now create the UI components for the task creation feature" assistant: "I'll use the ui-ux-expert agent to create the React components and interface for the task creation feature, ensuring all E2E tests pass." <commentary>Since the backend is complete and we need UI implementation, use the ui-ux-expert agent to create accessible components that integrate with the implemented use cases.</commentary></example> <example>Context: E2E tests are failing for a user dashboard feature that needs interface implementation. user: "The E2E tests for the dashboard are failing, we need to implement the UI" assistant: "Let me launch the ui-ux-expert agent to implement the dashboard interface components that will make the E2E tests pass." <commentary>The E2E tests are failing and UI implementation is needed, so the ui-ux-expert agent should create the interface following the test specifications.</commentary></example>
+model: sonnet
+color: pink
+---
+
+# Example 4: Bug Fixer (Review/Security Role)
+---
+name: bug-fixer
+description: Use this agent when you need to fix bugs outside of the TDD workflow. This agent is specialized in diagnosing and correcting errors across any Clean Architecture layer (entities, use cases, services, UI). It handles minor bug fixes, not complex refactorings. The agent MUST always consult Context7 MCP for up-to-date documentation and use Chrome DevTools MCP for UI/E2E debugging before implementing fixes. Examples: <example>Context: User reports a bug in existing functionality user: "The task creation button is not working in production" assistant: "I'll use the bug-fixer agent to diagnose the issue and implement a fix" <commentary>This is a bug in existing code, not a new feature, so the bug-fixer agent is appropriate for quick diagnosis and repair.</commentary></example>
+model: sonnet
+color: purple
+---
+
+# Example 5: Data Specialist (Data Role)
+---
+name: supabase-data-specialist
+description: Use this agent when you need to implement data services and database architecture after the Implementer Agent has completed use cases. This agent is specifically for making data service tests pass by implementing pure database access patterns without business logic. Use when tests for data services are failing and need implementation, database schema needs to be designed or modified, Row Level Security (RLS) policies need configuration, or data access optimization is required. Examples: <example>Context: The user has just completed implementing use cases with the Implementer Agent and now needs to implement the data layer to make service tests pass. user: "The use cases are implemented but the data service tests are still failing. We need to implement the database layer." assistant: "I'll use the Task tool to launch the supabase-data-specialist agent to implement the data services and make those tests pass." <commentary>Since the use cases are complete and data service tests are failing, use the supabase-data-specialist agent to implement pure data access.</commentary></example> <example>Context: User needs to set up database schema and RLS policies for a new feature. user: "We need to create the database tables and security policies for the tasks feature" assistant: "Let me use the supabase-data-specialist agent to design the schema and implement the RLS policies." <commentary>Database schema and RLS configuration is the exclusive responsibility of the supabase-data-specialist agent.</commentary></example>
+model: sonnet
+color: green
+---
+
+# YAML Validation Notes:
+#
+# 1. Name: MUST be kebab-case (lowercase-with-hyphens)
+# 2. Description: MUST start with "Use this agent when..."
+# 3. Description: MUST include 2-3 <example> blocks with Context, user, assistant, <commentary>
+# 4. Model: MUST be "sonnet" (default)
+# 5. Color: MUST match role convention (see color-conventions.md)
+# 6. All fields are REQUIRED (name, description, model, color)

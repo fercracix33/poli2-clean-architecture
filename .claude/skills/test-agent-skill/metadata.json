@@ -1,0 +1,10 @@
+{
+  "name": "test-agent-skill",
+  "version": "1.0.0",
+  "description": "Technical workflow and best practices for test-agent - Comprehensive test suite creation with Vitest, Playwright, and E2E testing",
+  "agent": "test-agent",
+  "technologies": ["Vitest", "Playwright", "@testing-library/react", "Zod", "MSW", "TypeScript", "TDD"],
+  "mcps_required": ["context7"],
+  "references_count": 5,
+  "last_updated": "2025-10-24"
+}

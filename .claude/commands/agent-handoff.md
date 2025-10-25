@@ -1,395 +1,702 @@
 ---
-description: "Automatiza el handoff entre agentes y actualiza _status.md"
-allowed-tools: Bash(cat:*), Bash(sed:*), Bash(date:*)
+description: "Automatiza handoffs en flujo iterativo v2.0 - Arquitecto crea requests, revisa iteraciones, aprueba/rechaza"
+allowed-tools: Bash(cat:*), Bash(sed:*), Bash(date:*), Bash(echo:*), Bash(mkdir:*)
 ---
 
-# Agent Handoff
+# Agent Handoff (Flujo Iterativo v2.0)
 
-Automatizar el proceso de handoff entre agentes especializados en el flujo TDD.
+Automatiza el flujo iterativo donde el Arquitecto coordina, revisa y aprueba el trabajo de cada agente.
 
 ## 🎯 Objetivo
 
-Facilitar la transición entre agentes, actualizando automáticamente el `_status.md` y proporcionando contexto al siguiente agente.
+Facilitar el rol del **Arquitecto como Coordinator & Reviewer**:
+- Crear `00-request.md` para cada agente
+- Registrar aprobaciones/rechazos de iteraciones
+- Actualizar `_status.md` con estado unificado
+- Coordinar handoffs opcionales para paralelismo
 
-## 🔄 Secuencia de Agentes (INMUTABLE)
+## 🔄 Flujo Iterativo (NUEVO)
 
 ```
-Arquitecto → Test Agent → Implementer → Supabase Agent → UI/UX Expert
+Usuario → Arquitecto (PRD Master)
+              ↓
+    ┌─────────────────────┐
+    │   ITERATION LOOP    │
+    │  (Per Agent Phase)  │
+    └─────────────────────┘
+              ↓
+    Arquitecto: /agent-handoff {feature} request {agent}
+              ↓
+    Agente trabaja → crea 01-iteration.md
+              ↓
+    Agente: /agent-handoff {feature} submit {agent} 01
+              ↓
+    Arquitecto + Usuario revisan
+              ↓
+    Arquitecto: /agent-handoff {feature} approve {agent} 01
+                              O
+              /agent-handoff {feature} reject {agent} 01
+              ↓
+    SI APROBADO → Continuar siguiente agente
+    SI RECHAZADO → Agente crea 02-iteration.md
 ```
 
-## 📝 Uso
+## 📝 Comandos Disponibles
+
+### 1. **Crear Request para Agente** (Arquitecto)
 
 ```bash
-# Completar handoff del agente actual
-/agent-handoff   
+/agent-handoff {feature-path} request {agent-name}
 
 # Ejemplos:
-/agent-handoff tasks/001-create-task arquitecto completed
-/agent-handoff tasks/001-create-task test-agent completed
-/agent-handoff tasks/001-create-task implementer in-progress
+/agent-handoff tasks/001-create-task request test-agent
+/agent-handoff tasks/001-create-task request implementer
+/agent-handoff tasks/001-create-task request supabase-agent
 ```
+
+**Qué hace**:
+- ✅ Crea carpeta `{agent}/` si no existe
+- ✅ Copia `agent-request-template.md` a `{agent}/00-request.md`
+- ✅ Actualiza `_status.md` con agente en "🔄 Waiting for Request"
+- ✅ Muestra checklist de qué debe incluir el request
+
+---
+
+### 2. **Agente Envía Iteración para Revisión** (Agente)
+
+```bash
+/agent-handoff {feature-path} submit {agent-name} {iteration-number}
+
+# Ejemplos:
+/agent-handoff tasks/001-create-task submit test-agent 01
+/agent-handoff tasks/001-create-task submit implementer 02
+```
+
+**Qué hace**:
+- ✅ Valida que existe `{agent}/{iteration}-iteration.md`
+- ✅ Actualiza `_status.md` con "📋 Review Pending"
+- ✅ Muestra checklist de revisión para Arquitecto
+
+---
+
+### 3. **Arquitecto Aprueba Iteración** (Arquitecto)
+
+```bash
+/agent-handoff {feature-path} approve {agent-name} {iteration-number}
+
+# Ejemplos:
+/agent-handoff tasks/001-create-task approve test-agent 01
+/agent-handoff tasks/001-create-task approve implementer 01
+```
+
+**Qué hace**:
+- ✅ Actualiza `{agent}/{iteration}-iteration.md` con sección de aprobación
+- ✅ Actualiza `_status.md` con "✅ Approved"
+- ✅ Sugiere crear `00-request.md` para siguiente agente
+- ✅ Ofrece crear handoff opcional
+
+---
+
+### 4. **Arquitecto Rechaza Iteración** (Arquitecto)
+
+```bash
+/agent-handoff {feature-path} reject {agent-name} {iteration-number}
+
+# Ejemplos:
+/agent-handoff tasks/001-create-task reject test-agent 01
+/agent-handoff tasks/001-create-task reject implementer 02
+```
+
+**Qué hace**:
+- ✅ Actualiza `{agent}/{iteration}-iteration.md` con sección de rechazo
+- ✅ Actualiza `_status.md` con "❌ Rejected - Needs Revision"
+- ✅ Incrementa número de iteración esperada
+- ✅ Muestra plantilla para feedback específico
+
+---
+
+### 5. **Crear Handoff para Paralelismo** (Arquitecto - Opcional)
+
+```bash
+/agent-handoff {feature-path} create-handoff {from-agent} {to-agent}
+
+# Ejemplos:
+/agent-handoff tasks/001-create-task create-handoff test-agent implementer
+/agent-handoff tasks/001-create-task create-handoff implementer supabase-agent
+```
+
+**Qué hace**:
+- ✅ Copia `agent-handoff-template.md` a `{from-agent}/handoff-001.md`
+- ✅ Actualiza `_status.md` indicando paralelismo habilitado
+- ✅ Muestra qué interfaces deben documentarse
+
+---
 
 ## 🤖 Agentes Válidos
 
-- `arquitecto` → Architect Agent
-- `test-agent` → Test Agent  
+- `test-agent` → Test Architect
 - `implementer` → Implementer Agent
-- `supabase-agent` → Supabase Agent
-- `ui-ux-agent` → UI/UX Expert Agent
+- `supabase-agent` → Supabase Data Specialist
+- `ui-ux-expert` → UI/UX Expert Agent
 
-## 📊 Status Válidos
+**Nota**: El Arquitecto NO usa este comando para sí mismo (es el coordinador).
 
-- `not-started` - No iniciado
-- `in-progress` - En progreso
-- `completed` - Completado
-- `blocked` - Bloqueado
+---
 
-## 🔧 Implementación del Handoff
+## 📊 Estados en _status.md
+
+```markdown
+## Agent Status
+
+### Test Agent
+- **Status**: ✅ Approved (Iteration 01)
+- **Last Updated**: 2025-10-24
+- **Iterations**: 01 (approved)
+
+### Implementer Agent
+- **Status**: 📋 Review Pending (Iteration 02)
+- **Last Updated**: 2025-10-24
+- **Iterations**: 01 (approved), 02 (pending review)
+
+### Supabase Agent
+- **Status**: 🔄 Waiting for Request
+- **Last Updated**: 2025-10-24
+
+### UI/UX Expert
+- **Status**: ⏸️ Not Started
+- **Last Updated**: -
+```
+
+---
+
+## 🔧 Implementación
 
 ```bash
-# Parsear argumentos
-IFS=' ' read -r PRD_PATH CURRENT_AGENT STATUS <<< "$ARGUMENTS"
+#!/bin/bash
 
-# Validar argumentos
-if [ -z "$PRD_PATH" ] || [ -z "$CURRENT_AGENT" ] || [ -z "$STATUS" ]; then
-    echo "❌ ERROR: Uso incorrecto"
-    echo "Uso: /agent-handoff   "
-    echo "Ejemplo: /agent-handoff tasks/001-create-task arquitecto completed"
+# Parsear argumentos
+IFS=' ' read -r FEATURE_PATH ACTION AGENT_NAME ITERATION <<< "$ARGUMENTS"
+
+# Validar argumentos mínimos
+if [ -z "$FEATURE_PATH" ] || [ -z "$ACTION" ]; then
+    echo "❌ ERROR: Argumentos insuficientes"
+    echo ""
+    echo "Uso:"
+    echo "  /agent-handoff {feature} request {agent}"
+    echo "  /agent-handoff {feature} submit {agent} {iteration}"
+    echo "  /agent-handoff {feature} approve {agent} {iteration}"
+    echo "  /agent-handoff {feature} reject {agent} {iteration}"
+    echo "  /agent-handoff {feature} create-handoff {from-agent} {to-agent}"
+    echo ""
+    echo "Ejemplo:"
+    echo "  /agent-handoff tasks/001-create-task request test-agent"
     exit 1
 fi
 
-PRD_DIR="PRDs/$PRD_PATH"
+PRD_DIR="PRDs/$FEATURE_PATH"
 STATUS_FILE="$PRD_DIR/_status.md"
 
 # Validar que existe el PRD
 if [ ! -d "$PRD_DIR" ]; then
     echo "❌ ERROR: No existe el directorio $PRD_DIR"
+    echo "Primero crea la estructura del PRD con el Arquitecto"
     exit 1
 fi
 
+# Crear _status.md si no existe
 if [ ! -f "$STATUS_FILE" ]; then
-    echo "❌ ERROR: No existe _status.md en $PRD_DIR"
+    echo "📝 Creando _status.md..."
+    cat > "$STATUS_FILE" << 'EOF'
+# Feature Status
+
+**Feature**: [Feature Name]
+**Last Updated**: [Date]
+**Overall Status**: 🔄 In Progress
+
+---
+
+## Agent Status
+
+### Test Agent
+- **Status**: ⏸️ Not Started
+- **Last Updated**: -
+
+### Implementer Agent
+- **Status**: ⏸️ Not Started
+- **Last Updated**: -
+
+### Supabase Agent
+- **Status**: ⏸️ Not Started
+- **Last Updated**: -
+
+### UI/UX Expert
+- **Status**: ⏸️ Not Started
+- **Last Updated**: -
+
+---
+
+## Notes
+
+(Architect notes go here)
+EOF
+fi
+
+CURRENT_DATE=$(date +"%Y-%m-%d %H:%M")
+
+# =========================================
+# COMANDO: request
+# =========================================
+if [ "$ACTION" == "request" ]; then
+    if [ -z "$AGENT_NAME" ]; then
+        echo "❌ ERROR: Falta nombre del agente"
+        echo "Uso: /agent-handoff $FEATURE_PATH request {agent}"
+        exit 1
+    fi
+
+    AGENT_DIR="$PRD_DIR/$AGENT_NAME"
+    REQUEST_FILE="$AGENT_DIR/00-request.md"
+
+    echo "=========================================="
+    echo "📝 CREAR REQUEST PARA AGENTE"
+    echo "=========================================="
+    echo ""
+    echo "Feature: $FEATURE_PATH"
+    echo "Agente: $AGENT_NAME"
+    echo ""
+
+    # Crear directorio del agente si no existe
+    mkdir -p "$AGENT_DIR"
+
+    # Copiar template
+    if [ ! -f "$REQUEST_FILE" ]; then
+        if [ -f "PRDs/_templates/agent-request-template.md" ]; then
+            cp "PRDs/_templates/agent-request-template.md" "$REQUEST_FILE"
+            echo "✅ Template copiado a $REQUEST_FILE"
+        else
+            echo "⚠️  Template no encontrado, creando archivo vacío"
+            touch "$REQUEST_FILE"
+        fi
+    else
+        echo "⚠️  $REQUEST_FILE ya existe, no se sobrescribe"
+    fi
+
+    # Actualizar _status.md
+    sed -i.bak "/^### $(echo $AGENT_NAME | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g')/,/^$/s|- \*\*Status\*\*.*|- **Status**: 🔄 Waiting for Request|" "$STATUS_FILE"
+    sed -i.bak "/^### $(echo $AGENT_NAME | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g')/,/^$/s|- \*\*Last Updated\*\*.*|- **Last Updated**: $CURRENT_DATE|" "$STATUS_FILE"
+    rm -f "$STATUS_FILE.bak"
+
+    echo ""
+    echo "=========================================="
+    echo "📋 PRÓXIMOS PASOS"
+    echo "=========================================="
+    echo ""
+    echo "1. Edita el archivo: $REQUEST_FILE"
+    echo ""
+    echo "2. Incluye las siguientes secciones:"
+    echo "   ✅ Context and Purpose"
+    echo "   ✅ Objectives"
+    echo "   ✅ Detailed Requirements"
+    echo "   ✅ Technical Specifications"
+    echo "   ✅ Expected Deliverables"
+    echo "   ✅ Limitations and Constraints"
+    echo "   ✅ Success Criteria"
+    echo ""
+    echo "3. Una vez completado, el agente puede comenzar su trabajo"
+    echo ""
+
+# =========================================
+# COMANDO: submit
+# =========================================
+elif [ "$ACTION" == "submit" ]; then
+    if [ -z "$AGENT_NAME" ] || [ -z "$ITERATION" ]; then
+        echo "❌ ERROR: Faltan argumentos"
+        echo "Uso: /agent-handoff $FEATURE_PATH submit {agent} {iteration}"
+        exit 1
+    fi
+
+    AGENT_DIR="$PRD_DIR/$AGENT_NAME"
+    ITERATION_FILE="$AGENT_DIR/${ITERATION}-iteration.md"
+
+    echo "=========================================="
+    echo "📤 ENVIAR ITERACIÓN PARA REVISIÓN"
+    echo "=========================================="
+    echo ""
+    echo "Agente: $AGENT_NAME"
+    echo "Iteración: $ITERATION"
+    echo ""
+
+    # Validar que existe el archivo de iteración
+    if [ ! -f "$ITERATION_FILE" ]; then
+        echo "❌ ERROR: No existe $ITERATION_FILE"
+        echo "El agente debe crear el archivo de iteración primero"
+        exit 1
+    fi
+
+    # Actualizar _status.md
+    AGENT_DISPLAY=$(echo $AGENT_NAME | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g')
+    sed -i.bak "/^### $AGENT_DISPLAY/,/^$/s|- \*\*Status\*\*.*|- **Status**: 📋 Review Pending (Iteration $ITERATION)|" "$STATUS_FILE"
+    sed -i.bak "/^### $AGENT_DISPLAY/,/^$/s|- \*\*Last Updated\*\*.*|- **Last Updated**: $CURRENT_DATE|" "$STATUS_FILE"
+    rm -f "$STATUS_FILE.bak"
+
+    echo "✅ Iteración marcada como 'Pendiente de Revisión'"
+    echo ""
+    echo "=========================================="
+    echo "📋 CHECKLIST DE REVISIÓN (Arquitecto)"
+    echo "=========================================="
+    echo ""
+    echo "Revisa el archivo: $ITERATION_FILE"
+    echo ""
+    echo "Verifica:"
+    echo "  [ ] Todos los objetivos de 00-request.md cumplidos"
+    echo "  [ ] Calidad del código/tests/documentación"
+    echo "  [ ] No hay violaciones arquitecturales"
+    echo "  [ ] Evidencia completa (tests, screenshots, etc.)"
+    echo "  [ ] Checklist de calidad marcado"
+    echo ""
+    echo "Luego ejecuta:"
+    echo "  /agent-handoff $FEATURE_PATH approve $AGENT_NAME $ITERATION"
+    echo "  O"
+    echo "  /agent-handoff $FEATURE_PATH reject $AGENT_NAME $ITERATION"
+    echo ""
+
+# =========================================
+# COMANDO: approve
+# =========================================
+elif [ "$ACTION" == "approve" ]; then
+    if [ -z "$AGENT_NAME" ] || [ -z "$ITERATION" ]; then
+        echo "❌ ERROR: Faltan argumentos"
+        echo "Uso: /agent-handoff $FEATURE_PATH approve {agent} {iteration}"
+        exit 1
+    fi
+
+    AGENT_DIR="$PRD_DIR/$AGENT_NAME"
+    ITERATION_FILE="$AGENT_DIR/${ITERATION}-iteration.md"
+
+    echo "=========================================="
+    echo "✅ APROBAR ITERACIÓN"
+    echo "=========================================="
+    echo ""
+    echo "Agente: $AGENT_NAME"
+    echo "Iteración: $ITERATION"
+    echo ""
+
+    if [ ! -f "$ITERATION_FILE" ]; then
+        echo "❌ ERROR: No existe $ITERATION_FILE"
+        exit 1
+    fi
+
+    # Agregar sección de aprobación al archivo de iteración
+    if ! grep -q "^### Architect Review" "$ITERATION_FILE"; then
+        cat >> "$ITERATION_FILE" << EOF
+
+---
+
+## Review Status
+
+**Submitted for Review**: $CURRENT_DATE
+
+### Architect Review
+**Date**: $CURRENT_DATE
+**Status**: Approved ✅
+**Feedback**:
+- All requirements from 00-request.md met
+- Quality is acceptable
+- Ready for next phase
+
+### User Review
+**Date**: $CURRENT_DATE
+**Status**: Approved ✅
+**Feedback**:
+- Business requirements satisfied
+EOF
+    fi
+
+    # Actualizar _status.md
+    AGENT_DISPLAY=$(echo $AGENT_NAME | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g')
+    sed -i.bak "/^### $AGENT_DISPLAY/,/^$/s|- \*\*Status\*\*.*|- **Status**: ✅ Approved (Iteration $ITERATION)|" "$STATUS_FILE"
+    sed -i.bak "/^### $AGENT_DISPLAY/,/^$/s|- \*\*Last Updated\*\*.*|- **Last Updated**: $CURRENT_DATE|" "$STATUS_FILE"
+    rm -f "$STATUS_FILE.bak"
+
+    echo "✅ Iteración $ITERATION aprobada"
+    echo "✅ _status.md actualizado"
+    echo ""
+    echo "=========================================="
+    echo "🎯 PRÓXIMOS PASOS"
+    echo "=========================================="
+    echo ""
+
+    # Determinar siguiente agente
+    case $AGENT_NAME in
+        "test-agent")
+            NEXT_AGENT="implementer"
+            NEXT_AGENT_DISPLAY="Implementer Agent"
+            ;;
+        "implementer")
+            NEXT_AGENT="supabase-agent"
+            NEXT_AGENT_DISPLAY="Supabase Agent"
+            ;;
+        "supabase-agent")
+            NEXT_AGENT="ui-ux-expert"
+            NEXT_AGENT_DISPLAY="UI/UX Expert"
+            ;;
+        "ui-ux-expert")
+            NEXT_AGENT="NONE"
+            NEXT_AGENT_DISPLAY="NONE - Feature Complete!"
+            ;;
+    esac
+
+    if [ "$NEXT_AGENT" == "NONE" ]; then
+        echo "🎉 ¡FEATURE COMPLETADA!"
+        echo ""
+        echo "Pasos finales:"
+        echo "  1. npm run test (validar unit tests)"
+        echo "  2. npm run test:e2e (validar E2E tests)"
+        echo "  3. /validate-architecture (validar Clean Architecture)"
+        echo "  4. Crear PR y solicitar code review"
+    else
+        echo "➡️  Siguiente agente: $NEXT_AGENT_DISPLAY"
+        echo ""
+        echo "Opciones:"
+        echo ""
+        echo "A) Secuencial (recomendado):"
+        echo "   /agent-handoff $FEATURE_PATH request $NEXT_AGENT"
+        echo ""
+        echo "B) Paralelo (avanzado - interfaces estables):"
+        echo "   /agent-handoff $FEATURE_PATH create-handoff $AGENT_NAME $NEXT_AGENT"
+        echo "   /agent-handoff $FEATURE_PATH request $NEXT_AGENT"
+    fi
+    echo ""
+
+# =========================================
+# COMANDO: reject
+# =========================================
+elif [ "$ACTION" == "reject" ]; then
+    if [ -z "$AGENT_NAME" ] || [ -z "$ITERATION" ]; then
+        echo "❌ ERROR: Faltan argumentos"
+        echo "Uso: /agent-handoff $FEATURE_PATH reject {agent} {iteration}"
+        exit 1
+    fi
+
+    AGENT_DIR="$PRD_DIR/$AGENT_NAME"
+    ITERATION_FILE="$AGENT_DIR/${ITERATION}-iteration.md"
+    NEXT_ITERATION=$(printf "%02d" $((10#$ITERATION + 1)))
+
+    echo "=========================================="
+    echo "❌ RECHAZAR ITERACIÓN"
+    echo "=========================================="
+    echo ""
+    echo "Agente: $AGENT_NAME"
+    echo "Iteración: $ITERATION"
+    echo "Siguiente iteración esperada: $NEXT_ITERATION"
+    echo ""
+
+    if [ ! -f "$ITERATION_FILE" ]; then
+        echo "❌ ERROR: No existe $ITERATION_FILE"
+        exit 1
+    fi
+
+    # Agregar plantilla de rechazo
+    if ! grep -q "^### Architect Review" "$ITERATION_FILE"; then
+        cat >> "$ITERATION_FILE" << 'EOF'
+
+---
+
+## Review Status
+
+**Submitted for Review**: [Date]
+
+### Architect Review
+**Date**: [Date]
+**Status**: Rejected ❌
+**Feedback**:
+
+**Issues Found**:
+
+1. **[Issue Title]** (SEVERITY: CRITICAL/HIGH/MEDIUM)
+   - **Location**: [Exact file and line number]
+   - **Problem**: [Detailed description of what's wrong]
+   - **Required Fix**: [Step-by-step correction needed]
+   - **Example**: [Code snippet or expected behavior]
+
+2. **[Issue Title]** (SEVERITY: CRITICAL/HIGH/MEDIUM)
+   - **Location**: ...
+   - **Problem**: ...
+   - **Required Fix**: ...
+
+**Action Required**:
+Please create iteration XX addressing these issues.
+
+### User Review
+**Date**: Pending
+**Status**: Waiting for corrections
+**Feedback**: Will review after Architect approval
+EOF
+    fi
+
+    # Actualizar _status.md
+    AGENT_DISPLAY=$(echo $AGENT_NAME | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g')
+    sed -i.bak "/^### $AGENT_DISPLAY/,/^$/s|- \*\*Status\*\*.*|- **Status**: ❌ Rejected - Needs Revision (Iteration $ITERATION)|" "$STATUS_FILE"
+    sed -i.bak "/^### $AGENT_DISPLAY/,/^$/s|- \*\*Last Updated\*\*.*|- **Last Updated**: $CURRENT_DATE|" "$STATUS_FILE"
+    rm -f "$STATUS_FILE.bak"
+
+    echo "⚠️  Iteración $ITERATION rechazada"
+    echo ""
+    echo "=========================================="
+    echo "📝 ACCIONES REQUERIDAS"
+    echo "=========================================="
+    echo ""
+    echo "1. Edita $ITERATION_FILE"
+    echo "   Completa la sección '## Review Status' con:"
+    echo "   - Issues específicos encontrados"
+    echo "   - Ubicación exacta (archivo:línea)"
+    echo "   - Correcciones requeridas"
+    echo ""
+    echo "2. El agente debe:"
+    echo "   - Leer el feedback en $ITERATION_FILE"
+    echo "   - Crear $AGENT_DIR/${NEXT_ITERATION}-iteration.md"
+    echo "   - Corregir todos los issues"
+    echo "   - Ejecutar: /agent-handoff $FEATURE_PATH submit $AGENT_NAME $NEXT_ITERATION"
+    echo ""
+
+# =========================================
+# COMANDO: create-handoff
+# =========================================
+elif [ "$ACTION" == "create-handoff" ]; then
+    FROM_AGENT="$AGENT_NAME"
+    TO_AGENT="$ITERATION"
+
+    if [ -z "$FROM_AGENT" ] || [ -z "$TO_AGENT" ]; then
+        echo "❌ ERROR: Faltan argumentos"
+        echo "Uso: /agent-handoff $FEATURE_PATH create-handoff {from-agent} {to-agent}"
+        exit 1
+    fi
+
+    FROM_DIR="$PRD_DIR/$FROM_AGENT"
+    HANDOFF_FILE="$FROM_DIR/handoff-001.md"
+
+    echo "=========================================="
+    echo "🔗 CREAR HANDOFF (Paralelismo)"
+    echo "=========================================="
+    echo ""
+    echo "Desde: $FROM_AGENT"
+    echo "Hacia: $TO_AGENT"
+    echo ""
+
+    mkdir -p "$FROM_DIR"
+
+    # Copiar template
+    if [ ! -f "$HANDOFF_FILE" ]; then
+        if [ -f "PRDs/_templates/agent-handoff-template.md" ]; then
+            cp "PRDs/_templates/agent-handoff-template.md" "$HANDOFF_FILE"
+            echo "✅ Template copiado a $HANDOFF_FILE"
+        else
+            echo "⚠️  Template no encontrado, creando archivo vacío"
+            touch "$HANDOFF_FILE"
+        fi
+    else
+        echo "⚠️  $HANDOFF_FILE ya existe"
+    fi
+
+    echo ""
+    echo "=========================================="
+    echo "📋 COMPLETA EL HANDOFF"
+    echo "=========================================="
+    echo ""
+    echo "Edita: $HANDOFF_FILE"
+    echo ""
+    echo "Incluye:"
+    echo "  ✅ Stable Interfaces (function signatures)"
+    echo "  ✅ Data Contracts (input/output types)"
+    echo "  ✅ Service Interfaces (methods to call)"
+    echo "  ✅ Constraints (assumptions, limitations)"
+    echo "  ✅ Coordination Notes (what if interfaces change)"
+    echo ""
+    echo "El agente $TO_AGENT podrá leer este handoff y comenzar en paralelo"
+    echo ""
+
+else
+    echo "❌ ERROR: Acción desconocida: $ACTION"
+    echo ""
+    echo "Acciones válidas:"
+    echo "  - request"
+    echo "  - submit"
+    echo "  - approve"
+    echo "  - reject"
+    echo "  - create-handoff"
     exit 1
 fi
-
-echo "=========================================="
-echo "🔄 AGENT HANDOFF: $CURRENT_AGENT"
-echo "=========================================="
-echo ""
-
-# Determinar el nombre legible del agente
-case $CURRENT_AGENT in
-    "arquitecto")
-        AGENT_NAME="Arquitecto (Architect)"
-        NEXT_AGENT="Test Agent"
-        AGENT_DOC="00-master-prd.md"
-        ;;
-    "test-agent")
-        AGENT_NAME="Test Agent"
-        NEXT_AGENT="Implementer Agent"
-        AGENT_DOC="02-test-spec.md"
-        ;;
-    "implementer")
-        AGENT_NAME="Implementer Agent"
-        NEXT_AGENT="Supabase Agent"
-        AGENT_DOC="03-implementation-spec.md"
-        ;;
-    "supabase-agent")
-        AGENT_NAME="Supabase Agent"
-        NEXT_AGENT="UI/UX Expert Agent"
-        AGENT_DOC="01-supabase-spec.md"
-        ;;
-    "ui-ux-agent")
-        AGENT_NAME="UI/UX Expert Agent"
-        NEXT_AGENT="NINGUNO (Feature Completa)"
-        AGENT_DOC="04-ui-spec.md"
-        ;;
-    *)
-        echo "❌ ERROR: Agente desconocido: $CURRENT_AGENT"
-        exit 1
-        ;;
-esac
-
-# Mostrar info del handoff
-echo "📋 PRD: $PRD_PATH"
-echo "👤 Agente Actual: $AGENT_NAME"
-echo "📄 Documento: $AGENT_DOC"
-echo "📊 Status: $STATUS"
-echo "➡️  Siguiente: $NEXT_AGENT"
-echo ""
 ```
 
-### 1. ACTUALIZAR _status.md
+---
+
+## 💡 Ejemplos de Flujo Completo
+
+### Flujo Secuencial (Normal)
 
 ```bash
-echo "=== ACTUALIZANDO _status.md ==="
+# 1. Arquitecto crea PRD master y entities.ts
+# (manual)
 
-# Obtener fecha actual
-CURRENT_DATE=$(date +"%Y-%m-%d")
+# 2. Arquitecto crea request para Test Agent
+/agent-handoff tasks/001-create-task request test-agent
 
-# Preparar el status del agente según el formato requerido
-case $STATUS in
-    "completed")
-        STATUS_EMOJI="✅"
-        STATUS_TEXT="Completed"
-        ;;
-    "in-progress")
-        STATUS_EMOJI="🔄"
-        STATUS_TEXT="In Progress"
-        ;;
-    "blocked")
-        STATUS_EMOJI="🚫"
-        STATUS_TEXT="Blocked"
-        ;;
-    "not-started")
-        STATUS_EMOJI="⏸️"
-        STATUS_TEXT="Not Started"
-        ;;
-    *)
-        echo "❌ ERROR: Status inválido: $STATUS"
-        exit 1
-        ;;
-esac
+# 3. Test Agent trabaja, crea 01-iteration.md
+# (manual)
 
-# Actualizar la línea del agente en _status.md
-# Formato: - **Architect**: ✅ Completed (2025-01-15)
+# 4. Test Agent envía para revisión
+/agent-handoff tasks/001-create-task submit test-agent 01
 
-# Buscar y reemplazar la línea del agente
-if grep -q "**$AGENT_NAME**" "$STATUS_FILE"; then
-    # Agente ya existe, actualizar
-    sed -i.bak "s|- \*\*$AGENT_NAME\*\*.*|- **$AGENT_NAME**: $STATUS_EMOJI $STATUS_TEXT ($CURRENT_DATE)|" "$STATUS_FILE"
-    echo "  ✅ Status actualizado para $AGENT_NAME"
-else
-    echo "  ⚠️  No se encontró entrada para $AGENT_NAME en _status.md"
-    echo "  📝 Agregando entrada..."
-    
-    # Agregar nueva entrada en la sección de Agent Status
-    # Buscar la línea "## Agent Status" y agregar después
-    sed -i.bak "/^## Agent Status/a\\
-- **$AGENT_NAME**: $STATUS_EMOJI $STATUS_TEXT ($CURRENT_DATE)" "$STATUS_FILE"
-fi
+# 5. Arquitecto + Usuario revisan y aprueban
+/agent-handoff tasks/001-create-task approve test-agent 01
 
-# Actualizar Last Updated
-sed -i.bak "s|^**Last Updated:**.*|**Last Updated:** $CURRENT_DATE|" "$STATUS_FILE"
+# 6. Arquitecto crea request para Implementer
+/agent-handoff tasks/001-create-task request implementer
 
-# Si el agente está completed, actualizar el Overall Status
-if [ "$STATUS" == "completed" ]; then
-    # Contar cuántos agentes están completed
-    COMPLETED_COUNT=$(grep -c "✅ Completed" "$STATUS_FILE")
-    
-    if [ "$COMPLETED_COUNT" -ge 5 ]; then
-        sed -i.bak "s|^**Status:**.*|**Status:** ✅ Completed|" "$STATUS_FILE"
-        echo "  🎉 ¡TODOS LOS AGENTES COMPLETADOS! Feature lista."
-    else
-        sed -i.bak "s|^**Status:**.*|**Status:** 🔄 In Progress|" "$STATUS_FILE"
-    fi
-fi
-
-# Limpiar backup
-rm -f "$STATUS_FILE.bak"
-
-echo "  ✅ _status.md actualizado"
-echo ""
+# 7. Implementer trabaja...
+# (continúa el ciclo)
 ```
 
-### 2. VALIDAR ENTREGABLES DEL AGENTE
+---
+
+### Flujo con Rechazo
 
 ```bash
-echo "=== VALIDANDO ENTREGABLES ==="
+# Test Agent envía iteración
+/agent-handoff tasks/001-create-task submit test-agent 01
 
-case $CURRENT_AGENT in
-    "arquitecto")
-        # Validar que exista 00-master-prd.md completo
-        if [ -f "$PRD_DIR/00-master-prd.md" ]; then
-            echo "  ✅ 00-master-prd.md existe"
-        else
-            echo "  ❌ FALTA: 00-master-prd.md"
-        fi
-        
-        # Validar entities.ts
-        FEATURE_NAME=$(basename "$PRD_PATH")
-        if [ -f "app/src/features/$FEATURE_NAME/entities.ts" ]; then
-            echo "  ✅ entities.ts creado"
-        else
-            echo "  ⚠️  entities.ts no encontrado - verificar feature name"
-        fi
-        ;;
-        
-    "test-agent")
-        # Validar que existan archivos .test.ts
-        FEATURE_NAME=$(basename "$PRD_PATH")
-        TEST_COUNT=$(find "app/src/features/$FEATURE_NAME" -name "*.test.ts" 2>/dev/null | wc -l)
-        
-        if [ "$TEST_COUNT" -gt 0 ]; then
-            echo "  ✅ Tests creados ($TEST_COUNT archivos)"
-        else
-            echo "  ❌ No se encontraron archivos .test.ts"
-        fi
-        
-        # Validar 02-test-spec.md
-        if [ -f "$PRD_DIR/02-test-spec.md" ]; then
-            echo "  ✅ 02-test-spec.md existe"
-        else
-            echo "  ❌ FALTA: 02-test-spec.md"
-        fi
-        ;;
-        
-    "implementer")
-        # Validar que existan use-cases
-        FEATURE_NAME=$(basename "$PRD_PATH")
-        USECASE_COUNT=$(find "app/src/features/$FEATURE_NAME/use-cases" -name "*.ts" ! -name "*.test.ts" 2>/dev/null | wc -l)
-        
-        if [ "$USECASE_COUNT" -gt 0 ]; then
-            echo "  ✅ Use cases implementados ($USECASE_COUNT archivos)"
-        else
-            echo "  ❌ No se encontraron use cases"
-        fi
-        ;;
-        
-    "supabase-agent")
-        # Validar que existan services
-        FEATURE_NAME=$(basename "$PRD_PATH")
-        if [ -f "app/src/features/$FEATURE_NAME/services/"*.service.ts ]; then
-            echo "  ✅ Services implementados"
-        else
-            echo "  ❌ No se encontraron services"
-        fi
-        
-        # Validar migrations
-        MIGRATION_COUNT=$(find "app/supabase/migrations" -name "*.sql" 2>/dev/null | wc -l)
-        echo "  📊 Migraciones encontradas: $MIGRATION_COUNT"
-        ;;
-        
-    "ui-ux-agent")
-        # Validar componentes
-        FEATURE_NAME=$(basename "$PRD_PATH")
-        COMPONENT_COUNT=$(find "app/src/features/$FEATURE_NAME/components" -name "*.tsx" 2>/dev/null | wc -l)
-        
-        if [ "$COMPONENT_COUNT" -gt 0 ]; then
-            echo "  ✅ Componentes creados ($COMPONENT_COUNT archivos)"
-        else
-            echo "  ❌ No se encontraron componentes"
-        fi
-        
-        # Validar tests E2E
-        E2E_COUNT=$(find "app/e2e" -name "*${FEATURE_NAME}*.spec.ts" 2>/dev/null | wc -l)
-        if [ "$E2E_COUNT" -gt 0 ]; then
-            echo "  ✅ Tests E2E creados ($E2E_COUNT archivos)"
-        else
-            echo "  ⚠️  No se encontraron tests E2E"
-        fi
-        ;;
-esac
+# Arquitecto encuentra problemas y rechaza
+/agent-handoff tasks/001-create-task reject test-agent 01
 
-echo ""
+# Test Agent corrige y crea 02-iteration.md
+/agent-handoff tasks/001-create-task submit test-agent 02
+
+# Arquitecto aprueba
+/agent-handoff tasks/001-create-task approve test-agent 02
 ```
 
-### 3. GENERAR HANDOFF SUMMARY
+---
+
+### Flujo con Paralelismo (Avanzado)
 
 ```bash
-echo "=========================================="
-echo "📊 HANDOFF SUMMARY"
-echo "=========================================="
-echo ""
-echo "✅ Agente: $AGENT_NAME"
-echo "✅ Status actualizado: $STATUS_TEXT"
-echo "✅ Fecha: $CURRENT_DATE"
-echo ""
+# Test Agent en iteración 02 (aún corrigiendo)
+# Pero interfaces ya son estables
 
-if [ "$STATUS" == "completed" ]; then
-    echo "🎯 PRÓXIMO PASO:"
-    echo ""
-    if [ "$NEXT_AGENT" == "NINGUNO (Feature Completa)" ]; then
-        echo "  🎉 ¡FEATURE COMPLETADA!"
-        echo "  📋 Pasos finales:"
-        echo "     1. Ejecutar todos los tests: npm run test"
-        echo "     2. Ejecutar E2E: npm run test:e2e"
-        echo "     3. Validar arquitectura: /validate-architecture"
-        echo "     4. Crear PR y solicitar code review"
-    else
-        echo "  ➡️  Siguiente agente: $NEXT_AGENT"
-        echo ""
-        echo "  📝 El $NEXT_AGENT debe:"
-        
-        case $NEXT_AGENT in
-            "Test Agent")
-                echo "     1. Leer PRD master (00-master-prd.md)"
-                echo "     2. Copiar template: 02-test-template.md"
-                echo "     3. Crear tests que FALLEN para todas las capas"
-                echo "     4. Configurar mocks apropiados"
-                echo "     5. Ejecutar: /agent-handoff $PRD_PATH test-agent completed"
-                ;;
-            "Implementer Agent")
-                echo "     1. Leer tests del Test Agent"
-                echo "     2. Implementar use cases para pasar tests"
-                echo "     3. NO modificar tests"
-                echo "     4. Validar cobertura >90%"
-                echo "     5. Ejecutar: /agent-handoff $PRD_PATH implementer completed"
-                ;;
-            "Supabase Agent")
-                echo "     1. Leer especificación de services"
-                echo "     2. Crear schema de base de datos"
-                echo "     3. Implementar RLS policies"
-                echo "     4. Implementar services puros (solo CRUD)"
-                echo "     5. Ejecutar: /agent-handoff $PRD_PATH supabase-agent completed"
-                ;;
-            "UI/UX Expert Agent")
-                echo "     1. Leer especificación de UI"
-                echo "     2. Crear componentes con shadcn/ui"
-                echo "     3. Implementar tests E2E"
-                echo "     4. Validar accesibilidad WCAG 2.1 AA"
-                echo "     5. Ejecutar: /agent-handoff $PRD_PATH ui-ux-agent completed"
-                ;;
-        esac
-    fi
-fi
+# Arquitecto crea handoff
+/agent-handoff tasks/001-create-task create-handoff test-agent implementer
 
-echo ""
-echo "=========================================="
+# Arquitecto crea request para Implementer (usa handoff)
+/agent-handoff tasks/001-create-task request implementer
+
+# Ahora Test Agent e Implementer trabajan EN PARALELO
 ```
 
-## 🚨 Casos Especiales
+---
 
-### Handoff con Status "blocked"
+## 🚨 Notas Importantes
 
-Si un agente se bloquea:
-
-```bash
-/agent-handoff tasks/001-create-task implementer blocked
-
-# Esto actualizará el status pero NO pasará al siguiente agente
-# El Arquitecto debe investigar y resolver el bloqueo
-```
-
-### Reiniciar Handoff
-
-Si necesitas reiniciar un agente:
-
-```bash
-/agent-handoff tasks/001-create-task test-agent not-started
-
-# Esto marca el agente como "not-started" y permite volver a ejecutarlo
-```
-
-## 💡 Integración con Workflow
-
-Este comando se integra con el workflow TDD:
-
-```bash
-# 1. Arquitecto completa su trabajo
-/agent-handoff tasks/001-create-task arquitecto completed
-
-# 2. Test Agent completa tests
-/agent-handoff tasks/001-create-task test-agent completed
-
-# 3. Implementer completa use cases
-/agent-handoff tasks/001-create-task implementer completed
-
-# 4. Supabase Agent completa services
-/agent-handoff tasks/001-create-task supabase-agent completed
-
-# 5. UI/UX Expert completa UI
-/agent-handoff tasks/001-create-task ui-ux-agent completed
-
-# 🎉 Feature completada!
-```
+1. **Solo Arquitecto crea requests**: Los agentes NO escriben sus propios `00-request.md`
+2. **Iteraciones numeradas**: 01, 02, 03... para trazabilidad completa
+3. **Feedback específico**: Al rechazar, siempre incluir ubicación exacta y fix requerido
+4. **Handoffs son opcionales**: Solo usar cuando interfaces son estables
+5. **_status.md es fuente única**: Refleja estado real de todos los agentes

@@ -1,0 +1,20 @@
+{
+  "name": "architect-agent-skill",
+  "version": "1.0.0",
+  "description": "Technical workflow and best practices for architect-agent - PRD creation, entity design, iteration review, and agent coordination",
+  "agent": "architect-agent",
+  "technologies": [
+    "Zod",
+    "TypeScript",
+    "Next.js",
+    "Supabase",
+    "Clean Architecture",
+    "TDD"
+  ],
+  "mcps_required": [
+    "context7",
+    "supabase"
+  ],
+  "references_count": 5,
+  "last_updated": "2025-10-24"
+}
