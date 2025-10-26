@@ -299,6 +299,189 @@ npm run test:watch -- src/features/{feature}/use-cases/
 
 ---
 
+### PHASE 2.5: Implement CASL Ability (IF Authorization Required)
+
+**When to include**: If tests include `defineAbilitiesFor()` tests, implement the ability builder.
+
+**Location**: `app/src/features/{feature}/abilities/defineAbility.ts`
+
+**Purpose**: Implement client-side authorization logic that determines what users can do.
+
+#### Step 2.5.1: Implement defineAbilitiesFor()
+
+**Template pattern**:
+
+```typescript
+import { AbilityBuilder, createMongoAbility } from '@casl/ability';
+import type { AppAbility, DefineAbilityInput, Actions, Subjects } from '../entities';
+
+/**
+ * Build CASL ability based on user role and permissions
+ *
+ * CRITICAL: This logic must MATCH the RLS policies in the database.
+ * CASL is for UX (hiding buttons), RLS is for security (actual enforcement).
+ */
+export function defineAbilitiesFor({
+  user,
+  workspace,
+  permissions,
+}: DefineAbilityInput): AppAbility {
+  const { can, cannot, build } = new AbilityBuilder<AppAbility>(createMongoAbility);
+
+  // ===== OWNER BYPASS =====
+  // Owner has full access to everything in their workspace
+  if (user.id === workspace.owner_id) {
+    can('manage', 'all');
+    return build();
+  }
+
+  // ===== SUPER ADMIN BYPASS (with restrictions) =====
+  // Super Admin has elevated access but with certain restrictions
+  const orgId = workspace.parent_id || workspace.id;
+  const isSuperAdmin = user.superAdminOrgs?.includes(orgId);
+
+  if (isSuperAdmin) {
+    can('manage', 'all');
+
+    // Restrictions: Things Super Admin CANNOT do
+    cannot('delete', 'Organization');
+    cannot('remove', 'Permission', { role: 'owner' });
+    cannot('transfer', 'Ownership');
+
+    return build();
+  }
+
+  // ===== NORMAL USERS: Map permissions to abilities =====
+  permissions.forEach((perm) => {
+    const [resource, action] = perm.full_name.split('.');
+    const subject = mapResourceToSubject(resource);
+
+    // Add conditional permissions if they exist
+    if (perm.conditions) {
+      can(action as Actions, subject, perm.conditions);
+    } else {
+      can(action as Actions, subject);
+    }
+  });
+
+  return build();
+}
+
+/**
+ * Convert database resource names to CASL subjects
+ * Database uses snake_case, plural (boards)
+ * CASL uses PascalCase, singular (Board)
+ */
+function mapResourceToSubject(resource: string): Subjects {
+  const mapping: Record<string, Subjects> = {
+    'boards': 'Board',
+    'cards': 'Card',
+    'comments': 'Comment',
+    'custom_fields': 'CustomField',
+    'labels': 'Label',
+  };
+
+  return mapping[resource] || 'all';
+}
+```
+
+#### Step 2.5.2: Implement loadUserAbility Use Case
+
+**Location**: `app/src/features/{feature}/use-cases/loadUserAbility.ts`
+
+**Purpose**: Server-side use case to load user's ability object.
+
+```typescript
+import { defineAbilitiesFor } from '../abilities/defineAbility';
+import type { AppAbility } from '../entities';
+import type { UserService } from '@/features/users/services/user.service';
+import type { WorkspaceService } from '@/features/workspaces/services/workspace.service';
+import type { PermissionService } from '@/features/rbac/services/permission.service';
+
+export async function loadUserAbility(
+  userId: string,
+  workspaceId: string,
+  services: {
+    userService: UserService;
+    workspaceService: WorkspaceService;
+    permissionService: PermissionService;
+  }
+): Promise<AppAbility> {
+  // 1. Load user data
+  const user = await services.userService.getById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  // 2. Load workspace data
+  const workspace = await services.workspaceService.getById(workspaceId);
+  if (!workspace) {
+    throw new Error('Workspace not found');
+  }
+
+  // 3. Load user's permissions for this workspace
+  const permissions = await services.permissionService.getUserPermissions(
+    userId,
+    workspaceId
+  );
+
+  // 4. Build and return ability
+  return defineAbilitiesFor({
+    user,
+    workspace,
+    permissions,
+  });
+}
+```
+
+#### Step 2.5.3: CASL Implementation Checklist
+
+- [ ] ✅ defineAbilitiesFor() signature matches entities.ts
+- [ ] ✅ Owner bypass implemented (can('manage', 'all'))
+- [ ] ✅ Super Admin bypass with restrictions implemented
+- [ ] ✅ Normal user permission mapping implemented
+- [ ] ✅ Resource-to-subject mapping function created
+- [ ] ✅ Conditional permissions handled (if applicable)
+- [ ] ✅ Field-level permissions handled (if applicable)
+- [ ] ✅ loadUserAbility() use case implemented
+- [ ] ✅ All CASL ability tests pass
+- [ ] ✅ No tests were modified
+
+**Critical Rules**:
+- ✅ CASL logic MUST match RLS policies (defense in depth)
+- ✅ Owner always gets `can('manage', 'all')`
+- ✅ Super Admin gets `can('manage', 'all')` with explicit `cannot()` restrictions
+- ✅ Normal users map permissions via `permissions.forEach()`
+- ❌ NEVER implement business logic in ability builder (pure authorization only)
+- ❌ NEVER trust CASL alone for security (RLS is the actual enforcement)
+
+**Coordination with Supabase Agent**:
+- Your `defineAbilitiesFor()` logic defines WHAT users can do
+- Supabase Agent's RLS policies ENFORCE the same rules at database level
+- Architect will ensure both agents implement the SAME authorization logic
+- If logic differs, it's a BUG that must be fixed
+
+**Example of CASL + RLS Alignment**:
+
+```typescript
+// CASL (your code):
+if (user.id === workspace.owner_id) {
+  can('delete', 'Board');
+}
+
+// RLS (Supabase Agent's code):
+CREATE POLICY "Owner can delete boards"
+  ON boards FOR DELETE
+  USING (auth.uid() = (
+    SELECT owner_id FROM workspaces
+    WHERE id = boards.workspace_id
+  ));
+```
+
+Both implement the same rule: only workspace owners can delete boards.
+
+---
+
 ### PHASE 3: Implement API Endpoints (GREEN Phase)
 
 **Principle**: API endpoints are THIN controllers that orchestrate use cases.

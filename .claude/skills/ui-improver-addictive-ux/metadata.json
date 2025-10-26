@@ -1,0 +1,24 @@
+{
+  "name": "ui-improver-addictive-ux",
+  "version": "2.0.0",
+  "description": "Complete workflow for creating addictive, delightful user experiences with STYLE_GUIDE integration, Context7 best practices, and Chrome DevTools verification",
+  "agent": "ui-improver",
+  "technologies": [
+    "Tailwind CSS",
+    "Framer Motion",
+    "shadcn/ui",
+    "Aceternity UI",
+    "React",
+    "Next.js",
+    "TypeScript",
+    "WCAG 2.1",
+    "Chrome DevTools"
+  ],
+  "mcps_required": [
+    "context7",
+    "chrome-devtools",
+    "shadcn"
+  ],
+  "references_count": 6,
+  "last_updated": "2025-10-26"
+}

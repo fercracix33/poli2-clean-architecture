@@ -1,0 +1,24 @@
+{
+  "name": "bug-fixer-diagnostic",
+  "version": "2.0.0",
+  "description": "Advanced diagnostic workflow and debugging best practices for bug-fixer agent with mandatory Context7 consultations",
+  "agent": "bug-fixer",
+  "technologies": [
+    "Playwright",
+    "Vitest",
+    "Zod",
+    "Supabase",
+    "PostgreSQL",
+    "RLS",
+    "Next.js",
+    "React",
+    "TypeScript"
+  ],
+  "mcps_required": [
+    "context7",
+    "chrome-devtools",
+    "supabase"
+  ],
+  "references_count": 6,
+  "last_updated": "2025-10-26"
+}

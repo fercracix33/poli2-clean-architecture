@@ -27,6 +27,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Server State**: TanStack Query (useEffect for data fetching is PROHIBITED)
 - **Client State**: Zustand (only for non-server state like UI state)
 - **Validation**: Zod (mandatory for all network boundaries and forms)
+- **Authorization**: CASL (@casl/ability + @casl/react) - Client-side authorization logic for UI visibility and permissions
 
 ### Mandatory Clean Architecture Layers
 
@@ -56,6 +57,13 @@ app/src/
 │       │   └── createTask.test.ts  # Vitest tests
 │       ├── services/       # Data access layer (Interface Adapter)
 │       │   └── task.service.ts     # Supabase code ONLY here
+│       ├── abilities/      # CASL ability definitions (IF feature has authorization)
+│       │   ├── defineAbility.ts
+│       │   └── defineAbility.test.ts
+│       ├── context/        # React context providers (IF needed)
+│       │   └── AbilityContext.tsx
+│       ├── hooks/          # Custom React hooks (IF needed)
+│       │   └── useAppAbility.ts
 │       └── entities.ts     # Zod schemas & types (Entity Layer)
 ├── lib/                    # Shared utilities
 └── components/ui/          # Generic shadcn components
@@ -143,6 +151,7 @@ Usuario → Arquitecto (PRD Master)
 - **Information Translator**: Agents read ONLY their folder; Arquitecto bridges information
 - **Architecture Guardian**: ONLY agent authorized to modify project directory structure
 - **Entity Implementation**: Implement pure `entities.ts` files with Zod schemas and TypeScript types
+- **CASL Types Definition**: Define AppAbility type and ability function signatures in entities.ts for features requiring authorization
 - **Coherence Maintenance**: Ensure consistency across all agent deliverables
 
 **Strict Limitations:**
@@ -180,6 +189,7 @@ Usuario → Arquitecto (PRD Master)
 - **Interface Definition**: Define expected function signatures before they exist
 - **Mock Configuration**: Set up all external dependency mocks (Supabase client, etc.)
 - **E2E Specification**: Define complete user workflows with Playwright (navigation → interaction → assertion)
+- **CASL Ability Tests**: Unit tests for defineAbilitiesFor() and E2E tests verifying <Can> component visibility (if authorization required)
 - **Failure Validation**: Ensure all tests fail with "function not defined" initially (E2E fail with "page not found")
 - **Handoff Preparation**: (Optional) If requested, prepare `handoff-001.md` for Implementer
 
@@ -221,6 +231,7 @@ Usuario → Arquitecto (PRD Master)
 - **Use Cases Only**: Implement pure business logic orchestration
 - **Test Compliance**: Make use case tests pass without modifying them
 - **Validation Logic**: Create business rules, authorization, input validation
+- **CASL Ability Implementation**: Implement defineAbilitiesFor() and loadUserAbility() use cases for authorized features
 - **Service Orchestration**: Coordinate calls to data services (without implementing them)
 - **Error Handling**: Implement specific error handling and propagation
 - **Handoff Preparation**: (Optional) If requested, prepare `handoff-001.md` for Supabase Agent
@@ -262,7 +273,7 @@ Usuario → Arquitecto (PRD Master)
 - **Iterative Development**: Create `01-iteration.md`, then `02-`, `03-`... if corrections needed
 - **Data Services Only**: Implement pure CRUD operations and data access
 - **Database Schema**: Design tables, relationships, constraints, indexes
-- **RLS Implementation**: Row Level Security policies for multi-tenant isolation
+- **RLS Implementation**: Row Level Security policies for multi-tenant isolation (NOT responsible for CASL - only database-level security)
 - **Query Optimization**: Efficient database queries and performance tuning
 - **Migration Management**: Database schema versioning and evolution
 - **Handoff Preparation**: (Optional) If requested, prepare `handoff-001.md` for UI/UX Expert
@@ -304,6 +315,7 @@ Usuario → Arquitecto (PRD Master)
 - **Iterative Development**: Create `01-iteration.md`, then `02-`, `03-`... if corrections needed
 - **React Components**: UI components using only approved stack (shadcn/ui, Tailwind)
 - **E2E Test Compliance**: Make Playwright E2E tests pass without modifying them
+- **CASL React Integration**: Implement AbilityContext, useAppAbility hook, and <Can> component usage for authorized features
 - **Accessibility**: WCAG 2.1 AA compliance mandatory
 - **User Experience**: Loading states, error handling, responsive design
 - **Performance**: Core Web Vitals optimization and efficient rendering
@@ -421,6 +433,49 @@ Each feature follows strict layered architecture:
 - Supabase client configuration in `lib/supabase.ts` and `lib/supabase-server.ts`
 - Row Level Security (RLS) MANDATORY for data access control
 - Organization-based multi-tenancy with role-based permissions
+
+### Authorization (Defense in Depth)
+
+**CRITICAL**: Authorization uses a two-layer approach for security:
+
+#### Layer 1: CASL (Client-Side - UX Layer)
+- **Purpose**: UI visibility, optimistic checks, better UX
+- **Location**: `features/{feature}/abilities/`
+- **Usage**: React components use `<Can>` or `ability.can()` to hide/show UI elements
+- **Security Level**: NOT trusted (client can manipulate)
+- **Performance**: Prevents unnecessary API calls
+
+#### Layer 2: RLS Policies (Server-Side - Security Layer)
+- **Purpose**: Actual security enforcement at database level
+- **Location**: Supabase database policies
+- **Usage**: PostgreSQL evaluates `auth.uid()` and workspace context
+- **Security Level**: TRUSTED (cannot be bypassed)
+- **Performance**: Executes on every query
+
+**Critical Rules**:
+- ✅ CASL and RLS must implement THE SAME authorization logic
+- ✅ CASL checks come FIRST (prevent API calls user can't access)
+- ✅ RLS is the FINAL authority (security enforcement)
+- ❌ NEVER rely on CASL alone for security
+- ❌ NEVER implement business logic in CASL (it's only for checks)
+
+**Example Flow**:
+```
+User clicks "Delete Board" button
+  ↓
+1. CASL: ability.can('delete', 'Board')?
+   → NO: Button disabled, API call prevented ✋
+   → YES: Continue ✅
+  ↓
+2. API Call: DELETE /api/boards/123
+  ↓
+3. Use Case: Calls boardService.delete(123, userId)
+  ↓
+4. RLS Policy: Executes at Supabase
+   → Check: auth.uid() = board.owner_id?
+   → NO: PostgreSQL rejects query 🛑
+   → YES: Delete succeeds ✅
+```
 
 ## Critical Rules
 

@@ -72,7 +72,12 @@
       "mcp__supabase__search_docs",
       "Bash(chmod:*)",
       "Bash(./scripts/validate-agent.sh:*)",
-      "Skill(agent-creator)"
+      "Skill(agent-creator)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(if [ -d \"C:\\Users\\Usuario\\Desktop\\programación\\poli2\\PRDs\\_analysis\" ])",
+      "Bash(then echo \"Directory exists\")",
+      "Bash(else echo \"Directory does not exist\")",
+      "Bash(fi)"
     ],
     "deny": [],
     "ask": []

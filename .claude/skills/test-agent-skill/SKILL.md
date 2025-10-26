@@ -361,6 +361,298 @@ describe('createEntity', () => {
 
 ---
 
+### PHASE 2.5: Create CASL Ability Tests (IF Authorization Required)
+
+**File**: `app/src/features/{feature}/abilities/defineAbility.test.ts`
+
+**Purpose**: Define authorization behavior for permission-based features (will FAIL: defineAbilitiesFor not defined).
+
+**When to include**: If PRD specifies permission checks, role-based access, or Owner/Super Admin rules.
+
+#### Step 2.5.1: Test Structure Template
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { defineAbilitiesFor } from './defineAbility';
+import type { User, Workspace, Permission } from '../entities';
+
+describe('defineAbilitiesFor', () => {
+  // RED phase: This should fail initially
+  it('should not be defined yet (RED phase)', () => {
+    expect(defineAbilitiesFor).toBeUndefined();
+  });
+
+  // These tests will fail until Implementer creates the function
+  describe('Owner bypass', () => {
+    it('Owner can manage all resources', () => {
+      const owner: User = {
+        id: 'owner-id',
+        email: 'owner@test.com',
+      };
+      const workspace: Workspace = {
+        id: 'workspace-id',
+        owner_id: 'owner-id',
+      };
+
+      const ability = defineAbilitiesFor({
+        user: owner,
+        workspace,
+        permissions: [],
+      });
+
+      expect(ability.can('manage', 'all')).toBe(true);
+      expect(ability.can('delete', 'Board')).toBe(true);
+      expect(ability.can('create', 'Card')).toBe(true);
+    });
+  });
+
+  describe('Super Admin', () => {
+    it('Super Admin can manage most resources', () => {
+      const superAdmin: User = {
+        id: 'admin-id',
+        email: 'admin@test.com',
+        superAdminOrgs: ['org-id'],
+      };
+      const workspace: Workspace = {
+        id: 'workspace-id',
+        owner_id: 'different-owner-id',
+        parent_id: 'org-id', // Part of org where user is Super Admin
+      };
+
+      const ability = defineAbilitiesFor({
+        user: superAdmin,
+        workspace,
+        permissions: [],
+      });
+
+      expect(ability.can('manage', 'all')).toBe(true);
+      expect(ability.can('read', 'Board')).toBe(true);
+      expect(ability.can('update', 'Card')).toBe(true);
+    });
+
+    it('Super Admin cannot delete Organization', () => {
+      const superAdmin: User = {
+        id: 'admin-id',
+        email: 'admin@test.com',
+        superAdminOrgs: ['org-id'],
+      };
+      const workspace: Workspace = {
+        id: 'workspace-id',
+        owner_id: 'different-owner-id',
+        parent_id: 'org-id',
+      };
+
+      const ability = defineAbilitiesFor({
+        user: superAdmin,
+        workspace,
+        permissions: [],
+      });
+
+      expect(ability.can('delete', 'Organization')).toBe(false);
+    });
+
+    it('Super Admin cannot remove Owner permissions', () => {
+      const superAdmin: User = {
+        id: 'admin-id',
+        email: 'admin@test.com',
+        superAdminOrgs: ['org-id'],
+      };
+      const workspace: Workspace = {
+        id: 'workspace-id',
+        owner_id: 'different-owner-id',
+        parent_id: 'org-id',
+      };
+
+      const ability = defineAbilitiesFor({
+        user: superAdmin,
+        workspace,
+        permissions: [],
+      });
+
+      expect(ability.can('remove', 'Permission', { role: 'owner' })).toBe(false);
+    });
+  });
+
+  describe('Permission-based access', () => {
+    it('User with boards.create permission can create boards', () => {
+      const user: User = {
+        id: 'user-id',
+        email: 'user@test.com',
+      };
+      const workspace: Workspace = {
+        id: 'workspace-id',
+        owner_id: 'different-owner-id',
+      };
+      const permissions: Permission[] = [
+        { id: '1', full_name: 'boards.create', user_id: 'user-id' },
+      ];
+
+      const ability = defineAbilitiesFor({ user, workspace, permissions });
+
+      expect(ability.can('create', 'Board')).toBe(true);
+    });
+
+    it('User with boards.update permission can update boards', () => {
+      const user: User = {
+        id: 'user-id',
+        email: 'user@test.com',
+      };
+      const workspace: Workspace = {
+        id: 'workspace-id',
+        owner_id: 'different-owner-id',
+      };
+      const permissions: Permission[] = [
+        { id: '1', full_name: 'boards.update', user_id: 'user-id' },
+      ];
+
+      const ability = defineAbilitiesFor({ user, workspace, permissions });
+
+      expect(ability.can('update', 'Board')).toBe(true);
+      expect(ability.can('delete', 'Board')).toBe(false); // No delete permission
+    });
+
+    it('User without permission cannot access resource', () => {
+      const user: User = {
+        id: 'user-id',
+        email: 'user@test.com',
+      };
+      const workspace: Workspace = {
+        id: 'workspace-id',
+        owner_id: 'different-owner-id',
+      };
+      const permissions: Permission[] = []; // No permissions
+
+      const ability = defineAbilitiesFor({ user, workspace, permissions });
+
+      expect(ability.can('create', 'Board')).toBe(false);
+      expect(ability.can('read', 'Board')).toBe(false);
+      expect(ability.can('update', 'Board')).toBe(false);
+      expect(ability.can('delete', 'Board')).toBe(false);
+    });
+  });
+
+  describe('Conditional permissions', () => {
+    it('User can only update own cards', () => {
+      const user: User = {
+        id: 'user-id',
+        email: 'user@test.com',
+      };
+      const workspace: Workspace = {
+        id: 'workspace-id',
+        owner_id: 'different-owner-id',
+      };
+      const permissions: Permission[] = [
+        { id: '1', full_name: 'cards.update', user_id: 'user-id', conditions: { user_id: 'user-id' } },
+      ];
+
+      const ability = defineAbilitiesFor({ user, workspace, permissions });
+
+      expect(ability.can('update', 'Card', { user_id: 'user-id' })).toBe(true);
+      expect(ability.can('update', 'Card', { user_id: 'other-user-id' })).toBe(false);
+    });
+  });
+});
+```
+
+#### Step 2.5.2: E2E Tests for CASL Visibility
+
+**File**: `e2e/{feature}/authorization.spec.ts`
+
+**Purpose**: Verify `<Can>` component correctly hides/shows UI based on abilities.
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+test.describe('Board authorization', () => {
+  test('user without delete permission cannot see delete button', async ({ page }) => {
+    // Login as user WITHOUT boards.delete permission
+    await page.goto('/login');
+    await page.fill('[name="email"]', 'viewer@test.com');
+    await page.fill('[name="password"]', 'password');
+    await page.click('button[type="submit"]');
+
+    // Navigate to boards page
+    await page.goto('/boards/123');
+
+    // Delete button should NOT exist in DOM
+    const deleteButton = page.getByRole('button', { name: /delete/i });
+    await expect(deleteButton).not.toBeVisible();
+  });
+
+  test('user with delete permission sees delete button', async ({ page }) => {
+    // Login as user WITH boards.delete permission
+    await page.goto('/login');
+    await page.fill('[name="email"]', 'editor@test.com');
+    await page.fill('[name="password"]', 'password');
+    await page.click('button[type="submit"]');
+
+    // Navigate to boards page
+    await page.goto('/boards/123');
+
+    // Delete button SHOULD be visible
+    const deleteButton = page.getByRole('button', { name: /delete/i });
+    await expect(deleteButton).toBeVisible();
+  });
+
+  test('Owner sees all action buttons', async ({ page }) => {
+    // Login as workspace Owner
+    await page.goto('/login');
+    await page.fill('[name="email"]', 'owner@test.com');
+    await page.fill('[name="password"]', 'password');
+    await page.click('button[type="submit"]');
+
+    // Navigate to boards page
+    await page.goto('/boards/123');
+
+    // All buttons should be visible
+    await expect(page.getByRole('button', { name: /create/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /edit/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /delete/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /settings/i })).toBeVisible();
+  });
+
+  test('user without access is redirected or sees empty state', async ({ page }) => {
+    // Login as user from different organization
+    await page.goto('/login');
+    await page.fill('[name="email"]', 'outsider@test.com');
+    await page.fill('[name="password"]', 'password');
+    await page.click('button[type="submit"]');
+
+    // Try to navigate to boards page
+    await page.goto('/boards/123');
+
+    // Should redirect to 403 or show "No access" message
+    await expect(page).toHaveURL(/\/(403|forbidden|no-access)/);
+    // OR
+    await expect(page.getByText(/you don't have access/i)).toBeVisible();
+  });
+});
+```
+
+#### Step 2.5.3: CASL Test Checklist
+
+- [ ] ✅ defineAbilitiesFor() initially undefined (RED phase)
+- [ ] ✅ Owner can manage 'all' resources
+- [ ] ✅ Super Admin can manage 'all' with restrictions
+- [ ] ✅ Super Admin cannot delete Organization
+- [ ] ✅ Super Admin cannot remove Owner permissions
+- [ ] ✅ User with permission can perform action
+- [ ] ✅ User without permission cannot perform action
+- [ ] ✅ Conditional permissions tested (if applicable)
+- [ ] ✅ Field-level permissions tested (if applicable)
+- [ ] ✅ E2E tests verify <Can> component visibility
+- [ ] ✅ E2E tests cover all user roles (Owner, Super Admin, Editor, Viewer)
+- [ ] ✅ E2E tests verify unauthorized access handling
+
+**Critical Rules**:
+- ❌ DON'T test CASL library itself (trust it works)
+- ✅ DO test your defineAbilitiesFor() logic
+- ✅ DO test that abilities match PRD requirements
+- ✅ DO test Owner/Super Admin special cases
+- ✅ DO verify E2E visibility matches abilities
+
+---
+
 ### PHASE 3: Create Service Tests
 
 **Files**: `app/src/features/{feature}/services/{entity}.service.test.ts`

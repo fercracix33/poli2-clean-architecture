@@ -78,6 +78,14 @@ mcp__supabase__execute_sql({
 - Organization-level or user-level access?
 - Should RLS follow existing patterns?
 
+**🔐 AUTHORIZATION IMPLEMENTATION** (If feature requires permissions)
+- Does this feature require permission checks? (if yes, CASL needed)
+- What actions need authorization? (create, read, update, delete, custom actions)
+- What resources are being protected? (boards, cards, comments, etc.)
+- Are there conditional permissions? (e.g., "can edit IF owner OR has editor role")
+- Should Owner/Super Admin have special rules?
+- Field-level permissions needed? (e.g., hide sensitive fields for certain roles)
+
 **⚙️ FUNCTIONAL REQUIREMENTS**
 - All CRUD operations needed?
 - Edge cases to handle?
@@ -247,6 +255,64 @@ export const EntityUpdateSchema = EntitySchema
 export type Entity = z.infer<typeof EntitySchema>;
 export type EntityCreate = z.infer<typeof EntityCreateSchema>;
 export type EntityUpdate = z.infer<typeof EntityUpdateSchema>;
+```
+
+#### CASL Types (IF Authorization Required)
+
+**When to include**: If the feature requires permission checks (e.g., "only owners can delete", "editors can modify", etc.)
+
+**Add to entities.ts**:
+```typescript
+// ===== CASL Integration =====
+import { MongoAbility } from '@casl/ability';
+
+// Define subjects (resources being protected)
+// IMPORTANT: Use PascalCase, singular form (boards → Board)
+export type Subjects =
+  | 'Board'    // Maps to database table 'boards'
+  | 'Card'     // Maps to database table 'cards'
+  | 'Comment'  // Maps to database table 'comments'
+  | 'all';     // Special: represents all resources
+
+// Define actions (what users can do)
+export type Actions =
+  | 'create'
+  | 'read'
+  | 'update'
+  | 'delete'
+  | 'move'     // Custom action example
+  | 'archive'  // Custom action example
+  | 'manage';  // Special: superuser action (all actions)
+
+// Export ability type
+export type AppAbility = MongoAbility<[Actions, Subjects]>;
+
+// Define ability builder signature (Implementer will implement this)
+export interface DefineAbilityInput {
+  user: User;
+  workspace: Workspace;
+  permissions: Permission[];  // From RBAC system
+}
+
+export type DefineAbilityFunction = (input: DefineAbilityInput) => AppAbility;
+```
+
+**Critical CASL Design Rules**:
+- ✅ Subjects are PascalCase, singular (`Board` not `boards`)
+- ✅ Actions are lowercase verbs (`delete` not `Delete`)
+- ✅ Include `'all'` subject for Owner/Super Admin bypass
+- ✅ Include `'manage'` action for full access
+- ✅ Custom actions OK (e.g., `'move'` for Kanban cards)
+- ❌ DON'T implement the ability builder here (Implementer's job)
+- ❌ DON'T add business logic to types (pure contracts only)
+
+**Subject Mapping Convention**:
+```
+Database Table → CASL Subject
+boards         → 'Board'
+cards          → 'Card'
+comments       → 'Comment'
+custom_fields  → 'CustomField'
 ```
 
 #### Section 8: RLS Policies

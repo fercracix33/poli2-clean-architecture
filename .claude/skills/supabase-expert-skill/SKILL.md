@@ -170,6 +170,108 @@ Validate implementation and prepare handoff to UI/UX Expert.
 
 ---
 
+## CASL and RLS Coordination (Defense in Depth)
+
+**CRITICAL**: If the feature uses CASL for client-side authorization, your RLS policies must implement THE SAME authorization logic.
+
+### Your Responsibility
+
+You are **NOT responsible for implementing CASL** (Implementer Agent handles that). However, you **MUST ensure RLS policies mirror CASL logic** for defense in depth.
+
+### How CASL and RLS Work Together
+
+**CASL (Client-Side - UX Layer)**:
+- Purpose: Hide/show UI elements, prevent unnecessary API calls
+- Implementation: Implementer Agent implements `defineAbilitiesFor()`
+- Security Level: NOT trusted (client can manipulate)
+- Performance: Prevents unnecessary API calls
+
+**RLS (Server-Side - Security Layer)**:
+- Purpose: Actual security enforcement at database level
+- Implementation: YOU implement PostgreSQL policies
+- Security Level: TRUSTED (cannot be bypassed)
+- Performance: Executes on every query
+
+### Coordination Requirements
+
+**CRITICAL RULES**:
+- ✅ Your RLS policies MUST implement the SAME logic as CASL
+- ✅ Compare RLS SQL to `defineAbilitiesFor()` implementation before completing
+- ✅ Test that bypassing CASL cannot bypass RLS (defense in depth)
+- ❌ NEVER assume CASL protects data (it only improves UX)
+- ❌ NEVER implement looser RLS than CASL (security gap)
+- ❌ NEVER implement stricter RLS than CASL without coordinating (UX breaks)
+
+### Example Alignment
+
+**CASL Logic (from Implementer Agent)**:
+```typescript
+// defineAbilitiesFor() in features/{feature}/abilities/defineAbility.ts
+if (user.id === workspace.owner_id) {
+  can('delete', 'Board');
+}
+
+permissions.forEach((perm) => {
+  if (perm.full_name === 'boards.delete') {
+    can('delete', 'Board');
+  }
+});
+```
+
+**RLS Policy (YOUR implementation)**:
+```sql
+-- mirrors the same Owner + Permission logic
+CREATE POLICY "Users can delete boards"
+  ON boards
+  FOR DELETE
+  USING (
+    -- Owner can delete
+    auth.uid() = (
+      SELECT owner_id FROM workspaces
+      WHERE id = boards.workspace_id
+    )
+    OR
+    -- User with boards.delete permission can delete
+    EXISTS (
+      SELECT 1 FROM permissions p
+      JOIN workspace_roles wr ON wr.role_id = p.role_id
+      WHERE wr.user_id = auth.uid()
+        AND wr.workspace_id = boards.workspace_id
+        AND p.full_name = 'boards.delete'
+    )
+  );
+```
+
+### Validation Checklist
+
+Before marking your iteration complete:
+
+- [ ] ✅ Read `features/{feature}/abilities/defineAbility.ts` (if it exists)
+- [ ] ✅ Compare CASL Owner bypass logic to RLS Owner checks
+- [ ] ✅ Compare CASL Super Admin restrictions to RLS restrictions
+- [ ] ✅ Compare CASL permission mapping to RLS permission checks
+- [ ] ✅ Verify conditional permissions match in both layers
+- [ ] ✅ Test that CASL saying "YES" → RLS also allows (UX works)
+- [ ] ✅ Test that CASL saying "NO" → API call fails at RLS (security works)
+
+### Communication with Implementer
+
+**If you find misalignment**:
+1. Document the discrepancy in your iteration document
+2. Ask Architect to clarify authorization requirements
+3. Coordinate with Implementer to align both layers
+4. DO NOT proceed with conflicting logic
+
+**Example discrepancy**:
+```
+ISSUE: CASL allows Super Admin to delete Organizations,
+but PRD says Super Admin should NOT be able to delete Organizations.
+
+ACTION: Asked Architect to clarify. Waiting for confirmation before implementing RLS.
+```
+
+---
+
 ## Reference Files (Load on Demand)
 
 **Core Workflow** (read sequentially):
