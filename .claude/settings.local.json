@@ -77,7 +77,9 @@
       "Bash(if [ -d \"C:\\Users\\Usuario\\Desktop\\programación\\poli2\\PRDs\\_analysis\" ])",
       "Bash(then echo \"Directory exists\")",
       "Bash(else echo \"Directory does not exist\")",
-      "Bash(fi)"
+      "Bash(fi)",
+      "Skill(architect-agent-skill)",
+      "Skill(test-agent-skill)"
     ],
     "deny": [],
     "ask": []
