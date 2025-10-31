@@ -10,6 +10,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
 
+// UUID constants for consistent test data
+const VALID_USER_UUID = '123e4567-e89b-12d3-a456-426614174000';
+const VALID_WORKSPACE_UUID = '223e4567-e89b-12d3-a456-426614174000';
+const VALID_OWNER_ROLE_UUID = '00000000-0000-0000-0000-000000000001';
+const VALID_ADMIN_ROLE_UUID = '00000000-0000-0000-0000-000000000002';
+const VALID_MEMBER_ROLE_UUID = '00000000-0000-0000-0000-000000000003';
+const VALID_INVITER_UUID = '323e4567-e89b-12d3-a456-426614174000';
+const VALID_MEMBER_2_UUID = '423e4567-e89b-12d3-a456-426614174000';
+const VALID_ADMIN_UUID = '523e4567-e89b-12d3-a456-426614174000';
+
 // This import will FAIL - function doesn't exist yet
 // @ts-expect-error - Function not implemented yet (TDD RED phase)
 import { assignRole } from './assignRole';
@@ -28,9 +38,32 @@ vi.mock('../services/workspace.service', () => ({
   },
 }));
 
+// Import mocked services
+import { roleService } from '../services/role.service';
+import { workspaceService } from '../services/workspace.service';
+
 describe('assignRole', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Configure mock to return assignment based on input
+    vi.mocked(roleService.assignRole).mockImplementation(async (input) => ({
+      workspace_id: input.workspace_id,
+      user_id: input.user_id,
+      role_id: input.role_id,
+      invited_by: input.invited_by,
+      joined_at: '2025-01-28T12:00:00.000Z',
+    }));
+
+    vi.mocked(workspaceService.getWorkspaceById).mockResolvedValue({
+      id: VALID_WORKSPACE_UUID,
+      name: 'Test Workspace',
+      owner_id: VALID_INVITER_UUID,
+      created_at: '2025-01-28T12:00:00.000Z',
+      updated_at: '2025-01-28T12:00:00.000Z',
+    });
+
+    vi.mocked(roleService.getWorkspaceMembership).mockResolvedValue(null);
   });
 
   describe('RED phase check', () => {
@@ -44,28 +77,28 @@ describe('assignRole', () => {
   describe('happy path', () => {
     it('should assign role to user in workspace', async () => {
       const assignmentData = {
-        workspace_id: 'workspace-123',
-        user_id: 'user-456',
-        role_id: 'admin-role-id',
-        invited_by: 'owner-123',
+        workspace_id: VALID_WORKSPACE_UUID,
+        user_id: VALID_USER_UUID,
+        role_id: VALID_ADMIN_ROLE_UUID,
+        invited_by: VALID_INVITER_UUID,
       };
 
       // Expected: This will FAIL with "assignRole is not defined"
       const assignment = await assignRole(assignmentData);
 
-      expect(assignment.workspace_id).toBe('workspace-123');
-      expect(assignment.user_id).toBe('user-456');
-      expect(assignment.role_id).toBe('admin-role-id');
-      expect(assignment.invited_by).toBe('owner-123');
+      expect(assignment.workspace_id).toBe(VALID_WORKSPACE_UUID);
+      expect(assignment.user_id).toBe(VALID_USER_UUID);
+      expect(assignment.role_id).toBe(VALID_ADMIN_ROLE_UUID);
+      expect(assignment.invited_by).toBe(VALID_INVITER_UUID);
       expect(assignment.joined_at).toBeDefined();
     });
 
     it('should return assignment with timestamp', async () => {
       const assignmentData = {
-        workspace_id: 'workspace-123',
-        user_id: 'user-456',
-        role_id: 'member-role-id',
-        invited_by: 'owner-123',
+        workspace_id: VALID_WORKSPACE_UUID,
+        user_id: VALID_USER_UUID,
+        role_id: VALID_MEMBER_ROLE_UUID,
+        invited_by: VALID_INVITER_UUID,
       };
 
       // Expected: This will FAIL with "assignRole is not defined"
@@ -76,14 +109,14 @@ describe('assignRole', () => {
     });
 
     it('should allow assigning any valid system role', async () => {
-      const roles = ['owner-role-id', 'admin-role-id', 'member-role-id'];
+      const roles = [VALID_OWNER_ROLE_UUID, VALID_ADMIN_ROLE_UUID, VALID_MEMBER_ROLE_UUID];
 
       for (const role_id of roles) {
         const assignmentData = {
-          workspace_id: 'workspace-123',
-          user_id: 'user-456',
+          workspace_id: VALID_WORKSPACE_UUID,
+          user_id: VALID_USER_UUID,
           role_id,
-          invited_by: 'owner-123',
+          invited_by: VALID_INVITER_UUID,
         };
 
         // Expected: This will FAIL with "assignRole is not defined"
@@ -97,9 +130,9 @@ describe('assignRole', () => {
     it('should validate all fields are UUIDs', async () => {
       const invalidData = {
         workspace_id: 'not-uuid',
-        user_id: 'user-456',
-        role_id: 'admin-role-id',
-        invited_by: 'owner-123',
+        user_id: VALID_USER_UUID,
+        role_id: VALID_ADMIN_ROLE_UUID,
+        invited_by: VALID_INVITER_UUID,
       };
 
       // Expected: This will FAIL with "assignRole is not defined"
@@ -109,9 +142,9 @@ describe('assignRole', () => {
     it('should require workspace_id', async () => {
       const invalidData = {
         // workspace_id missing
-        user_id: 'user-456',
-        role_id: 'admin-role-id',
-        invited_by: 'owner-123',
+        user_id: VALID_USER_UUID,
+        role_id: VALID_ADMIN_ROLE_UUID,
+        invited_by: VALID_INVITER_UUID,
       } as any;
 
       // Expected: This will FAIL with "assignRole is not defined"
@@ -120,10 +153,10 @@ describe('assignRole', () => {
 
     it('should require user_id', async () => {
       const invalidData = {
-        workspace_id: 'workspace-123',
+        workspace_id: VALID_WORKSPACE_UUID,
         // user_id missing
-        role_id: 'admin-role-id',
-        invited_by: 'owner-123',
+        role_id: VALID_ADMIN_ROLE_UUID,
+        invited_by: VALID_INVITER_UUID,
       } as any;
 
       // Expected: This will FAIL with "assignRole is not defined"
@@ -132,10 +165,10 @@ describe('assignRole', () => {
 
     it('should require role_id', async () => {
       const invalidData = {
-        workspace_id: 'workspace-123',
-        user_id: 'user-456',
+        workspace_id: VALID_WORKSPACE_UUID,
+        user_id: VALID_USER_UUID,
         // role_id missing
-        invited_by: 'owner-123',
+        invited_by: VALID_INVITER_UUID,
       } as any;
 
       // Expected: This will FAIL with "assignRole is not defined"
@@ -144,9 +177,9 @@ describe('assignRole', () => {
 
     it('should require invited_by', async () => {
       const invalidData = {
-        workspace_id: 'workspace-123',
-        user_id: 'user-456',
-        role_id: 'admin-role-id',
+        workspace_id: VALID_WORKSPACE_UUID,
+        user_id: VALID_USER_UUID,
+        role_id: VALID_ADMIN_ROLE_UUID,
         // invited_by missing
       } as any;
 
@@ -158,10 +191,10 @@ describe('assignRole', () => {
   describe('business rules', () => {
     it('should fail if workspace does not exist', async () => {
       const assignmentData = {
-        workspace_id: 'non-existent-workspace',
-        user_id: 'user-456',
-        role_id: 'admin-role-id',
-        invited_by: 'owner-123',
+        workspace_id: '00000000-0000-0000-0000-999999999999',
+        user_id: VALID_USER_UUID,
+        role_id: VALID_ADMIN_ROLE_UUID,
+        invited_by: VALID_INVITER_UUID,
       };
 
       // Expected: This will FAIL with "assignRole is not defined"
@@ -171,10 +204,10 @@ describe('assignRole', () => {
 
     it('should fail if role does not exist', async () => {
       const assignmentData = {
-        workspace_id: 'workspace-123',
-        user_id: 'user-456',
-        role_id: 'non-existent-role',
-        invited_by: 'owner-123',
+        workspace_id: VALID_WORKSPACE_UUID,
+        user_id: VALID_USER_UUID,
+        role_id: '00000000-0000-0000-0000-999999999999',
+        invited_by: VALID_INVITER_UUID,
       };
 
       // Expected: This will FAIL with "assignRole is not defined"
@@ -183,21 +216,21 @@ describe('assignRole', () => {
     });
 
     it('should allow assigning same user to multiple workspaces', async () => {
-      const userId = 'user-123';
+      const userId = VALID_USER_UUID;
 
       // Expected: This will FAIL with "assignRole is not defined"
       const assignment1 = await assignRole({
-        workspace_id: 'workspace-1',
+        workspace_id: VALID_WORKSPACE_UUID,
         user_id: userId,
-        role_id: 'member-role-id',
-        invited_by: 'owner-1',
+        role_id: VALID_MEMBER_ROLE_UUID,
+        invited_by: VALID_INVITER_UUID,
       });
 
       const assignment2 = await assignRole({
-        workspace_id: 'workspace-2',
+        workspace_id: '333e4567-e89b-12d3-a456-426614174000',
         user_id: userId,
-        role_id: 'admin-role-id',
-        invited_by: 'owner-2',
+        role_id: VALID_ADMIN_ROLE_UUID,
+        invited_by: VALID_INVITER_UUID,
       });
 
       expect(assignment1.user_id).toBe(userId);
@@ -206,33 +239,33 @@ describe('assignRole', () => {
     });
 
     it('should allow different roles in different workspaces', async () => {
-      const userId = 'user-123';
+      const userId = VALID_USER_UUID;
 
       // Expected: This will FAIL with "assignRole is not defined"
       const assignment1 = await assignRole({
-        workspace_id: 'workspace-1',
+        workspace_id: VALID_WORKSPACE_UUID,
         user_id: userId,
-        role_id: 'member-role-id',
-        invited_by: 'owner-1',
+        role_id: VALID_MEMBER_ROLE_UUID,
+        invited_by: VALID_INVITER_UUID,
       });
 
       const assignment2 = await assignRole({
-        workspace_id: 'workspace-2',
+        workspace_id: '333e4567-e89b-12d3-a456-426614174000',
         user_id: userId,
-        role_id: 'admin-role-id',
-        invited_by: 'owner-2',
+        role_id: VALID_ADMIN_ROLE_UUID,
+        invited_by: VALID_INVITER_UUID,
       });
 
-      expect(assignment1.role_id).toBe('member-role-id');
-      expect(assignment2.role_id).toBe('admin-role-id');
+      expect(assignment1.role_id).toBe(VALID_MEMBER_ROLE_UUID);
+      expect(assignment2.role_id).toBe(VALID_ADMIN_ROLE_UUID);
     });
 
     it('should prevent duplicate assignments (same user, same workspace)', async () => {
       const assignmentData = {
-        workspace_id: 'workspace-123',
-        user_id: 'user-456',
-        role_id: 'member-role-id',
-        invited_by: 'owner-123',
+        workspace_id: VALID_WORKSPACE_UUID,
+        user_id: VALID_USER_UUID,
+        role_id: VALID_MEMBER_ROLE_UUID,
+        invited_by: VALID_INVITER_UUID,
       };
 
       // Expected: This will FAIL with "assignRole is not defined"
@@ -244,26 +277,26 @@ describe('assignRole', () => {
 
     it('should track who invited the user', async () => {
       const assignmentData = {
-        workspace_id: 'workspace-123',
-        user_id: 'user-456',
-        role_id: 'member-role-id',
-        invited_by: 'admin-789',
+        workspace_id: VALID_WORKSPACE_UUID,
+        user_id: VALID_USER_UUID,
+        role_id: VALID_MEMBER_ROLE_UUID,
+        invited_by: VALID_ADMIN_UUID,
       };
 
       // Expected: This will FAIL with "assignRole is not defined"
       const assignment = await assignRole(assignmentData);
 
-      expect(assignment.invited_by).toBe('admin-789');
+      expect(assignment.invited_by).toBe(VALID_ADMIN_UUID);
     });
   });
 
   describe('service orchestration', () => {
     it('should call roleService.assignRole', async () => {
       const assignmentData = {
-        workspace_id: 'workspace-123',
-        user_id: 'user-456',
-        role_id: 'admin-role-id',
-        invited_by: 'owner-123',
+        workspace_id: VALID_WORKSPACE_UUID,
+        user_id: VALID_USER_UUID,
+        role_id: VALID_ADMIN_ROLE_UUID,
+        invited_by: VALID_INVITER_UUID,
       };
 
       // Expected: This will FAIL with "assignRole is not defined"
@@ -275,10 +308,10 @@ describe('assignRole', () => {
 
     it('should validate workspace exists before assignment', async () => {
       const assignmentData = {
-        workspace_id: 'workspace-123',
-        user_id: 'user-456',
-        role_id: 'admin-role-id',
-        invited_by: 'owner-123',
+        workspace_id: VALID_WORKSPACE_UUID,
+        user_id: VALID_USER_UUID,
+        role_id: VALID_ADMIN_ROLE_UUID,
+        invited_by: VALID_INVITER_UUID,
       };
 
       // Expected: This will FAIL with "assignRole is not defined"
@@ -290,10 +323,10 @@ describe('assignRole', () => {
 
     it('should validate role exists before assignment', async () => {
       const assignmentData = {
-        workspace_id: 'workspace-123',
-        user_id: 'user-456',
-        role_id: 'admin-role-id',
-        invited_by: 'owner-123',
+        workspace_id: VALID_WORKSPACE_UUID,
+        user_id: VALID_USER_UUID,
+        role_id: VALID_ADMIN_ROLE_UUID,
+        invited_by: VALID_INVITER_UUID,
       };
 
       // Expected: This will FAIL with "assignRole is not defined"
@@ -307,10 +340,10 @@ describe('assignRole', () => {
   describe('error handling', () => {
     it('should handle database errors gracefully', async () => {
       const assignmentData = {
-        workspace_id: 'workspace-123',
-        user_id: 'user-456',
-        role_id: 'admin-role-id',
-        invited_by: 'owner-123',
+        workspace_id: VALID_WORKSPACE_UUID,
+        user_id: VALID_USER_UUID,
+        role_id: VALID_ADMIN_ROLE_UUID,
+        invited_by: VALID_INVITER_UUID,
       };
 
       // Expected: This will FAIL with "assignRole is not defined"
@@ -319,10 +352,10 @@ describe('assignRole', () => {
 
     it('should provide clear error for non-existent workspace', async () => {
       const assignmentData = {
-        workspace_id: 'non-existent',
-        user_id: 'user-456',
-        role_id: 'admin-role-id',
-        invited_by: 'owner-123',
+        workspace_id: '00000000-0000-0000-0000-999999999999',
+        user_id: VALID_USER_UUID,
+        role_id: VALID_ADMIN_ROLE_UUID,
+        invited_by: VALID_INVITER_UUID,
       };
 
       // Expected: This will FAIL with "assignRole is not defined"
@@ -332,10 +365,10 @@ describe('assignRole', () => {
 
     it('should provide clear error for non-existent role', async () => {
       const assignmentData = {
-        workspace_id: 'workspace-123',
-        user_id: 'user-456',
-        role_id: 'non-existent-role',
-        invited_by: 'owner-123',
+        workspace_id: VALID_WORKSPACE_UUID,
+        user_id: VALID_USER_UUID,
+        role_id: '00000000-0000-0000-0000-999999999999',
+        invited_by: VALID_INVITER_UUID,
       };
 
       // Expected: This will FAIL with "assignRole is not defined"
@@ -345,10 +378,10 @@ describe('assignRole', () => {
 
     it('should handle duplicate assignment constraint violation', async () => {
       const assignmentData = {
-        workspace_id: 'workspace-123',
-        user_id: 'user-456',
-        role_id: 'member-role-id',
-        invited_by: 'owner-123',
+        workspace_id: VALID_WORKSPACE_UUID,
+        user_id: VALID_USER_UUID,
+        role_id: VALID_MEMBER_ROLE_UUID,
+        invited_by: VALID_INVITER_UUID,
       };
 
       // Expected: This will FAIL with "assignRole is not defined"
@@ -361,11 +394,11 @@ describe('assignRole', () => {
 
   describe('edge cases', () => {
     it('should allow user to invite themselves (owner creating workspace)', async () => {
-      const userId = 'user-123';
+      const userId = VALID_USER_UUID;
       const assignmentData = {
-        workspace_id: 'workspace-123',
+        workspace_id: VALID_WORKSPACE_UUID,
         user_id: userId,
-        role_id: 'owner-role-id',
+        role_id: VALID_OWNER_ROLE_UUID,
         invited_by: userId, // Self-invited
       };
 
@@ -379,22 +412,22 @@ describe('assignRole', () => {
     it('should handle rapid successive assignments', async () => {
       const assignments = [
         {
-          workspace_id: 'workspace-123',
-          user_id: 'user-1',
-          role_id: 'member-role-id',
-          invited_by: 'owner-123',
+          workspace_id: VALID_WORKSPACE_UUID,
+          user_id: VALID_USER_UUID,
+          role_id: VALID_MEMBER_ROLE_UUID,
+          invited_by: VALID_INVITER_UUID,
         },
         {
-          workspace_id: 'workspace-123',
-          user_id: 'user-2',
-          role_id: 'member-role-id',
-          invited_by: 'owner-123',
+          workspace_id: VALID_WORKSPACE_UUID,
+          user_id: VALID_MEMBER_2_UUID,
+          role_id: VALID_MEMBER_ROLE_UUID,
+          invited_by: VALID_INVITER_UUID,
         },
         {
-          workspace_id: 'workspace-123',
-          user_id: 'user-3',
-          role_id: 'admin-role-id',
-          invited_by: 'owner-123',
+          workspace_id: VALID_WORKSPACE_UUID,
+          user_id: VALID_ADMIN_UUID,
+          role_id: VALID_ADMIN_ROLE_UUID,
+          invited_by: VALID_INVITER_UUID,
         },
       ];
 
@@ -403,31 +436,31 @@ describe('assignRole', () => {
 
       expect(results).toHaveLength(3);
       results.forEach((result) => {
-        expect(result.workspace_id).toBe('workspace-123');
+        expect(result.workspace_id).toBe(VALID_WORKSPACE_UUID);
       });
     });
 
     it('should preserve invited_by even if inviter is later removed', async () => {
       const assignmentData = {
-        workspace_id: 'workspace-123',
-        user_id: 'user-456',
-        role_id: 'member-role-id',
-        invited_by: 'admin-789',
+        workspace_id: VALID_WORKSPACE_UUID,
+        user_id: VALID_USER_UUID,
+        role_id: VALID_MEMBER_ROLE_UUID,
+        invited_by: VALID_ADMIN_UUID,
       };
 
       // Expected: This will FAIL with "assignRole is not defined"
       const assignment = await assignRole(assignmentData);
 
-      // invited_by should remain even if admin-789 is later removed
-      expect(assignment.invited_by).toBe('admin-789');
+      // invited_by should remain even if admin is later removed
+      expect(assignment.invited_by).toBe(VALID_ADMIN_UUID);
     });
 
     it('should handle very large numbers of simultaneous assignments', async () => {
       const assignments = Array.from({ length: 100 }, (_, i) => ({
-        workspace_id: 'workspace-123',
-        user_id: `user-${i}`,
-        role_id: 'member-role-id',
-        invited_by: 'owner-123',
+        workspace_id: VALID_WORKSPACE_UUID,
+        user_id: `${i}23e4567-e89b-12d3-a456-426614174000`.substring(0, 36),
+        role_id: VALID_MEMBER_ROLE_UUID,
+        invited_by: VALID_INVITER_UUID,
       }));
 
       // Expected: This will FAIL with "assignRole is not defined"
@@ -442,10 +475,10 @@ describe('assignRole', () => {
       // Note: Authorization checks will be implemented in Phase 3 (CASL)
       // This test documents the expected behavior
       const assignmentData = {
-        workspace_id: 'workspace-123',
-        user_id: 'new-user',
-        role_id: 'member-role-id',
-        invited_by: 'member-without-permission',
+        workspace_id: VALID_WORKSPACE_UUID,
+        user_id: VALID_USER_UUID,
+        role_id: VALID_MEMBER_ROLE_UUID,
+        invited_by: VALID_MEMBER_2_UUID,
       };
 
       // Expected: This will FAIL with "assignRole is not defined"
@@ -456,15 +489,15 @@ describe('assignRole', () => {
     it('should document: Owner can assign any role', async () => {
       // Note: Phase 3 will validate inviter has permission
       const assignmentData = {
-        workspace_id: 'workspace-123',
-        user_id: 'user-456',
-        role_id: 'admin-role-id',
-        invited_by: 'owner-123',
+        workspace_id: VALID_WORKSPACE_UUID,
+        user_id: VALID_USER_UUID,
+        role_id: VALID_ADMIN_ROLE_UUID,
+        invited_by: VALID_INVITER_UUID,
       };
 
       // Expected: This will FAIL with "assignRole is not defined"
       const assignment = await assignRole(assignmentData);
-      expect(assignment.role_id).toBe('admin-role-id');
+      expect(assignment.role_id).toBe(VALID_ADMIN_ROLE_UUID);
     });
   });
 });

@@ -16,6 +16,14 @@ import { ZodError } from 'zod';
 // @ts-expect-error - Function not implemented yet (TDD RED phase)
 import { createWorkspace } from './createWorkspace';
 
+// Test Data Constants (Valid UUIDs)
+const VALID_USER_UUID = '123e4567-e89b-12d3-a456-426614174000';
+const VALID_USER_2_UUID = '123e4567-e89b-12d3-a456-426614174001';
+const VALID_USER_3_UUID = '123e4567-e89b-12d3-a456-426614174002';
+const VALID_WORKSPACE_UUID = '223e4567-e89b-12d3-a456-426614174000';
+const VALID_WORKSPACE_2_UUID = '223e4567-e89b-12d3-a456-426614174001';
+const VALID_OWNER_ROLE_UUID = '00000000-0000-0000-0000-000000000001'; // System Owner role
+
 // Mock the services (they don't exist yet either)
 vi.mock('../services/workspace.service', () => ({
   workspaceService: {
@@ -31,9 +39,39 @@ vi.mock('../services/role.service', () => ({
   },
 }));
 
+// Import mocked services
+import { workspaceService } from '../services/workspace.service';
+import { roleService } from '../services/role.service';
+
 describe('createWorkspace', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Configure mock to return workspace based on input
+    vi.mocked(workspaceService.createWorkspace).mockImplementation(async (input) => ({
+      id: VALID_WORKSPACE_UUID,
+      name: input.name.trim(), // Reflect the trimmed input name
+      owner_id: input.owner_id,
+      created_at: '2025-01-28T12:00:00.000Z',
+      updated_at: '2025-01-28T12:00:00.000Z',
+    }));
+
+    vi.mocked(roleService.getRoleByName).mockResolvedValue({
+      id: VALID_OWNER_ROLE_UUID,
+      name: 'owner',
+      description: 'Workspace owner with full access',
+      is_system: true,
+      workspace_id: null,
+      created_at: '2025-01-28T12:00:00.000Z',
+    });
+
+    vi.mocked(roleService.assignRole).mockImplementation(async (input) => ({
+      workspace_id: input.workspace_id,
+      user_id: input.user_id,
+      role_id: input.role_id,
+      invited_by: input.invited_by,
+      joined_at: '2025-01-28T12:00:00.000Z',
+    }));
   });
 
   describe('RED phase check', () => {
@@ -48,7 +86,7 @@ describe('createWorkspace', () => {
     it('should create workspace with owner', async () => {
       const workspaceData = {
         name: 'My Workspace',
-        owner_id: 'user-123',
+        owner_id: VALID_USER_UUID,
       };
 
       // Expected: This will FAIL with "createWorkspace is not defined"
@@ -56,7 +94,7 @@ describe('createWorkspace', () => {
 
       expect(workspace.id).toBeDefined();
       expect(workspace.name).toBe('My Workspace');
-      expect(workspace.owner_id).toBe('user-123');
+      expect(workspace.owner_id).toBe(VALID_USER_UUID);
       expect(workspace.created_at).toBeDefined();
       expect(workspace.updated_at).toBeDefined();
     });
@@ -64,7 +102,7 @@ describe('createWorkspace', () => {
     it('should auto-assign Owner role to creator', async () => {
       const workspaceData = {
         name: 'My Workspace',
-        owner_id: 'user-123',
+        owner_id: VALID_USER_UUID,
       };
 
       // Expected: This will FAIL with "createWorkspace is not defined"
@@ -76,13 +114,13 @@ describe('createWorkspace', () => {
       // Verify Owner role was assigned
       // (In real implementation, this would query workspace_users table)
       // For now, we just check the function was called
-      expect(workspace.owner_id).toBe('user-123');
+      expect(workspace.owner_id).toBe(VALID_USER_UUID);
     });
 
     it('should return workspace with timestamps', async () => {
       const workspaceData = {
         name: 'Test Workspace',
-        owner_id: 'user-456',
+        owner_id: VALID_USER_2_UUID,
       };
 
       // Expected: This will FAIL with "createWorkspace is not defined"
@@ -99,7 +137,7 @@ describe('createWorkspace', () => {
     it('should validate workspace name with Zod', async () => {
       const invalidData = {
         name: '', // Invalid: empty
-        owner_id: 'user-123',
+        owner_id: VALID_USER_UUID,
       };
 
       // Expected: This will FAIL with "createWorkspace is not defined"
@@ -119,7 +157,7 @@ describe('createWorkspace', () => {
     it('should reject name longer than 100 characters', async () => {
       const invalidData = {
         name: 'A'.repeat(101),
-        owner_id: 'user-123',
+        owner_id: VALID_USER_UUID,
       };
 
       // Expected: This will FAIL with "createWorkspace is not defined"
@@ -128,7 +166,7 @@ describe('createWorkspace', () => {
 
     it('should reject missing name', async () => {
       const invalidData = {
-        owner_id: 'user-123',
+        owner_id: VALID_USER_UUID,
         // name is missing
       } as any;
 
@@ -151,21 +189,21 @@ describe('createWorkspace', () => {
     it('should generate unique workspace ID', async () => {
       const workspaceData = {
         name: 'Workspace 1',
-        owner_id: 'user-123',
+        owner_id: VALID_USER_UUID,
       };
 
       // Expected: This will FAIL with "createWorkspace is not defined"
       const workspace1 = await createWorkspace(workspaceData);
       const workspace2 = await createWorkspace({
         name: 'Workspace 2',
-        owner_id: 'user-123',
+        owner_id: VALID_USER_UUID,
       });
 
       expect(workspace1.id).not.toBe(workspace2.id);
     });
 
     it('should allow same owner to create multiple workspaces', async () => {
-      const ownerId = 'user-123';
+      const ownerId = VALID_USER_UUID;
 
       // Expected: This will FAIL with "createWorkspace is not defined"
       const workspace1 = await createWorkspace({
@@ -189,12 +227,12 @@ describe('createWorkspace', () => {
       // Expected: This will FAIL with "createWorkspace is not defined"
       const workspace1 = await createWorkspace({
         name: workspaceName,
-        owner_id: 'user-123',
+        owner_id: VALID_USER_UUID,
       });
 
       const workspace2 = await createWorkspace({
         name: workspaceName,
-        owner_id: 'user-456',
+        owner_id: VALID_USER_2_UUID,
       });
 
       expect(workspace1.name).toBe(workspaceName);
@@ -207,7 +245,7 @@ describe('createWorkspace', () => {
     it('should call workspaceService.createWorkspace', async () => {
       const workspaceData = {
         name: 'My Workspace',
-        owner_id: 'user-123',
+        owner_id: VALID_USER_UUID,
       };
 
       // Expected: This will FAIL with "createWorkspace is not defined"
@@ -221,7 +259,7 @@ describe('createWorkspace', () => {
     it('should call roleService.assignRole for Owner role', async () => {
       const workspaceData = {
         name: 'My Workspace',
-        owner_id: 'user-123',
+        owner_id: VALID_USER_UUID,
       };
 
       // Expected: This will FAIL with "createWorkspace is not defined"
@@ -229,13 +267,13 @@ describe('createWorkspace', () => {
 
       // Verify Owner role was assigned
       // (This test documents the expected roleService interface)
-      expect(workspace.owner_id).toBe('user-123');
+      expect(workspace.owner_id).toBe(VALID_USER_UUID);
     });
 
     it('should use system Owner role (not create new role)', async () => {
       const workspaceData = {
         name: 'My Workspace',
-        owner_id: 'user-123',
+        owner_id: VALID_USER_UUID,
       };
 
       // Expected: This will FAIL with "createWorkspace is not defined"
@@ -251,7 +289,7 @@ describe('createWorkspace', () => {
     it('should handle database errors gracefully', async () => {
       const workspaceData = {
         name: 'My Workspace',
-        owner_id: 'user-123',
+        owner_id: VALID_USER_UUID,
       };
 
       // Mock database error
@@ -262,7 +300,7 @@ describe('createWorkspace', () => {
     it('should rollback on role assignment failure', async () => {
       const workspaceData = {
         name: 'My Workspace',
-        owner_id: 'user-123',
+        owner_id: VALID_USER_UUID,
       };
 
       // Expected: If workspace created but role assignment fails,
@@ -286,7 +324,7 @@ describe('createWorkspace', () => {
     it('should handle unicode characters in name', async () => {
       const workspaceData = {
         name: '我的工作空间 🚀',
-        owner_id: 'user-123',
+        owner_id: VALID_USER_UUID,
       };
 
       // Expected: This will FAIL with "createWorkspace is not defined"
@@ -298,7 +336,7 @@ describe('createWorkspace', () => {
     it('should trim whitespace from name', async () => {
       const workspaceData = {
         name: '  Trimmed Workspace  ',
-        owner_id: 'user-123',
+        owner_id: VALID_USER_UUID,
       };
 
       // Expected: This will FAIL with "createWorkspace is not defined"
@@ -312,7 +350,7 @@ describe('createWorkspace', () => {
       const longName = 'A'.repeat(100);
       const workspaceData = {
         name: longName,
-        owner_id: 'user-123',
+        owner_id: VALID_USER_UUID,
       };
 
       // Expected: This will FAIL with "createWorkspace is not defined"
@@ -325,7 +363,7 @@ describe('createWorkspace', () => {
     it('should handle single character name', async () => {
       const workspaceData = {
         name: 'A',
-        owner_id: 'user-123',
+        owner_id: VALID_USER_UUID,
       };
 
       // Expected: This will FAIL with "createWorkspace is not defined"

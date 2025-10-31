@@ -31,6 +31,16 @@ import { describe, it, expect, vi } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Role, WorkspaceUser, WorkspaceUserCreate, WorkspaceUserUpdate } from '../entities';
 
+// UUID constants for consistent test data
+const VALID_USER_UUID = '123e4567-e89b-12d3-a456-426614174000';
+const VALID_WORKSPACE_UUID = '223e4567-e89b-12d3-a456-426614174000';
+const VALID_OWNER_ROLE_UUID = '00000000-0000-0000-0000-000000000001';
+const VALID_ADMIN_ROLE_UUID = '00000000-0000-0000-0000-000000000002';
+const VALID_MEMBER_ROLE_UUID = '00000000-0000-0000-0000-000000000003';
+const VALID_OWNER_UUID = '323e4567-e89b-12d3-a456-426614174000';
+const VALID_INVITER_UUID = '423e4567-e89b-12d3-a456-426614174000';
+const VALID_ATTACKER_UUID = '523e4567-e89b-12d3-a456-426614174000';
+
 // ============================================================================
 // SERVICE INTERFACE (TO BE IMPLEMENTED BY SUPABASE AGENT)
 // ============================================================================
@@ -219,18 +229,18 @@ describe('RoleService', () => {
   describe('assignRole', () => {
     it('should assign role to user in workspace', async () => {
       const assignData: WorkspaceUserCreate = {
-        workspace_id: 'workspace-123',
-        user_id: 'user-456',
+        workspace_id: VALID_WORKSPACE_UUID,
+        user_id: VALID_USER_UUID,
         role_id: '00000000-0000-0000-0000-000000000002', // Admin role
-        invited_by: 'owner-123',
+        invited_by: VALID_OWNER_UUID,
       };
 
-      const assignment = await roleService.assignRole(assignData, 'owner-123');
+      const assignment = await roleService.assignRole(assignData, VALID_OWNER_UUID);
 
-      expect(assignment.workspace_id).toBe('workspace-123');
-      expect(assignment.user_id).toBe('user-456');
+      expect(assignment.workspace_id).toBe(VALID_WORKSPACE_UUID);
+      expect(assignment.user_id).toBe(VALID_USER_UUID);
       expect(assignment.role_id).toBe('00000000-0000-0000-0000-000000000002');
-      expect(assignment.invited_by).toBe('owner-123');
+      expect(assignment.invited_by).toBe(VALID_OWNER_UUID);
       expect(assignment.joined_at).toBeDefined();
     });
 
@@ -250,27 +260,27 @@ describe('RoleService', () => {
 
     it('should fail if role does not exist', async () => {
       const assignData: WorkspaceUserCreate = {
-        workspace_id: 'workspace-123',
-        user_id: 'user-456',
-        role_id: 'non-existent-role-id',
-        invited_by: 'owner-123',
+        workspace_id: VALID_WORKSPACE_UUID,
+        user_id: VALID_USER_UUID,
+        role_id: '00000000-0000-0000-0000-999999999999',
+        invited_by: VALID_OWNER_UUID,
       };
 
       await expect(async () => {
-        await roleService.assignRole(assignData, 'owner-123');
+        await roleService.assignRole(assignData, VALID_OWNER_UUID);
       }).rejects.toThrow(/role|does not exist|foreign key/i);
     });
 
     it('should fail if workspace does not exist', async () => {
       const assignData: WorkspaceUserCreate = {
-        workspace_id: 'non-existent-workspace',
-        user_id: 'user-456',
+        workspace_id: '00000000-0000-0000-0000-999999999998',
+        user_id: VALID_USER_UUID,
         role_id: '00000000-0000-0000-0000-000000000003',
-        invited_by: 'owner-123',
+        invited_by: VALID_OWNER_UUID,
       };
 
       await expect(async () => {
-        await roleService.assignRole(assignData, 'owner-123');
+        await roleService.assignRole(assignData, VALID_OWNER_UUID);
       }).rejects.toThrow(/workspace|does not exist|foreign key/i);
     });
 
@@ -292,29 +302,29 @@ describe('RoleService', () => {
     });
 
     it('should allow assigning same user to multiple workspaces', async () => {
-      const userId = 'multi-workspace-user';
+      const userId = '33333333-0000-0000-0000-000000000001';
 
       const assign1: WorkspaceUserCreate = {
-        workspace_id: 'workspace-1',
+        workspace_id: '11111111-0000-0000-0000-000000000001',
         user_id: userId,
         role_id: '00000000-0000-0000-0000-000000000003',
-        invited_by: 'owner-1',
+        invited_by: '22222222-0000-0000-0000-000000000001',
       };
 
       const assign2: WorkspaceUserCreate = {
-        workspace_id: 'workspace-2',
+        workspace_id: '11111111-0000-0000-0000-000000000002',
         user_id: userId,
         role_id: '00000000-0000-0000-0000-000000000002',
-        invited_by: 'owner-2',
+        invited_by: '22222222-0000-0000-0000-000000000002',
       };
 
       // Both assignments should succeed
-      await roleService.assignRole(assign1, 'owner-1');
-      await roleService.assignRole(assign2, 'owner-2');
+      await roleService.assignRole(assign1, '22222222-0000-0000-0000-000000000001');
+      await roleService.assignRole(assign2, '22222222-0000-0000-0000-000000000002');
 
       // User now member of 2 workspaces
-      const membership1 = await roleService.getWorkspaceMembership(userId, 'workspace-1');
-      const membership2 = await roleService.getWorkspaceMembership(userId, 'workspace-2');
+      const membership1 = await roleService.getWorkspaceMembership(userId, '11111111-0000-0000-0000-000000000001');
+      const membership2 = await roleService.getWorkspaceMembership(userId, '11111111-0000-0000-0000-000000000002');
 
       expect(membership1).toBeDefined();
       expect(membership2).toBeDefined();
@@ -322,15 +332,15 @@ describe('RoleService', () => {
 
     it('should enforce RLS on INSERT (workspace membership required)', async () => {
       const assignData: WorkspaceUserCreate = {
-        workspace_id: 'workspace-b',
-        user_id: 'victim-user',
+        workspace_id: '11111111-0000-0000-0000-000000000003',
+        user_id: '44444444-0000-0000-0000-000000000001',
         role_id: '00000000-0000-0000-0000-000000000003',
-        invited_by: 'attacker-user', // Attacker not in workspace-b
+        invited_by: VALID_ATTACKER_UUID, // Attacker not in workspace-b
       };
 
       // Attacker tries to add victim to workspace-b
       await expect(async () => {
-        await roleService.assignRole(assignData, 'attacker-user');
+        await roleService.assignRole(assignData, VALID_ATTACKER_UUID);
       }).rejects.toThrow(/policy|permission|not a member/i);
     });
 
@@ -339,10 +349,10 @@ describe('RoleService', () => {
 
       mocks.single.mockResolvedValue({
         data: {
-          workspace_id: 'workspace-123',
-          user_id: 'user-456',
+          workspace_id: VALID_WORKSPACE_UUID,
+          user_id: VALID_USER_UUID,
           role_id: 'role-789',
-          invited_by: 'owner-123',
+          invited_by: VALID_OWNER_UUID,
           joined_at: '2024-01-01T00:00:00Z',
         },
         error: null,
@@ -351,10 +361,10 @@ describe('RoleService', () => {
       await supabase
         .from('workspace_users')
         .insert({
-          workspace_id: 'workspace-123',
-          user_id: 'user-456',
+          workspace_id: VALID_WORKSPACE_UUID,
+          user_id: VALID_USER_UUID,
           role_id: 'role-789',
-          invited_by: 'owner-123',
+          invited_by: VALID_OWNER_UUID,
         })
         .single();
 
@@ -369,9 +379,9 @@ describe('RoleService', () => {
 
   describe('updateUserRole', () => {
     it('should update user role in workspace', async () => {
-      const workspaceId = 'workspace-update';
-      const userId = 'user-update';
-      const ownerId = 'owner-update';
+      const workspaceId = '00000000-0000-0000-0000-update';
+      const userId = '11111111-1111-1111-1111-update';
+      const ownerId = '22222222-2222-2222-2222-update';
 
       // Assign member role
       await roleService.assignRole({
@@ -395,9 +405,9 @@ describe('RoleService', () => {
     });
 
     it('should not allow changing workspace_id', async () => {
-      const workspaceId = 'workspace-immutable';
-      const userId = 'user-immutable';
-      const ownerId = 'owner-immutable';
+      const workspaceId = '00000000-0000-0000-0000-immutable';
+      const userId = '11111111-1111-1111-1111-immutable';
+      const ownerId = '22222222-2222-2222-2222-immutable';
 
       await roleService.assignRole({
         workspace_id: workspaceId,
@@ -418,9 +428,9 @@ describe('RoleService', () => {
     });
 
     it('should not allow changing user_id', async () => {
-      const workspaceId = 'workspace-user-immutable';
-      const userId = 'user-immutable';
-      const ownerId = 'owner-immutable';
+      const workspaceId = '00000000-0000-0000-0000-user-immutable';
+      const userId = '11111111-1111-1111-1111-immutable';
+      const ownerId = '22222222-2222-2222-2222-immutable';
 
       await roleService.assignRole({
         workspace_id: workspaceId,
@@ -441,10 +451,10 @@ describe('RoleService', () => {
     });
 
     it('should enforce RLS (only workspace members can update)', async () => {
-      const workspaceId = 'workspace-rls';
-      const userId = 'user-rls';
-      const ownerId = 'owner-rls';
-      const attackerId = 'attacker-rls';
+      const workspaceId = '00000000-0000-0000-0000-rls';
+      const userId = '11111111-1111-1111-1111-rls';
+      const ownerId = '22222222-2222-2222-2222-rls';
+      const attackerId = '99999999-9999-9999-9999-rls';
 
       await roleService.assignRole({
         workspace_id: workspaceId,
@@ -471,9 +481,9 @@ describe('RoleService', () => {
 
   describe('removeUserFromWorkspace', () => {
     it('should remove user from workspace', async () => {
-      const workspaceId = 'workspace-remove';
-      const userId = 'user-remove';
-      const ownerId = 'owner-remove';
+      const workspaceId = '00000000-0000-0000-0000-remove';
+      const userId = '11111111-1111-1111-1111-remove';
+      const ownerId = '22222222-2222-2222-2222-remove';
 
       // Assign role
       await roleService.assignRole({
@@ -492,8 +502,8 @@ describe('RoleService', () => {
     });
 
     it('should prevent removing owner from their workspace', async () => {
-      const workspaceId = 'workspace-owner-protect';
-      const ownerId = 'owner-protect';
+      const workspaceId = '00000000-0000-0000-0000-owner-protect';
+      const ownerId = '22222222-2222-2222-2222-protect';
 
       // Owner is automatically a member when workspace created
       // Attempt to remove owner
@@ -503,10 +513,10 @@ describe('RoleService', () => {
     });
 
     it('should enforce RLS (only workspace members can remove)', async () => {
-      const workspaceId = 'workspace-remove-rls';
-      const userId = 'user-remove-rls';
-      const ownerId = 'owner-remove-rls';
-      const attackerId = 'attacker-remove-rls';
+      const workspaceId = '00000000-0000-0000-0000-remove-rls';
+      const userId = '11111111-1111-1111-1111-remove-rls';
+      const ownerId = '22222222-2222-2222-2222-remove-rls';
+      const attackerId = '99999999-9999-9999-9999-remove-rls';
 
       await roleService.assignRole({
         workspace_id: workspaceId,
@@ -523,7 +533,7 @@ describe('RoleService', () => {
 
     it('should throw if user not in workspace', async () => {
       await expect(async () => {
-        await roleService.removeUserFromWorkspace('workspace-123', 'non-member-user', 'owner-123');
+        await roleService.removeUserFromWorkspace(VALID_WORKSPACE_UUID, '99999999-0000-0000-0000-000000000001', VALID_OWNER_UUID);
       }).rejects.toThrow(/not found|not a member/i);
     });
   });
@@ -534,9 +544,9 @@ describe('RoleService', () => {
 
   describe('getWorkspaceMembership', () => {
     it('should fetch user membership in workspace', async () => {
-      const workspaceId = 'workspace-membership';
-      const userId = 'user-membership';
-      const ownerId = 'owner-membership';
+      const workspaceId = '00000000-0000-0000-0000-membership';
+      const userId = '11111111-1111-1111-1111-membership';
+      const ownerId = '22222222-2222-2222-2222-membership';
 
       await roleService.assignRole({
         workspace_id: workspaceId,
@@ -554,15 +564,15 @@ describe('RoleService', () => {
     });
 
     it('should return null if user not in workspace', async () => {
-      const membership = await roleService.getWorkspaceMembership('non-member', 'workspace-123');
+      const membership = await roleService.getWorkspaceMembership('99999999-0000-0000-0000-000000000002', VALID_WORKSPACE_UUID);
 
       expect(membership).toBeNull();
     });
 
     it('should include joined_at timestamp', async () => {
-      const workspaceId = 'workspace-joined';
-      const userId = 'user-joined';
-      const ownerId = 'owner-joined';
+      const workspaceId = '00000000-0000-0000-0000-joined';
+      const userId = '11111111-1111-1111-1111-joined';
+      const ownerId = '22222222-2222-2222-2222-joined';
 
       await roleService.assignRole({
         workspace_id: workspaceId,
@@ -584,20 +594,20 @@ describe('RoleService', () => {
 
   describe('listWorkspaceMembers', () => {
     it('should return all members in workspace', async () => {
-      const workspaceId = 'workspace-list';
-      const ownerId = 'owner-list';
+      const workspaceId = '00000000-0000-0000-0000-list';
+      const ownerId = '22222222-2222-2222-2222-list';
 
       // Add multiple members
       await roleService.assignRole({
         workspace_id: workspaceId,
-        user_id: 'user-1',
+        user_id: '11111111-0000-0000-0000-000000000001',
         role_id: '00000000-0000-0000-0000-000000000003',
         invited_by: ownerId,
       }, ownerId);
 
       await roleService.assignRole({
         workspace_id: workspaceId,
-        user_id: 'user-2',
+        user_id: '11111111-0000-0000-0000-000000000002',
         role_id: '00000000-0000-0000-0000-000000000002',
         invited_by: ownerId,
       }, ownerId);
@@ -605,14 +615,14 @@ describe('RoleService', () => {
       const members = await roleService.listWorkspaceMembers(workspaceId, ownerId);
 
       expect(members.length).toBeGreaterThanOrEqual(2);
-      expect(members.some(m => m.user_id === 'user-1')).toBe(true);
-      expect(members.some(m => m.user_id === 'user-2')).toBe(true);
+      expect(members.some(m => m.user_id === '11111111-0000-0000-0000-000000000001')).toBe(true);
+      expect(members.some(m => m.user_id === '11111111-0000-0000-0000-000000000002')).toBe(true);
     });
 
     it('should enforce RLS (only workspace members see list)', async () => {
-      const workspaceId = 'workspace-list-rls';
-      const ownerId = 'owner-list-rls';
-      const attackerId = 'attacker-list-rls';
+      const workspaceId = '00000000-0000-0000-0000-list-rls';
+      const ownerId = '22222222-2222-2222-2222-list-rls';
+      const attackerId = '99999999-9999-9999-9999-list-rls';
 
       // Attacker (not a member) tries to list members
       const members = await roleService.listWorkspaceMembers(workspaceId, attackerId);
@@ -622,8 +632,8 @@ describe('RoleService', () => {
     });
 
     it('should return empty array if workspace has no members', async () => {
-      const workspaceId = 'workspace-empty';
-      const ownerId = 'owner-empty';
+      const workspaceId = '00000000-0000-0000-0000-empty';
+      const ownerId = '22222222-2222-2222-2222-empty';
 
       const members = await roleService.listWorkspaceMembers(workspaceId, ownerId);
 
@@ -654,31 +664,31 @@ describe('RoleService', () => {
 
     it('should throw on FK constraint violations', async () => {
       const assignData: WorkspaceUserCreate = {
-        workspace_id: 'non-existent-workspace',
-        user_id: 'user-123',
+        workspace_id: '00000000-0000-0000-0000-999999999998',
+        user_id: VALID_USER_UUID,
         role_id: '00000000-0000-0000-0000-000000000003',
-        invited_by: 'owner-123',
+        invited_by: VALID_OWNER_UUID,
       };
 
       await expect(async () => {
-        await roleService.assignRole(assignData, 'owner-123');
+        await roleService.assignRole(assignData, VALID_OWNER_UUID);
       }).rejects.toThrow(/foreign key|constraint|does not exist/i);
     });
 
     it('should throw on unique constraint violations', async () => {
       const assignData: WorkspaceUserCreate = {
-        workspace_id: 'workspace-123',
-        user_id: 'user-123',
+        workspace_id: VALID_WORKSPACE_UUID,
+        user_id: VALID_USER_UUID,
         role_id: '00000000-0000-0000-0000-000000000003',
-        invited_by: 'owner-123',
+        invited_by: VALID_OWNER_UUID,
       };
 
       // First assignment
-      await roleService.assignRole(assignData, 'owner-123');
+      await roleService.assignRole(assignData, VALID_OWNER_UUID);
 
       // Duplicate assignment
       await expect(async () => {
-        await roleService.assignRole(assignData, 'owner-123');
+        await roleService.assignRole(assignData, VALID_OWNER_UUID);
       }).rejects.toThrow(/duplicate|unique|already a member/i);
     });
 

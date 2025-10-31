@@ -1,0 +1,89 @@
+# YAML Frontmatter Examples for v3.0 Planning Agents
+
+# Example 1: Backend Planning Expert
+---
+name: backend-planning-expert
+description: Use this agent when planning backend business logic implementations. Specializes in use case orchestration, service interfaces, TanStack Query patterns, and Zod validation. Creates detailed implementation plans and reviews backend code at checkpoints. Examples: <example>Context: User needs backend planning for task creation feature user: 'Plan the backend implementation for task creation' assistant: 'I'll use the backend-planning-expert to create a detailed use case plan with TanStack Query integration' <commentary>Backend planning requires expertise in use case orchestration and server state patterns</commentary></example> <example>Context: Backend implementation needs review user: 'Review the use cases Claude implemented' assistant: 'I'll invoke backend-planning-expert to review the implementation against best practices' <commentary>Review phase catches TanStack Query anti-patterns and Zod validation issues</commentary></example>
+model: sonnet
+color: orange
+---
+
+# Example 2: Database Planning Expert
+---
+name: database-planning-expert
+description: Use this agent when planning database architecture and Supabase implementations. Specializes in schema design, RLS policies, migrations, and query optimization. Creates detailed database plans and reviews data service implementations at checkpoints. Examples: <example>Context: User needs database planning for multi-tenant system user: 'Plan the database schema with RLS for workspaces' assistant: 'I'll use the database-planning-expert to design the schema and RLS policies' <commentary>Database planning requires deep Supabase RLS knowledge and multi-tenancy patterns</commentary></example> <example>Context: RLS policies need review user: 'Review the RLS policies Claude implemented' assistant: 'I'll invoke database-planning-expert to audit RLS for performance and security' <commentary>Review phase catches RLS anti-patterns and circular dependencies</commentary></example>
+model: sonnet
+color: orange
+---
+
+# Example 3: Frontend Planning Expert
+---
+name: frontend-planning-expert
+description: Use this agent when planning React UI implementations. Specializes in component architecture, UX flows, state management, and accessibility. Creates detailed component plans and reviews frontend implementations at checkpoints. Examples: <example>Context: User needs UI planning for dashboard feature user: 'Plan the React components for the dashboard' assistant: 'I'll use the frontend-planning-expert to design the component hierarchy and UX flows' <commentary>Frontend planning requires expertise in React patterns and WCAG accessibility</commentary></example> <example>Context: Component implementation needs review user: 'Review the React components Claude implemented' assistant: 'I'll invoke frontend-planning-expert to review accessibility and component structure' <commentary>Review phase catches accessibility violations and state management issues</commentary></example>
+model: sonnet
+color: orange
+---
+
+# Example 4: Testing Planning Expert
+---
+name: testing-planning-expert
+description: Use this agent when planning test strategies. Specializes in test coverage, unit/integration/E2E specifications, and quality assurance. ALWAYS INVOKED FIRST before other planning agents. Creates comprehensive test strategy plans and reviews test implementations at checkpoints. Examples: <example>Context: User starts new feature development user: 'Plan the testing strategy for the new feature' assistant: 'I'll use the testing-planning-expert to create the test coverage plan first' <commentary>Testing planning MUST happen first to define quality requirements for all other agents</commentary></example> <example>Context: Test implementation needs review user: 'Review the test coverage Claude implemented' assistant: 'I'll invoke testing-planning-expert to assess coverage and quality' <commentary>Review phase ensures >90% coverage and catches missing test cases</commentary></example>
+model: sonnet
+color: orange
+---
+
+# Example 5: shadcn UI/UX Planning Expert
+---
+name: shadcn-uiux-planning-expert
+description: Use this agent when planning visual design and component composition with shadcn/ui. Specializes in component composition, animations, micro-interactions, and Style Guide compliance. Creates detailed visual design plans and reviews UI consistency at checkpoints. Examples: <example>Context: User needs visual design planning user: 'Plan the shadcn/ui components and animations for the feature' assistant: 'I'll use the shadcn-uiux-planning-expert to design the component composition' <commentary>Visual planning requires expertise in shadcn/ui patterns and Aceternity UI effects</commentary></example> <example>Context: Visual implementation needs review user: 'Review the visual consistency of the implementation' assistant: 'I'll invoke shadcn-uiux-planning-expert to check Style Guide compliance' <commentary>Review phase catches visual inconsistencies and animation issues</commentary></example>
+model: sonnet
+color: orange
+---
+
+# Example 6: Security Planning Expert
+---
+name: security-planning-expert
+description: Use this agent when planning security implementations. Specializes in CASL authorization, RLS security, defense-in-depth, and OWASP compliance. Creates detailed security architecture plans and reviews security implementations at checkpoints. Examples: <example>Context: User needs security planning user: 'Plan the CASL and RLS security for the feature' assistant: 'I'll use the security-planning-expert to design the authorization layers' <commentary>Security planning requires expertise in CASL client-side and RLS server-side patterns</commentary></example> <example>Context: Security implementation needs review user: 'Review the security implementation for vulnerabilities' assistant: 'I'll invoke security-planning-expert to audit OWASP compliance' <commentary>Review phase catches authorization gaps and OWASP Top 10 violations</commentary></example>
+model: sonnet
+color: orange
+---
+
+# Example 7: Performance Planning Expert
+---
+name: performance-planning-expert
+description: Use this agent when planning performance optimizations. Specializes in caching strategies, lazy loading, Core Web Vitals, and query optimization. Creates detailed performance plans and reviews optimization implementations at checkpoints. Examples: <example>Context: User needs performance planning user: 'Plan the performance optimizations for the feature' assistant: 'I'll use the performance-planning-expert to design the caching strategy' <commentary>Performance planning requires expertise in TanStack Query caching and Core Web Vitals</commentary></example> <example>Context: Performance implementation needs review user: 'Review the performance metrics of the implementation' assistant: 'I'll invoke performance-planning-expert to audit Core Web Vitals' <commentary>Review phase catches performance bottlenecks and caching issues</commentary></example>
+model: sonnet
+color: orange
+---
+
+# Common YAML Patterns
+
+# Pattern 1: Trigger-based description
+description: Use this agent when {specific trigger}. Specializes in {expertise areas}. Creates {deliverable type} and reviews {review scope} at checkpoints.
+
+# Pattern 2: Two examples (planning + reviewing)
+Examples:
+  <example>
+    Context: {planning scenario}
+    user: '{planning request}'
+    assistant: '{planning response}'
+    <commentary>{why this agent for planning}</commentary>
+  </example>
+  <example>
+    Context: {reviewing scenario}
+    user: '{review request}'
+    assistant: '{review response}'
+    <commentary>{why this agent for reviewing}</commentary>
+  </example>
+
+# Pattern 3: Color consistency
+color: orange  # ALL v3.0 planning agents use orange
+
+# Validation Checklist for YAML:
+# [ ] Name ends with '-planning-expert'
+# [ ] Description mentions both "planning" and "reviewing"
+# [ ] Has 2 examples: one for planning, one for reviewing
+# [ ] Examples have Context, user, assistant, and <commentary>
+# [ ] Color is orange
+# [ ] Model is sonnet
+# [ ] No unescaped colons in description text

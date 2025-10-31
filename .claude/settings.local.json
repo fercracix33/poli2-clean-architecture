@@ -79,7 +79,9 @@
       "Bash(else echo \"Directory does not exist\")",
       "Bash(fi)",
       "Skill(architect-agent-skill)",
-      "Skill(test-agent-skill)"
+      "Skill(test-agent-skill)",
+      "Skill(implementer-agent-skill)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []

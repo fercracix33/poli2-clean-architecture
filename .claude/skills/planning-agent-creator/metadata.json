@@ -1,0 +1,51 @@
+{
+  "name": "planning-agent-creator",
+  "version": "1.0.0",
+  "description": "Skill for creating Claude Code planning/reviewing agents for the v3.0 system where agents plan implementations and review work instead of implementing code",
+  "system_version": "v3.0",
+  "agent_type": "meta_skill",
+  "technologies": [
+    "Claude Code",
+    "YAML",
+    "Markdown",
+    "Agent Architecture",
+    "Context7",
+    "TDD v3.0"
+  ],
+  "creates_agents": [
+    "backend-planning-expert",
+    "database-planning-expert",
+    "frontend-planning-expert",
+    "testing-planning-expert",
+    "shadcn-uiux-planning-expert",
+    "security-planning-expert",
+    "performance-planning-expert"
+  ],
+  "mcps_required": [
+    "context7"
+  ],
+  "references": [
+    "references/planning-workflow-v3.md",
+    "references/agent-types-matrix.md",
+    "references/yaml-examples.yml",
+    "references/context7-integration.md"
+  ],
+  "assets": [
+    "assets/planning-agent-template.md",
+    "assets/plan-document-template.md",
+    "assets/review-checkpoint-template.md"
+  ],
+  "references_count": 4,
+  "assets_count": 3,
+  "workflow_phases": 6,
+  "last_updated": "2025-10-29",
+  "created_by": "skill-creator",
+  "replaces": "agent-creator (v2.0 - archived in sistemaAntiguo)",
+  "key_differences_from_v2": {
+    "agents_role": "Planning and reviewing (NOT implementing)",
+    "deliverables": "01-plan.md and review-checkpoint-N.md (NOT XX-iteration.md)",
+    "implementation": "Claude Code implements (NOT subagents)",
+    "context7": "Mandatory (NOT optional)",
+    "parallelism": "Supported via planning (NOT sequential handoffs)"
+  }
+}

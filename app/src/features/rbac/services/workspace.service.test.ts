@@ -28,6 +28,14 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Workspace, WorkspaceCreate, WorkspaceUpdate } from '../entities';
 
+// UUID constants for consistent test data
+const VALID_USER_UUID = '123e4567-e89b-12d3-a456-426614174000';
+const VALID_WORKSPACE_UUID = '223e4567-e89b-12d3-a456-426614174000';
+const VALID_OWNER_UUID = '323e4567-e89b-12d3-a456-426614174000';
+const VALID_MEMBER_UUID = '423e4567-e89b-12d3-a456-426614174000';
+const VALID_USER_A_UUID = '523e4567-e89b-12d3-a456-426614174000';
+const VALID_USER_B_UUID = '623e4567-e89b-12d3-a456-426614174000';
+
 // ============================================================================
 // SERVICE INTERFACE (TO BE IMPLEMENTED BY SUPABASE AGENT)
 // ============================================================================
@@ -111,23 +119,23 @@ describe('WorkspaceService', () => {
     it('should insert workspace into database', async () => {
       const createData: WorkspaceCreate = {
         name: 'Test Workspace',
-        owner_id: 'user-123',
+        owner_id: VALID_USER_UUID,
       };
 
       const expectedWorkspace: Workspace = {
-        id: 'workspace-uuid',
+        id: VALID_WORKSPACE_UUID,
         name: 'Test Workspace',
-        owner_id: 'user-123',
+        owner_id: VALID_USER_UUID,
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-01T00:00:00Z',
       };
 
       // Mock implementation would call supabase.from('workspaces').insert()
-      const result = await workspaceService.createWorkspace(createData, 'user-123');
+      const result = await workspaceService.createWorkspace(createData, VALID_USER_UUID);
 
       expect(result.id).toBeDefined();
       expect(result.name).toBe('Test Workspace');
-      expect(result.owner_id).toBe('user-123');
+      expect(result.owner_id).toBe(VALID_USER_UUID);
       expect(result.created_at).toBeDefined();
       expect(result.updated_at).toBeDefined();
     });
@@ -138,9 +146,9 @@ describe('WorkspaceService', () => {
       // Mock successful insert
       mocks.single.mockResolvedValue({
         data: {
-          id: 'workspace-uuid',
+          id: VALID_WORKSPACE_UUID,
           name: 'Test Workspace',
-          owner_id: 'user-123',
+          owner_id: VALID_USER_UUID,
           created_at: '2024-01-01T00:00:00Z',
           updated_at: '2024-01-01T00:00:00Z',
         },
@@ -152,39 +160,39 @@ describe('WorkspaceService', () => {
         .from('workspaces')
         .insert({
           name: 'Test Workspace',
-          owner_id: 'user-123',
+          owner_id: VALID_USER_UUID,
         })
         .single();
 
       expect(mocks.from).toHaveBeenCalledWith('workspaces');
       expect(mocks.insert).toHaveBeenCalledWith({
         name: 'Test Workspace',
-        owner_id: 'user-123',
+        owner_id: VALID_USER_UUID,
       });
     });
 
     it('should transform camelCase to snake_case for database', async () => {
       const createData: WorkspaceCreate = {
         name: 'My Workspace',
-        owner_id: 'user-456', // camelCase in TypeScript
+        owner_id: VALID_OWNER_UUID, // camelCase in TypeScript
       };
 
       // Service should transform to snake_case for PostgreSQL
       // Database column: owner_id (snake_case)
-      const result = await workspaceService.createWorkspace(createData, 'user-456');
+      const result = await workspaceService.createWorkspace(createData, VALID_OWNER_UUID);
 
-      expect(result.owner_id).toBe('user-456'); // camelCase in response
+      expect(result.owner_id).toBe(VALID_OWNER_UUID); // camelCase in response
     });
 
     it('should transform snake_case from database to camelCase', async () => {
       const createData: WorkspaceCreate = {
         name: 'Transform Test',
-        owner_id: 'user-789',
+        owner_id: VALID_OWNER_UUID,
       };
 
       // Database returns: created_at, updated_at (snake_case)
       // Service should transform to: createdAt, updatedAt (camelCase)
-      const result = await workspaceService.createWorkspace(createData, 'user-789');
+      const result = await workspaceService.createWorkspace(createData, VALID_OWNER_UUID);
 
       expect(result.created_at).toBeDefined(); // Check snake_case
       expect(result.updated_at).toBeDefined();
@@ -204,10 +212,10 @@ describe('WorkspaceService', () => {
       await expect(async () => {
         const createData: WorkspaceCreate = {
           name: 'Fail Workspace',
-          owner_id: 'user-fail',
+          owner_id: '99999999-9999-9999-9999-000000000001',
         };
 
-        await workspaceService.createWorkspace(createData, 'user-fail');
+        await workspaceService.createWorkspace(createData, '99999999-9999-9999-9999-000000000001');
       }).rejects.toThrow(/database|connection|error/i);
     });
 
@@ -215,22 +223,22 @@ describe('WorkspaceService', () => {
       // User A tries to create workspace with User B as owner (should fail)
       const createData: WorkspaceCreate = {
         name: 'Hacked Workspace',
-        owner_id: 'user-b', // Different from authenticated user
+        owner_id: VALID_USER_B_UUID, // Different from authenticated user
       };
 
       await expect(async () => {
         // Authenticated as user-a, trying to set owner_id to user-b
-        await workspaceService.createWorkspace(createData, 'user-a');
+        await workspaceService.createWorkspace(createData, VALID_USER_A_UUID);
       }).rejects.toThrow(/policy|permission|check constraint/i);
     });
 
     it('should auto-generate UUID for id', async () => {
       const createData: WorkspaceCreate = {
         name: 'UUID Test',
-        owner_id: 'user-uuid',
+        owner_id: '66666666-6666-6666-6666-000000000001',
       };
 
-      const result = await workspaceService.createWorkspace(createData, 'user-uuid');
+      const result = await workspaceService.createWorkspace(createData, '66666666-6666-6666-6666-000000000001');
 
       expect(result.id).toBeDefined();
       expect(result.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
@@ -239,10 +247,10 @@ describe('WorkspaceService', () => {
     it('should auto-generate timestamps', async () => {
       const createData: WorkspaceCreate = {
         name: 'Timestamp Test',
-        owner_id: 'user-timestamp',
+        owner_id: '77777777-7777-7777-7777-000000000001',
       };
 
-      const result = await workspaceService.createWorkspace(createData, 'user-timestamp');
+      const result = await workspaceService.createWorkspace(createData, '77777777-7777-7777-7777-000000000001');
 
       expect(result.created_at).toBeDefined();
       expect(result.updated_at).toBeDefined();
@@ -256,8 +264,8 @@ describe('WorkspaceService', () => {
 
   describe('getWorkspaceById', () => {
     it('should fetch workspace by ID', async () => {
-      const workspaceId = 'workspace-123';
-      const userId = 'user-123';
+      const workspaceId = VALID_WORKSPACE_UUID;
+      const userId = VALID_USER_UUID;
 
       const result = await workspaceService.getWorkspaceById(workspaceId, userId);
 
@@ -267,9 +275,9 @@ describe('WorkspaceService', () => {
     });
 
     it('should enforce RLS on SELECT', async () => {
-      const workspaceId = 'workspace-a';
-      const ownerId = 'user-a';
-      const attackerId = 'user-b';
+      const workspaceId = '00000000-0000-0000-0000-a';
+      const ownerId = VALID_USER_A_UUID;
+      const attackerId = VALID_USER_B_UUID;
 
       // User A creates workspace
       await workspaceService.createWorkspace({ name: 'Protected', owner_id: ownerId }, ownerId);
@@ -282,15 +290,15 @@ describe('WorkspaceService', () => {
     });
 
     it('should return null if workspace not found', async () => {
-      const result = await workspaceService.getWorkspaceById('non-existent-id', 'user-123');
+      const result = await workspaceService.getWorkspaceById('non-existent-id', VALID_USER_UUID);
 
       expect(result).toBeNull();
     });
 
     it('should return workspace if user is member', async () => {
-      const workspaceId = 'workspace-member';
-      const ownerId = 'owner-123';
-      const memberId = 'member-456';
+      const workspaceId = '00000000-0000-0000-0000-member';
+      const ownerId = VALID_OWNER_UUID;
+      const memberId = VALID_MEMBER_UUID;
 
       // Create workspace
       await workspaceService.createWorkspace({ name: 'Shared', owner_id: ownerId }, ownerId);
@@ -310,9 +318,9 @@ describe('WorkspaceService', () => {
 
       mocks.single.mockResolvedValue({
         data: {
-          id: 'workspace-123',
+          id: VALID_WORKSPACE_UUID,
           name: 'Test',
-          owner_id: 'user-123',
+          owner_id: VALID_USER_UUID,
           created_at: '2024-01-01T00:00:00Z',
           updated_at: '2024-01-01T00:00:00Z',
         },
@@ -322,19 +330,19 @@ describe('WorkspaceService', () => {
       await supabase
         .from('workspaces')
         .select('*')
-        .eq('id', 'workspace-123')
+        .eq('id', VALID_WORKSPACE_UUID)
         .single();
 
       expect(mocks.from).toHaveBeenCalledWith('workspaces');
       expect(mocks.select).toHaveBeenCalledWith('*');
-      expect(mocks.eq).toHaveBeenCalledWith('id', 'workspace-123');
+      expect(mocks.eq).toHaveBeenCalledWith('id', VALID_WORKSPACE_UUID);
       expect(mocks.single).toHaveBeenCalled();
     });
   });
 
   describe('listWorkspacesByUser', () => {
     it('should return all workspaces user belongs to', async () => {
-      const userId = 'user-multi';
+      const userId = '11111111-1111-1111-1111-multi';
 
       const workspaces = await workspaceService.listWorkspacesByUser(userId);
 
@@ -343,8 +351,8 @@ describe('WorkspaceService', () => {
     });
 
     it('should enforce RLS (only user workspaces)', async () => {
-      const userAId = 'user-a-list';
-      const userBId = 'user-b-list';
+      const userAId = '44444444-4444-4444-4444-000000000001';
+      const userBId = '44444444-4444-4444-4444-000000000002';
 
       // User A creates workspace
       await workspaceService.createWorkspace({ name: 'A Workspace', owner_id: userAId }, userAId);
@@ -362,7 +370,7 @@ describe('WorkspaceService', () => {
     });
 
     it('should return empty array if user has no workspaces', async () => {
-      const newUserId = 'new-user-no-workspaces';
+      const newUserId = '55555555-5555-5555-5555-000000000001';
 
       const workspaces = await workspaceService.listWorkspacesByUser(newUserId);
 
@@ -376,8 +384,8 @@ describe('WorkspaceService', () => {
 
   describe('updateWorkspace', () => {
     it('should update workspace name', async () => {
-      const workspaceId = 'workspace-update';
-      const userId = 'user-update';
+      const workspaceId = '00000000-0000-0000-0000-update';
+      const userId = '11111111-1111-1111-1111-update';
 
       // Create workspace first
       await workspaceService.createWorkspace({ name: 'Original Name', owner_id: userId }, userId);
@@ -394,9 +402,9 @@ describe('WorkspaceService', () => {
     });
 
     it('should enforce RLS on UPDATE (owner only)', async () => {
-      const workspaceId = 'workspace-rls-update';
-      const ownerId = 'owner-update';
-      const memberId = 'member-update';
+      const workspaceId = '00000000-0000-0000-0000-rls-update';
+      const ownerId = '22222222-2222-2222-2222-update';
+      const memberId = '33333333-3333-3333-3333-update';
 
       // Owner creates workspace
       await workspaceService.createWorkspace({ name: 'Protected', owner_id: ownerId }, ownerId);
@@ -412,8 +420,8 @@ describe('WorkspaceService', () => {
     });
 
     it('should prevent updating immutable fields', async () => {
-      const workspaceId = 'workspace-immutable';
-      const userId = 'user-immutable';
+      const workspaceId = '00000000-0000-0000-0000-immutable';
+      const userId = '11111111-1111-1111-1111-immutable';
 
       await workspaceService.createWorkspace({ name: 'Test', owner_id: userId }, userId);
 
@@ -421,15 +429,15 @@ describe('WorkspaceService', () => {
       await expect(async () => {
         await workspaceService.updateWorkspace(
           workspaceId,
-          { owner_id: 'different-owner' } as any, // TypeScript should block, but test anyway
+          { owner_id: '88888888-8888-8888-8888-000000000001' } as any, // TypeScript should block, but test anyway
           userId
         );
       }).rejects.toThrow(/immutable|cannot update owner/i);
     });
 
     it('should update updated_at timestamp', async () => {
-      const workspaceId = 'workspace-timestamp-update';
-      const userId = 'user-timestamp-update';
+      const workspaceId = '00000000-0000-0000-0000-timestamp-update';
+      const userId = '11111111-1111-1111-1111-timestamp-update';
 
       const created = await workspaceService.createWorkspace({ name: 'Before', owner_id: userId }, userId);
       const originalUpdatedAt = created.updated_at;
@@ -452,9 +460,9 @@ describe('WorkspaceService', () => {
 
       mocks.single.mockResolvedValue({
         data: {
-          id: 'workspace-123',
+          id: VALID_WORKSPACE_UUID,
           name: 'Updated Name',
-          owner_id: 'user-123',
+          owner_id: VALID_USER_UUID,
           created_at: '2024-01-01T00:00:00Z',
           updated_at: '2024-01-01T00:01:00Z',
         },
@@ -464,12 +472,12 @@ describe('WorkspaceService', () => {
       await supabase
         .from('workspaces')
         .update({ name: 'Updated Name' })
-        .eq('id', 'workspace-123')
+        .eq('id', VALID_WORKSPACE_UUID)
         .single();
 
       expect(mocks.from).toHaveBeenCalledWith('workspaces');
       expect(mocks.update).toHaveBeenCalledWith({ name: 'Updated Name' });
-      expect(mocks.eq).toHaveBeenCalledWith('id', 'workspace-123');
+      expect(mocks.eq).toHaveBeenCalledWith('id', VALID_WORKSPACE_UUID);
     });
   });
 
@@ -479,8 +487,8 @@ describe('WorkspaceService', () => {
 
   describe('deleteWorkspace', () => {
     it('should delete workspace', async () => {
-      const workspaceId = 'workspace-delete';
-      const userId = 'user-delete';
+      const workspaceId = '00000000-0000-0000-0000-delete';
+      const userId = '11111111-1111-1111-1111-delete';
 
       // Create workspace
       await workspaceService.createWorkspace({ name: 'To Delete', owner_id: userId }, userId);
@@ -494,9 +502,9 @@ describe('WorkspaceService', () => {
     });
 
     it('should enforce RLS on DELETE (owner only)', async () => {
-      const workspaceId = 'workspace-rls-delete';
-      const ownerId = 'owner-delete';
-      const memberId = 'member-delete';
+      const workspaceId = '00000000-0000-0000-0000-rls-delete';
+      const ownerId = '22222222-2222-2222-2222-delete';
+      const memberId = '33333333-3333-3333-3333-delete';
 
       await workspaceService.createWorkspace({ name: 'Protected Delete', owner_id: ownerId }, ownerId);
 
@@ -507,9 +515,9 @@ describe('WorkspaceService', () => {
     });
 
     it('should CASCADE delete related workspace_users records', async () => {
-      const workspaceId = 'workspace-cascade';
-      const ownerId = 'owner-cascade';
-      const memberId = 'member-cascade';
+      const workspaceId = '00000000-0000-0000-0000-cascade';
+      const ownerId = '22222222-2222-2222-2222-cascade';
+      const memberId = '33333333-3333-3333-3333-cascade';
 
       // Create workspace and add member
       await workspaceService.createWorkspace({ name: 'Cascade Test', owner_id: ownerId }, ownerId);
@@ -533,7 +541,7 @@ describe('WorkspaceService', () => {
 
     it('should throw error if workspace not found', async () => {
       await expect(async () => {
-        await workspaceService.deleteWorkspace('non-existent-id', 'user-123');
+        await workspaceService.deleteWorkspace('non-existent-id', VALID_USER_UUID);
       }).rejects.toThrow(/not found|does not exist/i);
     });
 
@@ -548,11 +556,11 @@ describe('WorkspaceService', () => {
       await supabase
         .from('workspaces')
         .delete()
-        .eq('id', 'workspace-123');
+        .eq('id', VALID_WORKSPACE_UUID);
 
       expect(mocks.from).toHaveBeenCalledWith('workspaces');
       expect(mocks.delete).toHaveBeenCalled();
-      expect(mocks.eq).toHaveBeenCalledWith('id', 'workspace-123');
+      expect(mocks.eq).toHaveBeenCalledWith('id', VALID_WORKSPACE_UUID);
     });
   });
 
@@ -573,13 +581,13 @@ describe('WorkspaceService', () => {
       });
 
       await expect(async () => {
-        await workspaceService.createWorkspace({ name: 'Test', owner_id: 'user-123' }, 'user-123');
+        await workspaceService.createWorkspace({ name: 'Test', owner_id: VALID_USER_UUID }, VALID_USER_UUID);
       }).rejects.toThrow(/connection|timeout/i);
     });
 
     it('should throw on invalid UUID format', async () => {
       await expect(async () => {
-        await workspaceService.getWorkspaceById('not-a-uuid', 'user-123');
+        await workspaceService.getWorkspaceById('not-a-uuid', VALID_USER_UUID);
       }).rejects.toThrow(/invalid|uuid/i);
     });
 
@@ -594,7 +602,7 @@ describe('WorkspaceService', () => {
 
     it('should return proper error messages', async () => {
       try {
-        await workspaceService.getWorkspaceById('invalid-id', 'user-123');
+        await workspaceService.getWorkspaceById('invalid-id', VALID_USER_UUID);
       } catch (error: any) {
         expect(error.message).toBeDefined();
         expect(error.message.length).toBeGreaterThan(0);
